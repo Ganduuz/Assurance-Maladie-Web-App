@@ -29,17 +29,26 @@ class MyHomePage extends StatelessWidget {
                     color: Color(0xFF5BADE9),
                     borderRadius: BorderRadius.circular(17.0),
                   ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'BIENVENUE!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Connexion',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
+              Positioned(
+                top: 100.0, // Ajustez cette valeur pour centrer verticalement le texte
+                left: 500.0, // Ajustez cette valeur pour centrer horizontalement le texte
+                child: Text(
+                  'Connexion',
+                  style: TextStyle(
+                    color: Color(0xFF5BADE9),
+                    fontSize: 20,
                   ),
                 ),
               ),
