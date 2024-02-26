@@ -92,7 +92,10 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 
   assets:
-    - assets/background.png
+  - assets/CapgeminiEngineering_82mm.png
+  - assets/assu-removebg-preview.png
+
+    
   fonts:  
     - family: Julius Sans One
       fonts:
