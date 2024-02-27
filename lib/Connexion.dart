@@ -23,24 +23,24 @@ class MyHomePage extends StatelessWidget {
           child: Stack(
             children: [
               Positioned(
-                top: 95.0,
+                top: 130.0,
                 left: 610.0,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: Color(0xFF2695FB),
-                        width: 2.0,
-                      ),
-                    ),
-                  ),
-                  child: Text(
-                    'Connexion',
-                    style: TextStyle(
-                      fontFamily: 'Julius Sans One',
-                      color: Color(0xFF2695FB),
-                      fontSize: 30,
+                         color: Color(0xFF2695FB),
+                            width: 2.0, // Ajuster la valeur de l'épaisseur du trait ici
+        ),
+      ),
+    ),
+    child: Text(
+      'Connexion',
+      style: TextStyle(
+        fontFamily: 'Julius Sans One',
+        color: Color(0xFF2695FB),
+        fontSize: 30,
                     ),
                   ),
                 ),
@@ -199,7 +199,7 @@ class MyHomePage extends StatelessWidget {
                             fontFamily: 'PlayfairDisplay-Regular',
                           ),
                         ),
-                        SizedBox(height: 70),
+                        SizedBox(height: 55),
                          Positioned(
                 top: 120,
                 left: 15,
@@ -228,7 +228,7 @@ class MyHomePage extends StatelessWidget {
                         ),
                       ),
                       TextSpan(
-                        text: '.',
+                        text: ' .',
                         style: TextStyle(
                             color: Colors.white,
                         ),
