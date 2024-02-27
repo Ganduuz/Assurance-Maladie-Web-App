@@ -57,19 +57,21 @@ class MyHomePage extends StatelessWidget {
                       TextField(
                         decoration: InputDecoration(
                           labelText: 'Adresse mail',
-                          labelStyle: TextStyle(color: Color.fromRGBO(209, 216, 223, 1),
-                          fontSize: 15,),
+                          labelStyle: TextStyle(
+                            color: Color.fromRGBO(209, 216, 223, 1),
+                            fontSize: 15,
+                          ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15.0),
                             borderSide: BorderSide(
-                              color: Color(0xFF2695FB),
+                              color: Color(0xFF5BADE9),
                               width: 2.0,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15.0),
                             borderSide: BorderSide(
-                              color: Color(0xFF2695FB),
+                              color: Color(0xFF5BADE9),
                               width: 2.0,
                             ),
                           ),
@@ -80,35 +82,102 @@ class MyHomePage extends StatelessWidget {
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: 'Mot de passe',
-                          labelStyle: TextStyle(color: Color.fromRGBO(209, 216, 223, 1),
-                          fontSize: 15,),
+                          labelStyle: TextStyle(
+                            color: Color.fromRGBO(209, 216, 223, 1),
+                            fontSize: 15,
+                          ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15.0),
                             borderSide: BorderSide(
-                              color: Color(0xFF2695FB),
+                              color: Color(0xFF5BADE9),
                               width: 2.0,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15.0),
                             borderSide: BorderSide(
-                              color: Color(0xFF2695FB),
+                              color: Color(0xFF5BADE9),
                               width: 2.0,
                             ),
                           ),
                         ),
                       ),
+                       Positioned(
+                         left: 500,
+                         top:40 ,
+                         bottom: 100,
+                          child:MouseRegion(
+                           cursor: SystemMouseCursors.click,
+                           child: GestureDetector(
+                               onTap: () {
+                     // Action à effectuer lorsque le lien est cliqué (par exemple, ouvrir une nouvelle page pour récupérer le mot de passe)
+                              },
+  
+                                 child: const Text(
+                                   'Mot de passe oublié ?',
+                                   style: TextStyle(
+                                    color: Color.fromARGB(255, 160, 180, 190),
+                                    fontFamily:'InriaSans-Light',
+                                   ),
+                                 ),
+                            ),
+                            ),
+                        ),
                       SizedBox(height: 55.0),
                       ElevatedButton(
-                        onPressed: () {
-                          // Gérer la logique de connexion ici
-                        },
-                        child: Text('Se connecter'),
+            style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.all(0),
+            shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30)),
+    ),
+  ),
+  
+  child: Container(
+   
+    decoration: BoxDecoration(
+      
+      borderRadius: BorderRadius.circular(15),
+      gradient: const LinearGradient(
+        colors: <Color>[
+          Color.fromARGB(255,26,149,251),
+          Color.fromARGB(255, 116, 196, 242),
+          Color.fromARGB(255, 153, 196, 237),
+        ],
+      ),
+    ),
+    padding: const EdgeInsets.fromLTRB(70, 10, 70, 10),
+
+                          child: const Text('Se connecter',
+                      style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFFFFFFFF),
+                      fontFamily: 'Istok web',
+                      )
+                     ),
+  ),
+            onPressed: () {
+              // Gérer la logique de connexion ici
+            }
+            
                       ),
+                      SizedBox(height: 190), // Espace entre le bouton et le texte 
+               Positioned(
+              top: 0, 
+              left: 500, 
+      child: Text(
+        'Votre bien-être est notre priorité !',
+        style: TextStyle(
+          fontSize: 13,
+         color: Color(0xFF5BADE9),
+          fontFamily: 'Karma-Regular', 
+        ),
+      ),
+    ),
                     ],
                   ),
                 ),
               ),
+
               Align(
                 alignment: Alignment.bottomLeft,
                 child: Container(
@@ -118,8 +187,8 @@ class MyHomePage extends StatelessWidget {
                     color: const Color(0xFF5BADE9),
                     borderRadius: BorderRadius.circular(17.0),
                   ),
-                  child: const Padding(
-                    padding: EdgeInsets.fromLTRB(30.0, 100.0, 80.0, 20.0),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(30.0, 100.0, 80.0, 20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -129,8 +198,6 @@ class MyHomePage extends StatelessWidget {
                             color: Colors.white,
                             fontSize: 30,
                             fontFamily: 'Aller_Std_Bd',
-                            
-                      
                           ),
                         ),
                         SizedBox(height: 30),
@@ -154,19 +221,18 @@ class MyHomePage extends StatelessWidget {
                 child: Image.asset(
                   'assets/CapgeminiEngineering_82mm.png',
                   width: 200,
-                  height: 200,
+                  height: 250,
                 ),
               ),
               Positioned(
-                top: 150.0,
+                top: 200.0,
                 bottom: 2.0,
-                left: 0,
-                right:570.0,
-                child: Container(
-                  width: 400.0,
-                  height: 600.0,
+                left: 14.0,
+                child: SizedBox(
+                  width: 350.0, // Largeur de l'image
+                  height: 450, // Hauteur de l'image
                   child: Image.asset(
-                    'assets/assu-removebg-preview.png',
+                    'assets/assu-removebg-preview.png', // Chemin de l'image
                   ),
                 ),
               ),

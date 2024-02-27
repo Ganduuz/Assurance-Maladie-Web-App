@@ -102,3 +102,15 @@ flutter:
     - family: Aller_Std_Bd
       fonts:
         - asset: fonts/Aller_Std_Bd.ttf
+        
+    - family: Karma-Regular
+      fonts:
+        - asset: fonts/Karma-Regular.ttf
+    
+    - family: IstokWeb-Bold
+      fonts:
+        - asset: fonts/IstokWeb-Bold.ttf
+    
+    - family: InriaSans-Light
+      fonts:
+        - asset: fonts/InriaSans-Light.ttf
