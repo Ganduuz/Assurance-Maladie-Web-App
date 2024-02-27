@@ -99,9 +99,9 @@ flutter:
     - family: Julius Sans One
       fonts:
         - asset: fonts/JuliusSansOne-Regular.ttf
-    - family: Aller_Std_Bd
+    - family: PlayfairDisplay-Regular
       fonts:
-        - asset: fonts/Aller_Std_Bd.ttf
+        - asset: fonts/PlayfairDisplay-Regular.ttf
         
     - family: Karma-Regular
       fonts:
@@ -114,3 +114,5 @@ flutter:
     - family: InriaSans-Light
       fonts:
         - asset: fonts/InriaSans-Light.ttf
+
+
