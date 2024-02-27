@@ -94,9 +94,11 @@ flutter:
   assets:
   - assets/CapgeminiEngineering_82mm.png
   - assets/assu-removebg-preview.png
-
     
   fonts:  
     - family: Julius Sans One
       fonts:
         - asset: fonts/JuliusSansOne-Regular.ttf
+    - family: Aller_Std_Bd
+      fonts:
+        - asset: fonts/Aller_Std_Bd.ttf

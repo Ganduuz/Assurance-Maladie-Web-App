@@ -161,7 +161,7 @@ class MyHomePage extends StatelessWidget {
                 top: 150.0,
                 bottom: 2.0,
                 left: 0,
-                right:500.0,
+                right:570.0,
                 child: Container(
                   width: 400.0,
                   height: 600.0,
