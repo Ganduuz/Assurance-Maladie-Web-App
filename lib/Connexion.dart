@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'local_storage_service.dart';
 import 'ForgotPasswordPage.dart';
 import 'Accueil.dart';
+import 'accAdmin.dart';
 
 class MyHomePage extends StatelessWidget {
   final TextEditingController mailController = TextEditingController();
@@ -15,16 +16,24 @@ class MyHomePage extends StatelessWidget {
 
     try {
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/login'), 
+        Uri.parse('http://127.0.0.1:5000/api/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'mail': mail, 'password': password}),
       );
 
       if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if(data['mail']=="RH@capgemini.com"){
+            Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AccueilAdmin()),
+          );
+        }else{
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Accueil()),
         );
+        LocalStorageService.saveData('user_id', data["user_id"]);}
       } else {
         showDialog(
           context: context,
@@ -105,7 +114,8 @@ class MyHomePage extends StatelessWidget {
                   left: 470,
                   right: 50,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 20.0),
                     color: Colors.white,
                     child: Column(
                       children: [
@@ -124,7 +134,8 @@ class MyHomePage extends StatelessWidget {
                                 width: 2.0,
                               ),
                             ),
-                            prefixIcon: const Icon(Icons.mail, color: Colors.blue),
+                            prefixIcon:
+                                const Icon(Icons.mail, color: Colors.blue),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15.0),
                               borderSide: BorderSide(
@@ -151,7 +162,8 @@ class MyHomePage extends StatelessWidget {
                                 width: 2.0,
                               ),
                             ),
-                            prefixIcon: const Icon(Icons.lock, color: Colors.blue),
+                            prefixIcon:
+                                const Icon(Icons.lock, color: Colors.blue),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15.0),
                               borderSide: BorderSide(
@@ -169,7 +181,9 @@ class MyHomePage extends StatelessWidget {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          ForgotPasswordPage()),
                                 );
                               },
                               child: const Text(
@@ -188,7 +202,8 @@ class MyHomePage extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.all(0),
                             shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(30)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
                             ),
                           ),
                           onPressed: () {
@@ -196,7 +211,8 @@ class MyHomePage extends StatelessWidget {
                           },
                           child: InkWell(
                             splashColor: Colors.transparent,
-                            hoverColor: const Color.fromARGB(255, 16, 46, 71).withOpacity(0.8),
+                            hoverColor: const Color.fromARGB(255, 16, 46, 71)
+                                .withOpacity(0.8),
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15),
@@ -208,7 +224,8 @@ class MyHomePage extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              padding: const EdgeInsets.fromLTRB(70, 10, 70, 10),
+                              padding:
+                                  const EdgeInsets.fromLTRB(70, 10, 70, 10),
                               child: const Text(
                                 'Se connecter',
                                 style: TextStyle(
@@ -247,7 +264,8 @@ class MyHomePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(17.0),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20.0, 120.0, 5.0, 20.0),
+                      padding:
+                          const EdgeInsets.fromLTRB(20.0, 120.0, 5.0, 20.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -272,7 +290,8 @@ class MyHomePage extends StatelessWidget {
                                 ),
                                 children: [
                                   TextSpan(
-                                    text: 'Connectez-vous pour accéder à votre espace personnel et profiter de tous les avantages de notre plateforme d\'assurance médicale dédiée aux employés de ',
+                                    text:
+                                        'Connectez-vous pour accéder à votre espace personnel et profiter de tous les avantages de notre plateforme d\'assurance médicale dédiée aux employés de ',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16.5,
