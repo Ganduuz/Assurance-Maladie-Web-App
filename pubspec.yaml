@@ -30,6 +30,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http: ^0.13.3
+  provider: ^5.0.0
+  localstorage: ^4.0.0+1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -92,8 +95,21 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 
   assets:
+  - assets/background.png
   - assets/CapgeminiEngineering_82mm.png
   - assets/assu-removebg-preview.png
+  - assets/acces 1.png
+  - assets/acces.png
+  - assets/user.png
+  - assets/criteria.png
+  - assets/insurance (1).png
+  - assets/interface.png
+  - assets/logout (1).png
+  - assets/newspaper (1).png
+  - assets/personal-data.png
+  - assets/user (1).png
+  - assets/home (1).png
+
     
   fonts:  
     - family: Julius Sans One
@@ -114,5 +130,9 @@ flutter:
     - family: InriaSans-Light
       fonts:
         - asset: fonts/InriaSans-Light.ttf
+    
+    - family: Inter[slnt,wght]
+      fonts:
+        - asset: fonts/Inter[slnt,wght].ttf
 
 
