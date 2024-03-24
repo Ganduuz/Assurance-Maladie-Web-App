@@ -34,6 +34,9 @@ dependencies:
   http: ^0.13.3
   provider: ^5.0.0
   localstorage: ^4.0.0+1
+  table_calendar: ^3.0.1
+  flutter_cupertino_date_picker_fork: ^1.0.7
+
 
 
   # The following adds the Cupertino Icons font to your application.

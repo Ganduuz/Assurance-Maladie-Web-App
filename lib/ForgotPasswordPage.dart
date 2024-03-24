@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class ForgotPasswordPage extends StatelessWidget {
-  const ForgotPasswordPage({super.key});
+  const ForgotPasswordPage({Key? key});
+
+  // Fonction de validation d'e-mail
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Veuillez entrer votre adresse e-mail';
+    }
+    // Vérifie si le format de l'e-mail est valide
+    String emailPattern = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+    RegExp regExp = RegExp(emailPattern);
+    if (!regExp.hasMatch(value)) {
+      return 'Veuillez entrer une adresse e-mail valide';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Récupération de mot de passe'),
-        backgroundColor: const Color.fromRGBO(255, 255, 255, 1), // Change opacity to 1
+        backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
       ),
       backgroundColor: Colors.white,
       body: SizedBox(
@@ -26,7 +41,7 @@ class ForgotPasswordPage extends StatelessWidget {
                 width: 3.0,
               ),
             ),
-            margin: const EdgeInsets.all(20.0),
+            margin: const EdgeInsets.fromLTRB(20.0, 10, 20.0, 20.0),
             child: Stack(
               children: [
                 Positioned(
@@ -95,16 +110,17 @@ class ForgotPasswordPage extends StatelessWidget {
                                 color: Colors.blue,
                               ),
                             ),
+                            validator: validateEmail, // Validation de l'e-mail
                           ),
                           const SizedBox(height: 20.0),
                           SizedBox(
-                            width: 200, // Take the full available width
+                            width: 200, 
                             child: ElevatedButton(
                               onPressed: () {
                                 // Ajoutez votre logique de réinitialisation du mot de passe ici
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue, // Set the color to blue here
+                                backgroundColor: Colors.blue, 
                               ),
                               child: const Text(
                                 'Réinitialiser',
