@@ -33,17 +33,16 @@ class _AccueilState extends State<Accueil> {
       print("user_id :" + LocalStorageService.getData('user_id'));
 
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/user'), // Change to post
-        body: jsonEncode({'user_id': user_id}), // Add your body here
+        Uri.parse('http://127.0.0.1:5000/api/user'), 
+        body: jsonEncode({'user_id': user_id}), 
         headers: {
           'Content-Type': 'application/json'
-        }, // Set appropriate headers
+        }, 
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print(data);
         setState(() {
-          _userName = data ['nom+ prenom']?? '';
+          _userName = (data['nom'] ?? '') + ' ' + (data['prenom'] ?? '');
           _userEmail = data['mail']?? '';
         });
       } else {

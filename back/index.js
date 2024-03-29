@@ -7,6 +7,8 @@ const app = express();
 const port = 5000;
 const crypto = require('crypto');
 const sendEmail = require('./../back/email');
+const multer = require('multer');
+const upload = multer();
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -58,6 +60,21 @@ usersSchema.methods.createResetPasswordToken = function () {
 
 // Définition du modèle users à partir du schéma
 const usersModel = mongoose.model('users', usersSchema);
+
+const familyMemberSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Référence à l'utilisateur
+    nom: String,
+    prenom:String,
+    relation: String,
+    naissance: Date
+    
+});
+
+const FamilyMember = mongoose.model('membres', familyMemberSchema);
+
+module.exports = FamilyMember;
+
+
 
 // Endpoint pour se connecter
 app.post('/api/login', async (req, res) => {
@@ -160,18 +177,18 @@ app.post('/api/user/update', async (req, res) => {
     }
 });
 
-app.post('/api/user/:userId/upload-image', async (req, res) => {
+app.post('/api/user/:userId/upload-image', upload.single('image'), async (req, res) => {
     try {
-        const userId = req.params.userId;
-        const image = req.body.image; // L'image est envoyée dans le corps de la requête
-        // Mettez à jour le document de l'utilisateur avec le nouveau chemin d'image
-        await usersModel.findByIdAndUpdate(userId, { image: image });
-        res.status(200).json({ message: 'Image mise à jour avec succès' });
+      const userId = req.params.userId;
+      const image = req.file.buffer; // Utilisez req.file.buffer pour accéder au contenu de l'image
+      await usersModel.findByIdAndUpdate(userId, { image: image });
+      res.status(200).json({ message: 'Image mise à jour avec succès' });
+  
     } catch (error) {
-        console.error('Erreur lors de la mise à jour de l\'image :', error);
-        res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'image' });
+      console.error('Erreur lors de la mise à jour de l\'image :', error);
+      res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'image' });
     }
-});
+  });
 
 // Endpoint pour modifier le mot de passe de l'utilisateur
 app.post('/api/user/update-password', async (req, res) => {
@@ -179,7 +196,7 @@ app.post('/api/user/update-password', async (req, res) => {
         const { user_id, nouveauMotDePasse } = req.body;
         const user = await usersModel.findOne({ _id: user_id });
         if (user) {
-            // Mettre à jour le mot de passe de l'utilisateur%
+            // Mettre à jour le mot de passe de l'utilisateur
             const updatedUser = await usersModel.findByIdAndUpdate(user_id, {
                 password: nouveauMotDePasse
             });
@@ -190,6 +207,8 @@ app.post('/api/user/update-password', async (req, res) => {
                 res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour du mot de passe' });
                 console.log('Erreur lors de la mise à jour du mot de passe');
             }
+        } else {
+            res.status(404).json({ message: 'Utilisateur introuvable' });
         }
     } catch (error) {
         console.error('Erreur lors de la mise à jour du mot de passe : ', error);
@@ -198,7 +217,7 @@ app.post('/api/user/update-password', async (req, res) => {
 });
 
 // Endpoint pour réinitialiser le mot de passe de l'utilisateur
-app.post('/api/reset-password', async (req, res) => {
+app.post('/api/forgot-password', async (req, res) => {
     try {
         const { email } = req.body;
         const user = await usersModel.findOne({ mail: email });
@@ -219,5 +238,76 @@ app.post('/api/reset-password', async (req, res) => {
     } catch (error) {
         console.error('Erreur lors de la réinitialisation du mot de passe : ', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la réinitialisation du mot de passe' });
+    }
+});
+
+
+app.patch('/api/reset-password/:token', async (req, res) => {
+    try {
+        const token = crypto.createHash('sha256').update(req.params.token).digest('hex');
+        // Recherche de l'utilisateur avec le token de réinitialisation correspondant et vérification de la validité du token
+        const user = await usersModel.findOne({
+            passwordResetToken: token,
+            passwordResetTokenExpired: { $gt: Date.now() }
+        });
+
+        if (user) {
+            // Mettre à jour le mot de passe de l'utilisateur avec le nouveau mot de passe
+            user.password = req.body.password;
+            user.passwordResetToken = undefined;
+            user.passwordResetTokenExpired = undefined;
+            user.createpasswordChangedAt = Date.now(); 
+
+            await user.save(); // Sauvegarder les modifications
+
+            res.status(200).json({ message: 'Nouveau mot de passe ajouté' });
+        } else {
+            res.status(404).json({ message: 'Le token est invalide ou a expiré' }); // Correction du message
+        }
+    } catch (error) {
+        console.error('Erreur lors de la réinitialisation du mot de passe : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la réinitialisation du mot de passe' });
+    }
+});
+
+
+
+
+
+
+// Endpoint pour ajouter un membre de la famille
+app.post('/api/family-members/add', async (req, res) => {
+    try {
+        const { userId, nom, prenom, relation, naissance } = req.body; // Garder "naissance" tel quel
+        const newMember = await FamilyMember.create({ userId, nom, prenom, relation, naissance }); // Garder "naissance" tel quel
+        res.status(200).json({ message: 'Nouveau membre ajouté', newMember }); // Changer l'objet JSON pour inclure le message et le nouveau membre
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout d\'un membre de la famille : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un membre de la famille' });
+    }
+});
+
+
+
+// Endpoint pour mettre à jour un membre de la famille
+app.put('/api/family-members/:memberId', async (req, res) => {
+    try {
+        const { nom,prenom, relation,naissance } = req.body;
+        const updatedMember = await FamilyMember.findByIdAndUpdate(req.params.memberId, { nom,prenom, relation,naissance }, { new: true });
+        res.json(updatedMember);
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour d\'un membre de la famille : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour d\'un membre de la famille' });
+    }
+});
+
+// Endpoint pour supprimer un membre de la famille
+app.delete('/api/family-members/:memberId', async (req, res) => {
+    try {
+        await FamilyMember.findByIdAndDelete(req.params.memberId);
+        res.json({ message: 'Membre de la famille supprimé avec succès' });
+    } catch (error) {
+        console.error('Erreur lors de la suppression d\'un membre de la famille : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la suppression d\'un membre de la famille' });
     }
 });

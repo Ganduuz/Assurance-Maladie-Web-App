@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'Connexion.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String token;
@@ -14,6 +17,28 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   bool _passwordValid = true;
+
+
+Future<void> resetPass(BuildContext context) async {
+        final String password = _passwordController.text;
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:5000/api/reset-password/:token'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        
+      } else {
+        
+        
+      }
+    } catch (error) {
+      print('Erreur de connexion: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,11 +80,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               onPressed: () {
                 if (_passwordController.text.isNotEmpty &&
                     _passwordController.text == _confirmPasswordController.text) {
-                  // Appelez la fonction pour réinitialiser le mot de passe avec le nouveau mot de passe (_passwordController.text) et le jeton (widget.token)
-                  // Par exemple, resetPassword(widget.token, _passwordController.text);
-                  // Vous devrez implémenter la logique de réinitialisation de mot de passe ici
-                  // Une fois la réinitialisation terminée, vous pouvez rediriger l'utilisateur vers une autre page
-                  Navigator.pop(context); // Redirigez l'utilisateur vers une autre page après la réinitialisation
+                  resetPass(context);
+                   Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                     builder: (context) =>
+                      MyHomePage()),
+                    );
                 } else {
                   setState(() {
                     _passwordValid = false;

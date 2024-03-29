@@ -8,6 +8,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+
+
 class MonCompte extends StatefulWidget {
   const MonCompte({Key? key}) : super(key: key);
 
@@ -88,7 +91,7 @@ void initState() {
        ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Coordonnées mis à jour avec succès'),
-        duration: Duration(seconds: 2),
+        duration: Duration(seconds: 3),
       ),
     );
     } else {
@@ -125,7 +128,7 @@ void _updatePassword() async {
          ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Mot de passe mis à jour avec succès'),
-        duration: Duration(seconds: 2),
+        duration: Duration(seconds: 3),
       ),
     );
       } else {
@@ -143,36 +146,41 @@ void _updatePassword() async {
 
 
 Future<void> _importImage() async {
-    final html.FileUploadInputElement input = html.FileUploadInputElement()
-      ..accept = 'image/*';
-    input.click();
+  final html.FileUploadInputElement input = html.FileUploadInputElement()..accept = 'image/*';
+  input.click();
 
-    input.onChange.listen((event) async {
-      final file = input.files!.first;
-      final reader = html.FileReader();
-      reader.readAsArrayBuffer(file);
-      reader.onLoadEnd.listen((event) async {
-        final encodedImage = reader.result as Uint8List;
-        try {
-          var user_id = LocalStorageService.getData('user_id');
-          final response = await http.post(
-            Uri.parse('http://127.0.0.1:5000/api/user/$user_id/upload-image'),
-            body: encodedImage,
-          );
-          if (response.statusCode == 200) {
-            print('Image ajoutée avec succès');
-            // Traitez la réponse du serveur si nécessaire
-          } else {
-            print('Erreur lors de l\'ajout de l\'image: ${response.statusCode}');
-            // Gérez les erreurs de réponse du serveur
-          }
-        } catch (error) {
-          print('Erreur lors de la connexion: $error');
-          // Gérez les erreurs de connexion
+  input.onChange.listen((event) async {
+    final file = input.files!.first;
+    final reader = html.FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onLoadEnd.listen((event) async {
+      final encodedImage = reader.result as Uint8List;
+      final formData = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://127.0.0.1:5000/api/user/${LocalStorageService.getData('user_id')}/upload-image'),
+      );
+      formData.files.add(http.MultipartFile.fromBytes(
+        'image',
+        encodedImage,
+        filename: 'image.jpg',
+        contentType: MediaType('image', 'jpg'),
+      ));
+      try {
+        final response = await http.Response.fromStream(await formData.send());
+        if (response.statusCode == 200) {
+          print('Image ajoutée avec succès');
+          // Traitez la réponse du serveur si nécessaire
+        } else {
+          print('Erreur lors de l\'ajout de l\'image: ${response.statusCode}');
+          // Gérez les erreurs de réponse du serveur
         }
-      });
+      } catch (error) {
+        print('Erreur lors de la connexion: $error');
+        // Gérez les erreurs de connexion
+      }
     });
-  }
+  });
+}
 
   @override
   Widget build(BuildContext context) {

@@ -36,6 +36,8 @@ dependencies:
   localstorage: ^4.0.0+1
   table_calendar: ^3.0.1
   flutter_cupertino_date_picker_fork: ^1.0.7
+  uni_links: ^0.5.0
+  url_launcher: ^6.0.6
 
 
 

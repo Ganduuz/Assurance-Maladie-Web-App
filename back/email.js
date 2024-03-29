@@ -4,16 +4,17 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = async (options) => {
     const transporter = nodemailer.createTransport({
-        host: "sandbox.smtp.mailtrap.io",
-        port: 2525,
+        service:"gmail",
+        host: "smtp.gmail.com",
+        port: 587,
         auth: {
-            user: "7c4abb9330525c",
-            pass: "0d7ac612045bd9"
+            user: "gandouzakrem48@gmail.com",
+            pass: "ykfv nhvu vuxi qocr"
         }
     });
 
     const emailOptions = {
-        from: 'CineFlix support <support@cineflix.com>',
+        from: 'Capgemini-santé support <support@capgemini.com>',
         to: options.email,
         subject: options.subject,
         text: options.message

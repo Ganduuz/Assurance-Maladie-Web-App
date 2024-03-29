@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ForgotPasswordPage extends StatelessWidget {
-  const ForgotPasswordPage({Key? key});
+  final TextEditingController mailController = TextEditingController();
 
   // Fonction de validation d'e-mail
   String? validateEmail(String? value) {
@@ -18,12 +19,64 @@ class ForgotPasswordPage extends StatelessWidget {
     return null;
   }
 
+  Future<void> forgetPass(BuildContext context) async {
+    final String mail = mailController.text;
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:5000/api/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': mail}),
+      );
+
+      if (response.statusCode == 200) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Lien Envoyé'),
+              content: Text('Un lien de récupération a été envoyé à votre boite mail.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Utilisateur introuvable'),
+              content: Text('Veuillez vérifier votre adresse e-mail.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (error) {
+      print('Erreur de connexion: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Récupération de mot de passe'),
-        backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
+        backgroundColor: Colors.white,
       ),
       backgroundColor: Colors.white,
       body: SizedBox(
@@ -103,6 +156,7 @@ class ForgotPasswordPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 30.0),
                           TextFormField(
+                            controller: mailController,
                             decoration: const InputDecoration(
                               labelText: 'Adresse e-mail',
                               prefixIcon: Icon(
@@ -114,13 +168,13 @@ class ForgotPasswordPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 20.0),
                           SizedBox(
-                            width: 200, 
+                            width: 200,
                             child: ElevatedButton(
                               onPressed: () {
-                                // Ajoutez votre logique de réinitialisation du mot de passe ici
+                                forgetPass(context);
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue, 
+                                backgroundColor: Colors.blue,
                               ),
                               child: const Text(
                                 'Réinitialiser',
