@@ -9,6 +9,10 @@ const crypto = require('crypto');
 const sendEmail = require('./../back/email');
 const multer = require('multer');
 const upload = multer();
+const moment = require('moment');
+
+
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -109,7 +113,8 @@ app.post('/api/user', async (req, res) => {
             if (user) {
                 res.status(200).json({
                     message: 'Données récupérées',
-                    mail: user.mail
+                    mail: user.mail,
+                    membre:user.membre
                 });
                 console.log('Données récupérées');
             } else {
@@ -272,15 +277,59 @@ app.patch('/api/reset-password/:token', async (req, res) => {
 
 
 
+// Endpoint pour récupérer les détails des membres de la famille de l'utilisateur actuellement connecté
+app.get('/api/family-members/:user_id', async (req, res) => {
+    try {
+        const { user_id } = req.params;
+        
+        // Recherche des membres de la famille appartenant à l'utilisateur avec l'ID spécifié
+        const familyMembers = await FamilyMember.find({ userId: user_id });
+        
+        if (familyMembers.length > 0) {
+            // Créer un tableau pour stocker les détails de chaque membre
+            const membersDetails = familyMembers.map(member => {
+                const formattedDate = moment(member.naissance).format('DD/MM/YYYY');
 
+                return {
+                    _id: member._id,
+                    nom: member.nom,
+                    prenom: member.prenom,
+                    relation: member.relation,
+                    naissance: formattedDate
+                    // Ajoutez d'autres détails de membre si nécessaire
+                };
+            });
+            console.log('membres récupérées');
+            res.status(200).json({ message: 'Détails des membres de la famille récupérés', membersDetails });
+        } else {
+            res.status(404).json({ message: 'Aucun membre de la famille trouvé pour cet utilisateur' });
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des détails des membres de la famille : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des membres de la famille' });
+    }
+});
 
 
 // Endpoint pour ajouter un membre de la famille
 app.post('/api/family-members/add', async (req, res) => {
     try {
-        const { userId, nom, prenom, relation, naissance } = req.body; // Garder "naissance" tel quel
-        const newMember = await FamilyMember.create({ userId, nom, prenom, relation, naissance }); // Garder "naissance" tel quel
-        res.status(200).json({ message: 'Nouveau membre ajouté', newMember }); // Changer l'objet JSON pour inclure le message et le nouveau membre
+        const { userId, nom, prenom, relation, naissance } = req.body; 
+
+        // Séparer les composants de la date
+        const [day, month, year] = naissance.split('/').map(Number);
+
+        // Vérifier si les composants sont valides
+        if (isNaN(day) || isNaN(month) || isNaN(year)) {
+            return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
+        }
+
+        // Créer un nouvel objet Date
+        const formattedDate = new Date(year, month - 1, day);
+
+        // Ajouter le nouveau membre avec la date formatée
+        const newMember = await FamilyMember.create({ userId, nom, prenom, relation, naissance: formattedDate });
+        res.status(200).json({ message: 'Nouveau membre ajouté', newMember });
     } catch (error) {
         console.error('Erreur lors de l\'ajout d\'un membre de la famille : ', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un membre de la famille' });
@@ -289,12 +338,16 @@ app.post('/api/family-members/add', async (req, res) => {
 
 
 
+
+
+
 // Endpoint pour mettre à jour un membre de la famille
-app.put('/api/family-members/:memberId', async (req, res) => {
+app.put('/api/family-members/update/:memberId', async (req, res) => {
     try {
-        const { nom,prenom, relation,naissance } = req.body;
-        const updatedMember = await FamilyMember.findByIdAndUpdate(req.params.memberId, { nom,prenom, relation,naissance }, { new: true });
-        res.json(updatedMember);
+        const memberId = mongoose.Types.ObjectId(req.params.memberId);
+        const { nom,prenom,relation,naissance } = req.body;
+        const updatedMember = await FamilyMember.findByIdAndUpdate(memberId, { nom,prenom,relation,naissance}, { new: true });
+        res.status(200).json({ message: 'Membre mis a jour', updatedMember }); // Changer l'objet JSON pour inclure le message et le nouveau membre
     } catch (error) {
         console.error('Erreur lors de la mise à jour d\'un membre de la famille : ', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour d\'un membre de la famille' });
@@ -302,7 +355,7 @@ app.put('/api/family-members/:memberId', async (req, res) => {
 });
 
 // Endpoint pour supprimer un membre de la famille
-app.delete('/api/family-members/:memberId', async (req, res) => {
+app.delete('/api/family-members/delete/:memberId', async (req, res) => {
     try {
         await FamilyMember.findByIdAndDelete(req.params.memberId);
         res.json({ message: 'Membre de la famille supprimé avec succès' });

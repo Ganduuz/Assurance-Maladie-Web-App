@@ -1,13 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Pour formater les dates
-
 import 'dart:convert';
 import 'local_storage_service.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:table_calendar/table_calendar.dart';
 
+class Radiobtn extends StatefulWidget {
+  final Function(int)? onValueChanged; // Ajout du paramètre de fonction de rappel
+
+  Radiobtn({this.onValueChanged}); // Constructeur avec un paramètre facultatif
+
+  @override
+  RadiobtnState createState() => RadiobtnState();
+}
+
+class RadiobtnState extends State<Radiobtn> {
+  int _value= 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Radio(
+              value: 1,
+              groupValue: _value,
+              onChanged: (value) {
+                setState(() {
+                  _value = value as int ;
+                });
+                if (widget.onValueChanged != null) {
+                  widget.onValueChanged!(_value); 
+                }
+              },
+            ),
+            Text("Enfant"),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            Radio(
+              value: 2,
+              groupValue: _value,
+              onChanged: (value) {
+                setState(() {
+                  _value = value as int;
+                });
+                if (widget.onValueChanged != null) {
+                  widget.onValueChanged!(_value); // Appel de la fonction de rappel avec la nouvelle valeur
+                }
+              },
+            ),
+            Text("Conjoint"),
+          ],
+        ),
+      ],
+
+    );
+  }
+
+
+  void handleRadio(int? value) {
+    setState(() {
+      _value = value!;
+    });
+  }
+}
 
 
 class FamilyMemberPage extends StatefulWidget {
@@ -20,27 +82,160 @@ class _FamilyMemberPageState extends State<FamilyMemberPage> {
   String _nom = '';
   String _prenom = '';
   String _naissance='';
+  String memberId='';
   TextEditingController nomController = TextEditingController();
   TextEditingController prenomController = TextEditingController();
   TextEditingController dobController = TextEditingController();
-  bool isConjoint = false;
-  bool isEnfant = false;
+   int _value =0; 
+    DateTime _selectedDay = DateTime.now();
+    DateTime _focusedDay = DateTime.now();
   List<FamilyMember> familyMembers = [];
-
   DateTime selectedDate = DateTime.now();
-  
 
+
+  void buildCalendarWidget(BuildContext context) {
+  
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: SizedBox(
+              height: 380,
+              width: 380,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    TableCalendar(
+                      focusedDay: _focusedDay,
+                      firstDay: DateTime.utc(1950),
+                      lastDay: DateTime.utc(2100),
+                      rowHeight: 35,
+                      daysOfWeekStyle: DaysOfWeekStyle(weekdayStyle: TextStyle(fontWeight: FontWeight.w400),
+                      weekendStyle:TextStyle(fontWeight: FontWeight.w400), ),
+                      onDaySelected: (DateTime selectDay,DateTime focusDay) {
+                        setState(() {
+                          _selectedDay=selectDay;
+                          _focusedDay=focusDay;
+                         dobController.text = DateFormat('dd/MM/yyyy').format(_selectedDay);
+                         _naissance = DateFormat('dd/MM/yyyy').format(_selectedDay);
+                        _selectedDay = DateTime.now();
+                        _focusedDay=DateTime.now();
+                        },);
+                      },
+                      headerStyle: HeaderStyle(formatButtonVisible: false, titleCentered: true),
+                      calendarStyle:CalendarStyle(
+                        isTodayHighlighted: true,
+                        selectedDecoration: BoxDecoration(
+                          color: Colors.blue.shade200,
+                          shape: BoxShape.circle,
+                        ),
+                        todayDecoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                        ),
+                        selectedTextStyle: TextStyle(color: Color.fromARGB(255, 149, 167, 158)),
+                      ) ,
+                      selectedDayPredicate: (DateTime date) {
+                        return isSameDay(_selectedDay, date);
+                      },
+                    ),
+                    SizedBox(height: 10,),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(child: TextButton(
+                          onPressed: () {   
+                            Navigator.pop(context, _selectedDay);
+                          },
+                          child: Text(
+                            "OK",
+                            style: TextStyle(color: Colors.blue.shade300),
+                          ),
+                        ),),
+                        SizedBox(),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            "Annuler",
+                            style: TextStyle(color: Colors.blue.shade300),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+},
+);
+}
+  void initState() {
+  super.initState();
+  _loadFamilyMembers(); 
+}
+
+Future<void> _loadFamilyMembers() async {
+  try {
+    List<FamilyMember> members = await fetchFamilyMembers(); 
+    setState(() {
+      familyMembers = members; 
+    });
+  } catch (error) {
+   
+    print('Erreur lors du chargement des membres de la famille: $error');
+  }
+}
+
+Future<List<FamilyMember>> fetchFamilyMembers() async {
+  var user_id = LocalStorageService.getData('user_id');
+
+  final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/family-members/$user_id'));
+  
+  if (response.statusCode == 200) {
+    // Analyser la réponse JSON
+    final jsonData = jsonDecode(response.body);
+    final List<dynamic> membersJson = jsonData['membersDetails'];
+    
+    // Convertir les données JSON en liste d'objets FamilyMember
+    List<FamilyMember> familyMembers = membersJson.map((json) => FamilyMember.fromJson(json)).toList();
+    
+    return familyMembers;
+  } else {
+    // En cas d'erreur, lancer une exception
+    throw Exception('Failed to load family members');
+  }
+}
+
+  
   void _addMember() async {
   try {
     var user_id = LocalStorageService.getData('user_id');
-
+   String relation = _value == 1 ? "Enfant" : "Conjoint";
     final response = await http.post(
       Uri.parse('http://127.0.0.1:5000/api/family-members/add'), 
       body: jsonEncode({
         'userId': user_id,
         'nom': _nom,
         'prenom': _prenom,
-        'relation': "",
+        'relation': relation,
         'naissance': _naissance,
       }),
       headers: {
@@ -69,35 +264,72 @@ class _FamilyMemberPageState extends State<FamilyMemberPage> {
 }
 
 
+  void _updateMember(String memberId) async {
+  try {
+       String relation = _value == 1 ? "Enfant" : "Conjoint";
 
-Future<void> _selectDate(BuildContext context) async {
-    final screenSize = MediaQuery.of(context).size;
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            primaryColor: Colors.blue, // Définit la couleur principale sur bleu
-            colorScheme: ColorScheme.light(primary: Colors.blue), // Définit la couleur de l'accent sur bleu
-            buttonTheme: ButtonThemeData(
-              textTheme: ButtonTextTheme.primary, // Définit le texte des boutons sur la couleur primaire
-            ),
-          ),
-          child: child!,
-          
-        );
+          final response = await http.post(
+      Uri.parse('http://127.0.0.1:5000/api/family-members/update/$memberId'), 
+      body: jsonEncode({  
+        'nom': _nom,
+        'prenom': _prenom,
+        'relation': relation, 
+        'naissance': _naissance,
+      }),
+      headers: {
+        'Content-Type': 'application/json'
       },
     );
-    if (picked != null && picked != selectedDate)
-      setState(() {
-        selectedDate = picked;
-        dobController.text = DateFormat('dd/MM/yyyy').format(picked);
-        _naissance =dobController.text;
-      });
+
+    if (response.statusCode == 200) {
+      print('Membre mis à jour.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Membre mis à jour avec succès'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } else {
+      print('Erreur lors de la mise à jour du membre: ${response.statusCode}');
+    }
+  } catch (error) {
+    // Gérer les erreurs de connexion
+    print('Erreur de connexion: $error');
   }
+}
+
+
+
+
+void _deleteMember(memberId) async {
+  try {
+          final response = await http.post(
+      Uri.parse('http://127.0.0.1:5000/api/family-members/update/$memberId'), 
+      body: jsonEncode({  
+      
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('Membre supprimé.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Membre mis à jour avec succès'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } else {
+      print('Erreur lors de la mise supression du membre: ${response.statusCode}');
+    }
+  } catch (error) {
+    // Gérer les erreurs de connexion
+    print('Erreur de connexion: $error');
+  }
+}
+
 
 
   @override
@@ -141,7 +373,7 @@ Future<void> _selectDate(BuildContext context) async {
                           child: ListTile(
                             contentPadding: EdgeInsets.all(40),
                             title: Text(
-                              '${familyMembers[index].nom} ${familyMembers[index].prenom} ',
+                              '${familyMembers[index].nom} ${familyMembers[index].prenom}\n(${familyMembers[index].type})',
                               textAlign: TextAlign.center, // Centrer le texte
                               style: TextStyle(
                                 color: Colors.blue,
@@ -153,6 +385,7 @@ Future<void> _selectDate(BuildContext context) async {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                
                                 SizedBox(height: 40.0),
                                 Text(
                                   'Date de naissance: ${familyMembers[index].dob}',
@@ -242,7 +475,7 @@ Future<void> _selectDate(BuildContext context) async {
                                 SizedBox(height: 40.0),
                                 SizedBox(
                                   height: 40, // Taille fixe des boutons
-                                  width: double.infinity, // Pour étendre sur toute la largeur
+                                  width: double.infinity, 
                                   child: TextButton(
                                     onPressed: () {
                                       _modifierMembreFamille(context, index, familyMembers[index]);
@@ -326,8 +559,8 @@ Future<void> _selectDate(BuildContext context) async {
     nomController.text = ''; // Réinitialiser le champ nom
     prenomController.text = ''; // Réinitialiser le champ prénom
     dobController.text = ''; // Réinitialiser le champ date de naissance
-    isConjoint = false;
-    isEnfant = false;
+    _value = 1;
+    _selectedDay = DateTime.now();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -338,7 +571,7 @@ Future<void> _selectDate(BuildContext context) async {
           elevation: 0.0,
           backgroundColor: Colors.transparent,
           child: Container(
-            height: 550,
+            height: 600,
             width: 700,
             padding: EdgeInsets.all(20.0),
             decoration: BoxDecoration(
@@ -359,12 +592,15 @@ Future<void> _selectDate(BuildContext context) async {
                 child: Row(
                   children: [
                       IconButton(
-                      onPressed: () => _selectDate(context),
-                      icon: Icon(
-                        Icons.calendar_month,
-                        color: Colors.blue,
+                      onPressed: (){
+                             buildCalendarWidget(context);
+                        },
+                        icon: Icon(
+                          Icons.calendar_month,
+                          color: Colors.blue,
+                        ),
                       ),
-                    ),
+
                     Text(
                       'Date de naissance',
                       style: TextStyle(
@@ -385,9 +621,12 @@ Future<void> _selectDate(BuildContext context) async {
                     setState(() {
                       familyMembers.add(
                         FamilyMember(
+                          id: '',
                           nom: nomController.text,
                           prenom: prenomController.text,
                           dob: dobController.text,
+                          type: _value == 1 ? "Enfant" : "Conjoint",
+
                         ),
                       );
                     });
@@ -433,7 +672,7 @@ Future<void> _selectDate(BuildContext context) async {
         return AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0), // Ajuster le rayon de la bordure
+            borderRadius: BorderRadius.circular(10.0),
           ),
           title: Text("Supprimer ?"),
           content: Container(
@@ -449,7 +688,7 @@ Future<void> _selectDate(BuildContext context) async {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Fermer le dialog
+                Navigator.of(context).pop();
               },
               child: Text(
                 "Non",
@@ -460,10 +699,11 @@ Future<void> _selectDate(BuildContext context) async {
             ),
             TextButton(
               onPressed: () {
+                _deleteMember(memberId);
                 setState(() {
-                  familyMembers.removeAt(index); // Supprimer le membre
+                  familyMembers.removeAt(index); 
                 });
-                Navigator.of(context).pop(); // Fermer le dialog
+                Navigator.of(context).pop(); 
               },
               child: Text(
                 "Oui",
@@ -483,7 +723,7 @@ Future<void> _selectDate(BuildContext context) async {
     nomController.text = member.nom;
     prenomController.text = member.prenom;
     dobController.text = member.dob;
-
+    _value = member.type == "Enfant" ? 1 : 2;
     selectedDate = DateFormat('dd/MM/yyyy').parse(member.dob);
 
     showDialog(
@@ -517,12 +757,15 @@ Future<void> _selectDate(BuildContext context) async {
                 child: Row(
                   children: [
                       IconButton(
-                      onPressed: () => _selectDate(context),
-                      icon: Icon(
-                        Icons.calendar_month,
-                        color: Colors.blue,
+                     onPressed: (){
+                             buildCalendarWidget(context);
+                        },
+                        icon: Icon(
+                          Icons.calendar_month,
+                          color: Colors.blue,
+                        ),
                       ),
-                    ),
+
                     Text(
                       'Date de naissance',
                       style: TextStyle(
@@ -539,10 +782,12 @@ Future<void> _selectDate(BuildContext context) async {
                   children: [
                     ElevatedButton(
                       onPressed: () {
+                        _updateMember(member.id);
                         setState(() {
                           familyMembers[index].nom = nomController.text;
                           familyMembers[index].prenom = prenomController.text;
                           familyMembers[index].dob = dobController.text;
+                          familyMembers[index].type= _value ==1 ? "Enfant" : "Conjoint" ;
                         });
                         Navigator.pop(context);
                       },
@@ -581,104 +826,77 @@ Future<void> _selectDate(BuildContext context) async {
     );
   }
 
-  Widget _buildForm() {
-    return Column(
+Widget _buildForm() {
+  return Form(
+    child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         TextFormField(
           style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
           controller: nomController,
           onChanged: (value) {
-          setState(() {
-            // Mettre à jour la valeur du contrôleur de nom
-            _nom = value;
-          });
-        },
+            setState(() {
+              _nom = value;
+            });
+          },
           decoration: InputDecoration(
             labelText: 'Nom',
-            labelStyle: const TextStyle(
-              color: Color.fromRGBO(209, 216, 223, 1),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            focusedBorder: OutlineInputBorder(
-              // Bordure lorsque le champ est en focus
-              borderSide: BorderSide(color: Colors.blue, width: 2.0),
-              borderRadius: BorderRadius.circular(5.0),
-            ),
           ),
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'Le champ Nom est obligatoire';
+            }
+            return null;
+          },
         ),
         SizedBox(height: 30.0),
         TextFormField(
           style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
           controller: prenomController,
           onChanged: (value) {
-          setState(() {
-            // Mettre à jour la valeur du contrôleur de nom
-            _prenom = value;
-          });
-        },
+            setState(() {
+              _prenom = value;
+            });
+          },
           decoration: InputDecoration(
             labelText: 'Prénom',
-            labelStyle: const TextStyle(
-              color: Color.fromRGBO(209, 216, 223, 1),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            focusedBorder: OutlineInputBorder(
-              // Bordure lorsque le champ est en focus
-              borderSide: BorderSide(color: Colors.blue, width: 2.0),
-              borderRadius: BorderRadius.circular(5.0),
-            ),
           ),
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'Le champ Prénom est obligatoire';
+            }
+            return null;
+          },
         ),
         SizedBox(height: 30.0),
-      
-            Row(
-              children: [
-                Radio(
-                  value: 'Conjoint',
-                  groupValue: isConjoint ? 'Conjoint' : null,
-                  onChanged: (value) {
-                    setState(() {
-                      isConjoint = true;
-                      isEnfant = false;
-                    });
-                  },
-                ),
-                Text('Conjoint'),
-              ],
-            ),
-            SizedBox(width: 20.0),
-            Row(
-              children: [
-                Radio(
-                  value: 'Enfant',
-                  groupValue: isEnfant ? 'Enfant' : null,
-                  onChanged: (value) {
-                    setState(() {
-                      isEnfant = true;
-                      isConjoint = false;
-                    });
-                  },
-                ),
-                Text('Enfant'),
-              ],
-            ),
-          ],
-        
-    );
-  }
+        Radiobtn(
+          onValueChanged: (value) {
+            setState(() {
+              _value = value;
+            });
+          },
+        ),
+      ],
+    ),
+  );
 }
 
+}
 class FamilyMember {
+  String id;
   String nom;
   String prenom;
   String dob;
+  String type;
 
-  FamilyMember({required this.nom, required this.prenom, required this.dob});
+  FamilyMember({required this.nom, required this.prenom, required this.dob, required this.type , required this.id});
+  factory FamilyMember.fromJson(Map<String, dynamic> json) {
+    return FamilyMember(
+      id:json['_id'],
+      nom: json['nom'],
+      prenom: json['prenom'],
+      type: json['relation'],
+      dob: json['naissance'],
+    );
+  }
 }
-
-

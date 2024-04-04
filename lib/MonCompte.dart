@@ -1,4 +1,3 @@
-// ignore_for_file: dead_code
 
 import 'dart:convert';
 import 'dart:html' as html;
