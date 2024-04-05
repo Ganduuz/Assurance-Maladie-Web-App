@@ -28,9 +28,36 @@ class _MonCompteState extends State<MonCompte> {
   final _formKey = GlobalKey<FormState>();
 void initState() {
     super.initState();
-    // Appeler la fonction pour récupérer les données de l'utilisateur au démarrage de la page
     _getUserData();
+    _getUserImage();
   }
+
+Future<void> _getUserImage() async {
+    try {
+      var user_id = LocalStorageService.getData('user_id');
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:5000/api/user/get-image'),
+        body: jsonEncode({'user_id': user_id}),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final imageUrl = data['_imageUrl'];
+        final imageResponse = await http.get(Uri.parse(imageUrl));
+           
+        if (imageResponse.statusCode == 200) {
+        setState(() {
+          _imageBytes = imageResponse.bodyBytes;
+        });
+      }
+      } else {
+        print('Erreur lors de la récupération de l\'image: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Erreur de connexion: $error');
+    }
+  }
+
 
   Future<void> _getUserData() async {
     try {
@@ -38,15 +65,14 @@ void initState() {
       print("user_id :" + LocalStorageService.getData('user_id'));
 
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/user/informations'), // Change to post
-        body: jsonEncode({'user_id': user_id}), // Add your body here
+        Uri.parse('http://127.0.0.1:5000/api/user/informations'), 
+        body: jsonEncode({'user_id': user_id}), 
         headers: {
           'Content-Type': 'application/json'
         }, // Set appropriate headers
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print(data);
            setState(() {
              _nom = data['nom']?? '';
              _prenom = data['prenom'] ?? '';
@@ -154,9 +180,10 @@ Future<void> _importImage() async {
     reader.readAsArrayBuffer(file);
     reader.onLoadEnd.listen((event) async {
       final encodedImage = reader.result as Uint8List;
+      final userId = await LocalStorageService.getData('user_id');
       final formData = http.MultipartRequest(
         'POST',
-        Uri.parse('http://127.0.0.1:5000/api/user/${LocalStorageService.getData('user_id')}/upload-image'),
+        Uri.parse('http://127.0.0.1:5000/api/user/$userId/upload-image'),
       );
       formData.files.add(http.MultipartFile.fromBytes(
         'image',
@@ -224,7 +251,7 @@ Future<void> _importImage() async {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                             ),
-                            child: CircleAvatar(
+                             child: CircleAvatar(
                               radius: 80.0,
                               backgroundImage: _imageBytes != null
                                   ? MemoryImage(_imageBytes!)

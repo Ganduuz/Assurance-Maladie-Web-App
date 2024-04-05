@@ -91,6 +91,8 @@ class _FamilyMemberPageState extends State<FamilyMemberPage> {
     DateTime _focusedDay = DateTime.now();
   List<FamilyMember> familyMembers = [];
   DateTime selectedDate = DateTime.now();
+  double plafond =0;
+   
 
 
   void buildCalendarWidget(BuildContext context) {
@@ -404,9 +406,9 @@ void _deleteMember(memberId) async {
                                       child: TextButton(
                                         onPressed: () {},
                                         child: Text(
-                                          '1500.00',
+                                          '${familyMembers[index].reste.toStringAsFixed(2)}',
                                           style: TextStyle(
-                                            color: Color.fromARGB(255, 241, 189, 0),
+                                            color: Color.fromARGB(255, 54, 249, 0),
                                             fontFamily: 'Istok web',
                                             fontSize: 12,
                                           ),
@@ -416,7 +418,7 @@ void _deleteMember(memberId) async {
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(5.0),
                                             side: BorderSide(
-                                              color:  Color.fromARGB(255, 241, 189, 0),
+                                              color: Color.fromARGB(255, 54, 249, 0),
                                             ),
                                           ),
                                         ),
@@ -428,7 +430,7 @@ void _deleteMember(memberId) async {
                                       child: TextButton(
                                         onPressed: () {},
                                         child: Text(
-                                          '620.30',
+                                          '${familyMembers[index].consome.toStringAsFixed(2)}',
                                           style: TextStyle(
                                             color: Color.fromARGB(255, 241, 52, 0),
                                             fontFamily: 'Istok web',
@@ -452,9 +454,9 @@ void _deleteMember(memberId) async {
                                       child: TextButton(
                                         onPressed: () {},
                                         child: Text(
-                                          '879.70',
+                                          '${familyMembers[index].plafond.toStringAsFixed(2)}',
                                           style: TextStyle(
-                                            color: Color.fromARGB(255, 54, 249, 0),
+                                            color: Color.fromARGB(255, 241, 189, 0),
                                             fontFamily: 'Istok web',
                                             fontSize: 12,
                                           ),
@@ -464,11 +466,12 @@ void _deleteMember(memberId) async {
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(5.0),
                                             side: BorderSide(
-                                              color: Color.fromARGB(255, 54, 249, 0),
+                                              color:  Color.fromARGB(255, 241, 189, 0),
                                             ),
                                           ),
                                         ),
                                       ),
+                                      
                                     ),
                                   ],
                                 ),
@@ -619,17 +622,34 @@ void _deleteMember(memberId) async {
                   onPressed: () {
                     _addMember();
                     setState(() {
-                      familyMembers.add(
-                        FamilyMember(
-                          id: '',
-                          nom: nomController.text,
-                          prenom: prenomController.text,
-                          dob: dobController.text,
-                          type: _value == 1 ? "Enfant" : "Conjoint",
-
-                        ),
-                      );
-                    });
+      if (_value == 1) {
+        familyMembers.add(
+          FamilyMember(
+            id: '',
+            nom: nomController.text,
+            prenom: prenomController.text,
+            dob: dobController.text,
+            type: "Enfant",
+            plafond: 500.00,
+            reste:500.00,
+            consome:0,
+          ),
+        );
+      } else {
+        familyMembers.add(
+          FamilyMember(
+            id: '',
+            nom: nomController.text,
+            prenom: prenomController.text,
+            dob: dobController.text,
+            type: "Conjoint",
+            plafond: 1000.00,
+            reste:1000.00,
+            consome: 0,
+          ),
+        );
+      }
+    });
                     Navigator.pop(context);
                   },
                   child: Text('Ajouter', style: TextStyle(color: Colors.white, fontFamily: 'Istok web')),
@@ -888,8 +908,11 @@ class FamilyMember {
   String prenom;
   String dob;
   String type;
+  double plafond;
+  double reste;
+  double consome;
 
-  FamilyMember({required this.nom, required this.prenom, required this.dob, required this.type , required this.id});
+  FamilyMember({required this.nom, required this.prenom, required this.dob, required this.type , required this.id ,required this.plafond, required this.reste,required this.consome});
   factory FamilyMember.fromJson(Map<String, dynamic> json) {
     return FamilyMember(
       id:json['_id'],
@@ -897,6 +920,9 @@ class FamilyMember {
       prenom: json['prenom'],
       type: json['relation'],
       dob: json['naissance'],
+      plafond :json ['plafond'],
+      reste:json ['reste'],
+      consome:json['consome'],
     );
   }
 }

@@ -10,7 +10,7 @@ const sendEmail = require('./../back/email');
 const multer = require('multer');
 const upload = multer();
 const moment = require('moment');
-
+const jwt = require('jsonwebtoken');
 
 
 
@@ -70,7 +70,10 @@ const familyMemberSchema = new mongoose.Schema({
     nom: String,
     prenom:String,
     relation: String,
-    naissance: Date
+    naissance: Date,
+    plafond: Number,
+    reste:Number,
+    consome:Number,
     
 });
 
@@ -94,6 +97,7 @@ app.post('/api/login', async (req, res) => {
             req.session.user_id = user._id.toString(); // Stocker l'ID de l'utilisateur dans la session
             res.status(200).json({ message: 'Connexion réussie', user_id: user._id.toString(), mail: user.mail, username: user.username });
             console.log('Connexion réussie pour', req.session.user_id);
+            const token = jwt.sign({ user_id: user._id }, 'your_secret_key', { expiresIn: '1h' }); // Utilisez votre propre clé secrète et définissez l'expiration souhaitée
         } else {
             res.status(404).json({ message: 'Utilisateur introuvable' });
             console.log('Utilisateur introuvable');
@@ -103,6 +107,9 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la connexion' });
     }
 });
+
+
+
 
 // Endpoint pour récupérer les informations de l'utilisateur actuellement connecté
 app.post('/api/user', async (req, res) => {
@@ -141,7 +148,7 @@ app.post('/api/user/informations', async (req, res) => {
                     prenom: user.prenom,
                     adresse: user.adresse,
                     emploi: user.emploi,
-                    image: user.image
+                    _imageUrl: user.image
                 });
                 console.log('Informations récupérées');
             } else {
@@ -155,6 +162,29 @@ app.post('/api/user/informations', async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des données de l\'utilisateur' });
     }
 });
+
+
+app.post('/api/user/get-image', async (req, res) => {
+    try {
+        const { user_id } = req.body;
+        
+            const user = await usersModel.findById(user_id);
+            if (user) {
+                res.status(200).json({
+                    message: 'Image récupérées',
+                    _imageUrl: user.image
+                });
+                console.log('Image récupérées');
+            } else {
+                res.status(404).json({ message: 'Utilisateur introuvable' });
+            }
+        
+    } catch (error) {
+        console.error('Erreur lors de la récupération des données de l\'utilisateur : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des données de l\'utilisateur' });
+    }
+});
+
 
 app.post('/api/user/update', async (req, res) => {
     try {
@@ -193,7 +223,7 @@ app.post('/api/user/:userId/upload-image', upload.single('image'), async (req, r
       console.error('Erreur lors de la mise à jour de l\'image :', error);
       res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'image' });
     }
-  });
+});
 
 // Endpoint pour modifier le mot de passe de l'utilisateur
 app.post('/api/user/update-password', async (req, res) => {
@@ -289,19 +319,24 @@ app.get('/api/family-members/:user_id', async (req, res) => {
             // Créer un tableau pour stocker les détails de chaque membre
             const membersDetails = familyMembers.map(member => {
                 const formattedDate = moment(member.naissance).format('DD/MM/YYYY');
-
+        
                 return {
                     _id: member._id,
                     nom: member.nom,
                     prenom: member.prenom,
                     relation: member.relation,
-                    naissance: formattedDate
-                    // Ajoutez d'autres détails de membre si nécessaire
+                    naissance: formattedDate,
+                    plafond: member.plafond,
+                    reste: member.reste, // Inclure le champ reste dans la réponse JSON
+                    consome: member.consome, // Inclure le champ consome dans la réponse JSON
                 };
             });
             console.log('membres récupérées');
             res.status(200).json({ message: 'Détails des membres de la famille récupérés', membersDetails });
-        } else {
+        
+        }
+        
+         else {
             res.status(404).json({ message: 'Aucun membre de la famille trouvé pour cet utilisateur' });
         }
     } catch (error) {
@@ -327,8 +362,26 @@ app.post('/api/family-members/add', async (req, res) => {
         // Créer un nouvel objet Date
         const formattedDate = new Date(year, month - 1, day);
 
-        // Ajouter le nouveau membre avec la date formatée
-        const newMember = await FamilyMember.create({ userId, nom, prenom, relation, naissance: formattedDate });
+        let plafond;
+        // Déterminer le plafond en fonction de la relation
+        if (relation === "Enfant") {
+            plafond = 500.00;
+        } else if (relation === "Conjoint") {
+            plafond = 1000.00;
+        }
+
+        // Ajouter le nouveau membre avec la date formatée, le plafond déterminé, reste et consome
+        const newMember = await FamilyMember.create({ 
+            userId, 
+            nom, 
+            prenom, 
+            relation, 
+            naissance: formattedDate, 
+            plafond,
+            reste: plafond, // Ajout du champ reste
+            consome: 0 // Ajout du champ consome
+        });
+
         res.status(200).json({ message: 'Nouveau membre ajouté', newMember });
     } catch (error) {
         console.error('Erreur lors de l\'ajout d\'un membre de la famille : ', error);
@@ -341,12 +394,20 @@ app.post('/api/family-members/add', async (req, res) => {
 
 
 
+
 // Endpoint pour mettre à jour un membre de la famille
 app.put('/api/family-members/update/:memberId', async (req, res) => {
     try {
         const memberId = mongoose.Types.ObjectId(req.params.memberId);
         const { nom,prenom,relation,naissance } = req.body;
-        const updatedMember = await FamilyMember.findByIdAndUpdate(memberId, { nom,prenom,relation,naissance}, { new: true });
+        let plafond;
+        // Déterminer le plafond en fonction de la relation
+        if (relation === "Enfant") {
+            plafond = 500.00;
+        } else if (relation === "Conjoint") {
+            plafond = 1000.00;
+        }
+        const updatedMember = await FamilyMember.findByIdAndUpdate(memberId, { nom,prenom,relation,naissance,plafond,reste:plafond}, { new: true });
         res.status(200).json({ message: 'Membre mis a jour', updatedMember }); // Changer l'objet JSON pour inclure le message et le nouveau membre
     } catch (error) {
         console.error('Erreur lors de la mise à jour d\'un membre de la famille : ', error);
