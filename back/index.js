@@ -43,6 +43,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/Employés')
 
 // Définition du modèle de la collection users avec Mongoose (utilisation du singulier pour le modèle)
 const usersSchema = new mongoose.Schema({
+    cin:String,
     mail: String,
     nom: String,
     prenom: String,
@@ -51,7 +52,10 @@ const usersSchema = new mongoose.Schema({
     emploi: String,
     image: String,
     passwordResetToken: String,
-    passwordResetTokenExpired: Date
+    passwordResetTokenExpired: Date,
+    plafond: Number,
+    reste:Number,
+    consome:Number,
 });
 
 usersSchema.methods.createResetPasswordToken = function () {
@@ -81,7 +85,57 @@ const FamilyMember = mongoose.model('membres', familyMemberSchema);
 
 module.exports = FamilyMember;
 
+app.post('/api/employe/add', async (req, res) => {
+    try {
+        const { cin, nom, prenom, mail, emploi } = req.body; 
 
+        // Ajouter le nouveau membre avec le mot de passe initialisé à la valeur du cin, le plafond déterminé, reste et consommé
+        const newEmploye = await usersModel.create({ 
+            cin,
+            nom, 
+            prenom, 
+            mail,
+            password: cin, 
+            emploi,
+            adresse:'', 
+            plafond: 1500.00, // Plafond initialisé à 1500.00 par défaut
+            reste: 1500.00, // Reste initialisé au plafond par défaut
+            consome: 0, // Aucune consommation initiale par défaut
+        });
+
+        const message = `Cher/Chère ${prenom},
+
+                Nous sommes enchantés de vous accueillir dans notre système de suivi de remboursement médical, spécialement conçu pour les employés de Capgemini Tunisie ! 🎉
+
+                Votre inscription a été validée avec succès et vous avez maintenant accès à notre plateforme intuitive et conviviale.
+
+                Voici vos informations de connexion :
+
+                Identifiant (adresse e-mail) : ${mail}
+                Mot de passe : ${cin}
+
+                Avec ces informations, vous pouvez dès maintenant explorer toutes les fonctionnalités de notre application, suivre vos remboursements médicaux et gérer vos demandes en 
+                toute simplicité.
+
+                Nous nous engageons à vous offrir une expérience utilisateur de qualité et nous restons à votre disposition pour toute question ou assistance supplémentaire.
+
+                Bienvenue à bord de notre système de suivi de remboursement médical dédié aux employés de Capgemini Tunisie !
+
+                Cordialement,`;
+
+        await sendEmail({
+            email: mail,
+            subject: 'Bienvenue dans notre système de suivi de remboursement médical !',
+            message: message
+        });
+
+        res.status(200).json({ message: 'Nouvel employé ajouté, mail envoyé', newEmploye });
+        console.log('employé ajouté , mail envoyé ');
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout d\'un employé : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un employé' });
+    }
+});
 
 // Endpoint pour se connecter
 app.post('/api/login', async (req, res) => {
@@ -118,12 +172,13 @@ app.post('/api/user', async (req, res) => {
         if (user_id) {
             const user = await usersModel.findById(user_id);
             if (user) {
+                const username = `${user.nom} ${user.prenom}`; 
                 res.status(200).json({
                     message: 'Données récupérées',
+                    username: username,
                     mail: user.mail,
-                    membre:user.membre
+                    membre: user.membre
                 });
-                console.log('Données récupérées');
             } else {
                 res.status(404).json({ message: 'Utilisateur introuvable' });
             }
@@ -144,6 +199,7 @@ app.post('/api/user/informations', async (req, res) => {
             if (user) {
                 res.status(200).json({
                     message: 'Données récupérées',
+                    cin:user.cin,
                     nom: user.nom,
                     prenom: user.prenom,
                     adresse: user.adresse,
@@ -188,9 +244,10 @@ app.post('/api/user/get-image', async (req, res) => {
 
 app.post('/api/user/update', async (req, res) => {
     try {
-        const { user_id, nom, prenom, adresse, emploi } = req.body;
+        const { user_id,cin, nom, prenom, adresse, emploi } = req.body;
         if (user_id) {
             const updatedUser = await usersModel.findByIdAndUpdate(user_id, {
+                cin,
                 nom,
                 prenom,
                 adresse,
@@ -351,8 +408,18 @@ app.post('/api/family-members/add', async (req, res) => {
     try {
         const { userId, nom, prenom, relation, naissance } = req.body; 
 
+        // Vérifier si la date de naissance est définie et a le format attendu
+        if (!naissance || typeof naissance !== 'string') {
+            return res.status(400).json({ message: 'La date de naissance est requise et doit être une chaîne de caractères' });
+        }
+
         // Séparer les composants de la date
-        const [day, month, year] = naissance.split('/').map(Number);
+        const dateComponents = naissance.split('/');
+        if (dateComponents.length !== 3) {
+            return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
+        }
+
+        const [day, month, year] = dateComponents.map(Number);
 
         // Vérifier si les composants sont valides
         if (isNaN(day) || isNaN(month) || isNaN(year)) {
@@ -388,7 +455,6 @@ app.post('/api/family-members/add', async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un membre de la famille' });
     }
 });
-
 
 
 

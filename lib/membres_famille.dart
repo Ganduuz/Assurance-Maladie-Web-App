@@ -92,6 +92,8 @@ class _FamilyMemberPageState extends State<FamilyMemberPage> {
   List<FamilyMember> familyMembers = [];
   DateTime selectedDate = DateTime.now();
   double plafond =0;
+    final _formMemb = GlobalKey<FormState>();
+
    
 
 
@@ -332,9 +334,7 @@ void _deleteMember(memberId) async {
   }
 }
 
-
-
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -374,22 +374,35 @@ void _deleteMember(memberId) async {
                           ),
                           child: ListTile(
                             contentPadding: EdgeInsets.all(40),
-                            title: Text(
-                              '${familyMembers[index].nom} ${familyMembers[index].prenom}\n(${familyMembers[index].type})',
-                              textAlign: TextAlign.center, // Centrer le texte
+                            title: 
+                              Text(
+                                '${familyMembers[index].nom} ${familyMembers[index].prenom}',
+                                textAlign: TextAlign.center, // Centrer le texte
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: 'Open Sans Regular',
+                                ),
+                              ),
+                              
+                            subtitle: Column(
+                              
+                              children: [
+                               Text(
+                              '${familyMembers[index].type} ',
+                             textAlign: TextAlign.end, // Alignement à droite
                               style: TextStyle(
-                                color: Colors.blue,
-                                fontSize: 20,
+                                color: Color.fromARGB(255, 158, 161, 162),
+                                fontSize: 13,
                                 fontWeight: FontWeight.w400,
                                 fontFamily: 'Open Sans Regular',
                               ),
                             ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                
+                             
                                 SizedBox(height: 40.0),
-                                Text(
+                               Text(
+                                  textAlign: TextAlign.start,
                                   'Date de naissance: ${familyMembers[index].dob}',
                                   style: TextStyle(
                                     fontSize: 15,
@@ -557,7 +570,6 @@ void _deleteMember(memberId) async {
       ),
     );
   }
-
   void _showAddMemberDialog(BuildContext context) {
     nomController.text = ''; // Réinitialiser le champ nom
     prenomController.text = ''; // Réinitialiser le champ prénom
@@ -620,36 +632,40 @@ void _deleteMember(memberId) async {
                 SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
-                    _addMember();
+                    if (_formMemb.currentState!.validate()) {
+                        _addMember();
+                        Navigator.of(context).pop();
+                      }
+                    
                     setState(() {
-      if (_value == 1) {
-        familyMembers.add(
-          FamilyMember(
-            id: '',
-            nom: nomController.text,
-            prenom: prenomController.text,
-            dob: dobController.text,
-            type: "Enfant",
-            plafond: 500.00,
-            reste:500.00,
-            consome:0,
-          ),
-        );
-      } else {
-        familyMembers.add(
-          FamilyMember(
-            id: '',
-            nom: nomController.text,
-            prenom: prenomController.text,
-            dob: dobController.text,
-            type: "Conjoint",
-            plafond: 1000.00,
-            reste:1000.00,
-            consome: 0,
-          ),
-        );
-      }
-    });
+                      if (_value == 1) {
+                        familyMembers.add(
+                          FamilyMember(
+                            id: '',
+                            nom: nomController.text,
+                            prenom: prenomController.text,
+                            dob: dobController.text,
+                            type: "Enfant",
+                            plafond: 500.00,
+                            reste:500.00,
+                            consome:0,
+                          ),
+                        );
+                      } else {
+                        familyMembers.add(
+                          FamilyMember(
+                            id: '',
+                            nom: nomController.text,
+                            prenom: prenomController.text,
+                            dob: dobController.text,
+                            type: "Conjoint",
+                            plafond: 1000.00,
+                            reste:1000.00,
+                            consome: 0,
+                          ),
+                        );
+                      }
+                    });
                     Navigator.pop(context);
                   },
                   child: Text('Ajouter', style: TextStyle(color: Colors.white, fontFamily: 'Istok web')),
@@ -802,7 +818,11 @@ void _deleteMember(memberId) async {
                   children: [
                     ElevatedButton(
                       onPressed: () {
+                        if (_formMemb.currentState!.validate()) {
                         _updateMember(member.id);
+                        Navigator.of(context).pop();
+                      }
+                        
                         setState(() {
                           familyMembers[index].nom = nomController.text;
                           familyMembers[index].prenom = prenomController.text;
@@ -848,6 +868,8 @@ void _deleteMember(memberId) async {
 
 Widget _buildForm() {
   return Form(
+        key: _formMemb,
+
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -859,15 +881,19 @@ Widget _buildForm() {
               _nom = value;
             });
           },
-          decoration: InputDecoration(
-            labelText: 'Nom',
-          ),
           validator: (value) {
-            if (value!.isEmpty) {
-              return 'Le champ Nom est obligatoire';
+            if (value == null || value.isEmpty) {
+              return 'Veuillez entrer un nom';
+            }
+           if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+              return 'Le nom doit contenir uniquement des caractères alphabétiques';
             }
             return null;
           },
+          decoration: InputDecoration(
+            labelText: 'Nom',
+          ),
+          
         ),
         SizedBox(height: 30.0),
         TextFormField(
@@ -878,15 +904,19 @@ Widget _buildForm() {
               _prenom = value;
             });
           },
-          decoration: InputDecoration(
-            labelText: 'Prénom',
-          ),
           validator: (value) {
-            if (value!.isEmpty) {
-              return 'Le champ Prénom est obligatoire';
+            if (value == null || value.isEmpty) {
+              return 'Veuillez entrer un prénom';
+            }
+            if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+              return 'Le prénom doit contenir uniquement des caractères alphabétiques';
             }
             return null;
           },
+          decoration: InputDecoration(
+            labelText: 'Prénom',
+          ),
+          
         ),
         SizedBox(height: 30.0),
         Radiobtn(
@@ -895,6 +925,7 @@ Widget _buildForm() {
               _value = value;
             });
           },
+          
         ),
       ],
     ),

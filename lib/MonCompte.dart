@@ -19,6 +19,7 @@ class MonCompte extends StatefulWidget {
 
 class _MonCompteState extends State<MonCompte> {
   Uint8List? _imageBytes;
+  String _cin='';
   String _nom = '';
   String _prenom = '';
   String _adresse = '';
@@ -26,6 +27,8 @@ class _MonCompteState extends State<MonCompte> {
   String _nouveauMotDePasse = '';
  String _confirmationNouveauMotDePasse = '';
   final _formKey = GlobalKey<FormState>();
+  final _formInfos = GlobalKey<FormState>();
+
 void initState() {
     super.initState();
     _getUserData();
@@ -74,6 +77,7 @@ Future<void> _getUserImage() async {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
            setState(() {
+            _cin=data['cin']?? '';
              _nom = data['nom']?? '';
              _prenom = data['prenom'] ?? '';
              _adresse = data['adresse'] ?? '';
@@ -99,6 +103,7 @@ Future<void> _getUserImage() async {
     final response = await http.post(
       Uri.parse('http://127.0.0.1:5000/api/user/update'), 
       body: jsonEncode({
+        'cin':_cin,
         'user_id': user_id,
         'nom': _nom,
         'prenom': _prenom,
@@ -281,7 +286,7 @@ Future<void> _importImage() async {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16.0),
+                  const SizedBox(width: 20.0),
                   // Texte pour les informations personnelles
                   Expanded(
                     child: Container(
@@ -307,15 +312,90 @@ Future<void> _importImage() async {
                               icon: Image.asset('assets/edit (1).png'),
                               iconSize: 30,
                             ),
+                            
                           ),
-                          Text('Nom : $_nom'),
-                          const SizedBox(height: 18.0),
-                          Text('Prénom : $_prenom'),
-                          const SizedBox(height: 18.0),
-                          Text('Adresse : $_adresse'),
-                          const SizedBox(height: 18.0),
-                          Text('Emploi : $_emploi'),
-                          const SizedBox(height: 18.0),
+Column(
+  crossAxisAlignment: CrossAxisAlignment.start, // Aligne les éléments à gauche
+  children: [
+    Row(
+      children: [
+        Text(
+          'CIN : ',
+          style: TextStyle(
+            color: Colors.blue,
+          ),
+        ),
+        Text('                             '),
+        Text(
+          '$_cin',
+        ),
+      ],
+    ),
+    SizedBox(height: 18.0),
+    Row(
+      children: [
+        Text(
+          'Nom : ',
+          style: TextStyle(
+            color: Colors.blue,
+          ),
+        ),
+        Text('                           '),
+        Text(
+          '$_nom',
+        ),
+      ],
+    ),
+    SizedBox(height: 18.0),
+    Row(
+      children: [
+        Text(
+          'Prénom : ',
+          style: TextStyle(
+            color: Colors.blue,
+          ),
+        ),
+         Text('                      '),
+        Text(
+          '$_prenom',
+        ),
+      ],
+    ),
+    SizedBox(height: 18.0),
+    Row(
+      children: [
+        Text(
+          'Adresse : ',
+          style: TextStyle(
+            color: Colors.blue,
+          ),
+        ),
+        Text('                     '),
+        Text(
+          '$_adresse',
+        ),
+      ],
+    ),
+    SizedBox(height: 18.0),
+    Row(
+      children: [
+        Text(
+          'Emploi : ',
+          style: TextStyle(
+            color: Colors.blue,
+          ),
+        ),
+        Text('                        '),
+        Text(
+          '$_emploi',
+        ),
+      ],
+    ),
+    SizedBox(height: 18.0),
+  ],
+),
+
+
                         ],
                       ),
                     ),
@@ -342,95 +422,142 @@ Future<void> _importImage() async {
 
   
 
-  void _modifierInformations() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
+ void _modifierInformations() {
+  
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        elevation: 0.0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          height: 630,
+          width: 600,
+          padding: EdgeInsets.all(20.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(5.0),
           ),
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          child: Container(
-            height: 480,
-            width: 600,
-            padding: EdgeInsets.all(20.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Positioned(
-                  left: 0,
-                  child: Text(
-                    'Modifier les informations',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Positioned(
+                left: 0,
+                child: Text(
+                  'Modifier les informations',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                Divider(color: Color(0xFF5BADE9), height: 30,),
-                SizedBox(height: 30.0),
-                _buildForm(),
-                SizedBox(height: 30.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
+              ),
+              Divider(color: Color(0xFF5BADE9), height: 30,),
+              SizedBox(height: 20.0),
+              _buildForm(),
+              SizedBox(height: 30.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formInfos.currentState!.validate()) {
                         _updateUserData();
                         Navigator.of(context).pop();
-                      },
-                      child: Text('Enregistrer', style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF5BADE9),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
+                      }
+                    },
+                    child: Text('Enregistrer', style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF5BADE9),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
                       ),
-                      
                     ),
-                    SizedBox(width: 10.0),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        'Annuler',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                  ),
+                  SizedBox(width: 10.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Annuler',
+                      style: TextStyle(color: Colors.white),
+                    ),
 
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
+  
 
   Widget _buildForm() {
-    return Column(
+  return Form(
+    key: _formInfos,
+    child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        TextFormField(
+          initialValue: _cin,
+          onChanged: (value) {
+            setState(() {
+              _cin = value;
+            });
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Veuillez entrer un CIN';
+            }
+            if (value.length != 8) {
+              return 'Entrez un CIN valide de 8 chiffres';
+            }
+            if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+              return 'Le CIN doit contenir uniquement des chiffres';
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+            labelText: 'CIN',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: const BorderSide(
+                color: Color(0xFF5BADE9),
+                width: 1.0,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 30.0),
         TextFormField(
           initialValue: _nom,
           onChanged: (value) {
             setState(() {
               _nom = value;
             });
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Veuillez entrer un nom';
+            }
+           if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+              return 'Le nom doit contenir uniquement des caractères alphabétiques';
+            }
+            return null;
           },
           decoration: InputDecoration(
             labelText: 'Nom',
@@ -451,6 +578,15 @@ Future<void> _importImage() async {
               _prenom = value;
             });
           },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Veuillez entrer un prénom';
+            }
+            if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+              return 'Le prénom doit contenir uniquement des caractères alphabétiques';
+            }
+            return null;
+          },
           decoration: InputDecoration(
             labelText: 'Prénom',
             border: OutlineInputBorder(
@@ -469,6 +605,12 @@ Future<void> _importImage() async {
             setState(() {
               _adresse = value;
             });
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Veuillez entrer une adresse';
+            }
+            return null;
           },
           decoration: InputDecoration(
             labelText: 'Adresse',
@@ -489,6 +631,15 @@ Future<void> _importImage() async {
               _emploi = value;
             });
           },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Veuillez entrer votre emploi';
+            }
+            if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+              return "L'emploi doit contenir uniquement des caractères alphabétiques";
+            }
+            return null;
+          },
           decoration: InputDecoration(
             labelText: 'Emploi',
             border: OutlineInputBorder(
@@ -501,8 +652,10 @@ Future<void> _importImage() async {
           ),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
+
      void _resetFields() {
     setState(() {
       _nouveauMotDePasse = '';

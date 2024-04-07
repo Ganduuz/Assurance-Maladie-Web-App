@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
+import 'moncompte.dart';
+import 'actesMed.dart';
+import 'BulletinsSoins.dart';
+import 'contact.dart';
+import 'membres_famille.dart';
+import 'connexion.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'local_storage_service.dart';
-import 'MonCompte.dart';
-import 'actesMed.dart';
-import 'BulletinsSoins.dart';
-import 'Connexion.dart';
-import 'contact.dart';
-import 'membres_famille.dart';
 class Accueil extends StatefulWidget {
-  const Accueil({Key? key});
+  const Accueil({Key? key}) : super(key: key);
 
   @override
   _AccueilState createState() => _AccueilState();
 }
 
 class _AccueilState extends State<Accueil> {
-  String _userName = '';
+  int selectedIndex = 0;
+   String _userName = '';
   String _userEmail = '';
-  int _selectedIndex = 0;
 
-  @override
+ @override
   void initState() {
     super.initState();
     // Appeler la fonction pour récupérer les données de l'utilisateur au démarrage de la page
     _getUserData();
   }
 
-  Future<void> _getUserData() async {
+Future<void> _getUserData() async {
     try {
       var user_id = LocalStorageService.getData('user_id');
       print("user_id :" + LocalStorageService.getData('user_id'));
@@ -42,8 +42,8 @@ class _AccueilState extends State<Accueil> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          _userName = (data['nom'] ?? '') + ' ' + (data['prenom'] ?? '');
-          _userEmail = data['mail']?? '';
+          _userName = data['username'] ?? '';
+          _userEmail = data['mail']?? '';     
         });
       } else {
         // Gérer les erreurs de réponse du serveur
@@ -56,32 +56,32 @@ class _AccueilState extends State<Accueil> {
     }
   }
 
+
   static final List<Widget> _widgetOptions = <Widget>[
     Home(),
-    MonCompte(),
     FamilyMemberPage(),
-    BulletinsSoins(),
-    actesMed(),
-    contact(),
+     BulletinsSoins(),
+     actesMed(),
+    const MonCompte(),
+   
   ];
 
   @override
   Widget build(BuildContext context) {
-        
     return Scaffold(
-      backgroundColor: Colors.white,
-
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
         title: Image.asset(
           'assets/CapgeminiEngineering_82mm.png',
           width: 220,
-          height: 180,
+          height: 220,
         ),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 40),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
                   width: 200,
@@ -89,8 +89,7 @@ class _AccueilState extends State<Accueil> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const contact()),
+                        MaterialPageRoute(builder: (context) => const contact()), // Navigation vers Acceuil
                       );
                     },
                     style: ButtonStyle(
@@ -100,10 +99,10 @@ class _AccueilState extends State<Accueil> {
                         ),
                       ),
                       backgroundColor: MaterialStateProperty.all<Color>(
-                        Colors.white,
+                        const Color.fromARGB(255, 255, 255, 255),
                       ),
                       foregroundColor: MaterialStateProperty.all<Color>(
-                        const Color(0xFF5BADE9),
+                         Color.fromARGB(255, 73, 167, 226),
                       ),
                     ),
                     child: const Text(
@@ -114,9 +113,8 @@ class _AccueilState extends State<Accueil> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 40),
-                const Icon(Icons.notifications,
-                    color: Color.fromARGB(255, 18, 171, 219)),
+                 SizedBox(width: 40),
+                Icon(Icons.notifications, color: Color.fromARGB(255, 18, 171, 219)),
               ],
             ),
           ),
@@ -124,25 +122,26 @@ class _AccueilState extends State<Accueil> {
       ),
       body: Column(
         children: [
-          const Divider(color: Color(0xFF5BADE9)),
+         
           Expanded(
             child: Row(
               children: [
                 SizedBox(
-                  width: 300,
+                  width: 250,
                   child: MenuDrawer(
                     userName: _userName,
                     userEmail: _userEmail,
                     onItemTapped: (index) {
                       setState(() {
-                        _selectedIndex = index;
+                        selectedIndex = index;
                       });
                     },
+                    selectedIndex: selectedIndex,
                   ),
                 ),
                 Expanded(
                   child: IndexedStack(
-                    index: _selectedIndex,
+                    index: selectedIndex,
                     children: _widgetOptions,
                   ),
                 ),
@@ -159,149 +158,232 @@ class MenuDrawer extends StatelessWidget {
   final String userName;
   final String userEmail;
   final Function(int) onItemTapped;
+  final int selectedIndex;
+static const double defaultPadding = 5.0;
 
-  const MenuDrawer(
-      {Key? key,
-      required this.userName,
-      required this.userEmail,
-      required this.onItemTapped});
-
-  SizedBox _buildSizedImage(String imagePath) {
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: Image.asset(imagePath),
-    );
-  }
+  const MenuDrawer({Key? key, required this.userEmail,  required this.userName,required this.onItemTapped, required this.selectedIndex}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      backgroundColor: Colors.white,
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          Container(
-            width: 300,
-            color: const Color.fromARGB(255, 255, 255, 255),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                UserAccountsDrawerHeader(
-                  accountName: Text(
-                    userName,
-                    style: const TextStyle(
-                        color: Color.fromARGB(255, 115, 111, 110)),
-                  ),
-                  accountEmail: Text(
-                    userEmail,
-                    style: const TextStyle(
-                        color: Color.fromARGB(255, 115, 111, 110)),
-                  ),
-                  currentAccountPicture: const CircleAvatar(
-                    backgroundImage: AssetImage('assets/user.png'),
-                  ),
-                  decoration: const BoxDecoration(
+    double height = MediaQuery.of(context).size.height;
+    return Scaffold(
+      body: Container(
+        padding: EdgeInsets.all(defaultPadding * 1.2),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Container(
+                height: height,
+                padding: EdgeInsets.symmetric(
+                    horizontal: defaultPadding,
+                    vertical: defaultPadding * 3),
+                decoration: BoxDecoration(
                     color: Color.fromARGB(255, 255, 255, 255),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ListTile(
-            title: const Text('Accueil'),
-            leading: _buildSizedImage('assets/home (1).png'),
-            onTap: () {
-              onItemTapped(0);
-            },
-          ),
-          ListTile(
-            title: const Text('Mon Compte'),
-            leading: _buildSizedImage('assets/user (1).png'),
-            onTap: () {
-              onItemTapped(1);
-            },
-          ),
-          ListTile(
-            title: const Text('Membres de Famille'),
-            leading: _buildSizedImage('assets/user (1).png'),
-            onTap: () {
-              onItemTapped(2);
-            },
-          ),
-          ListTile(
-            title: const Text('Mes bulletins de soins'),
-            leading: _buildSizedImage('assets/newspaper (1).png'),
-            onTap: () {
-              onItemTapped(3);
-            },
-          ),
-          ListTile(
-            title: const Text('Actes Médicaux'),
-            leading: _buildSizedImage('assets/insurance (1).png'),
-            onTap: () {
-              onItemTapped(4);
-            },
-          ),
-           ListTile(
-            title: const Text('Déconnexion'),
-             leading: _buildSizedImage('assets/logout (1).png'),
-            onTap: () {
-              onItemTapped(5);
-              showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('Déconnexion'),
-                              content: Container(
-                                width: 400,
-                                padding: const EdgeInsets.all(15.0),
-                                child: const Text('Voulez-vous vous déconnecter?'),
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text('Annuler',
-                                  style: TextStyle(
-                                     color: Color(0xFF5BADE9)),
-                                  ),
+                    borderRadius: BorderRadius.circular(15)),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 100,
+                      child: DrawerHeader(
+                        padding:
+                            EdgeInsets.only(left: defaultPadding * 1.5),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundImage: AssetImage("assets/user (1).png"),
+                                  radius: 20,
                                 ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => MyHomePage(),
+                                SizedBox(width: defaultPadding),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      userName,
+                                      style: TextStyle(
+                                              color: Color.fromARGB(255, 73, 167, 226),
+                                              fontSize: 16)
+                                    ),
+                                    Text(
+                                      userEmail,
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 11,
                                       ),
-                                    );
-                                  },
-                                  child: const Text('Déconnexion',
-                                  style:TextStyle(
-                                    color: Color(0xFF5BADE9)
-                                  ),),
+                                    ),
+                                  ],
                                 ),
                               ],
-                            ); 
-                      },
-                    );
-          },
-        ),
+                          
+                            ), Expanded(
+              flex: 4,
+              child: Container(),),
+                          ],
+                        ),
+                      ),
+                    ),
+          SizedBox(),
+          AccueLisTile(
+            title: "Accueil",
+            icon: Icon(Icons.home),
+            press: () {
+              onItemTapped(0);
+            },
+            isSelected: selectedIndex == 0,
+          ),
+          AccueLisTile(
+            title: "Membre de famille",
+            icon: Icon(Icons.verified_user_sharp),
+            press: () {
+              onItemTapped(1);
+            },
+            isSelected: selectedIndex == 1,
+          ),
+          AccueLisTile(
+            title: "Bulletins de soins",
+            icon: Icon(Icons.newspaper),
+            press: () {
+              onItemTapped(2);
+            },
+            isSelected: selectedIndex == 2,
+          ),
+          AccueLisTile(
+            title: "Actes médicaux",
+            icon: Icon(Icons.local_hospital),
+            press: () {
+              onItemTapped(3);
+            },
+            isSelected: selectedIndex == 3,
+          ),
+          Spacer(),
+          AccueLisTile(
+            title: "Mon compte",
+            icon: Icon(Icons.account_box),
+            press: () {
+              onItemTapped(4);
+            },
+            isSelected: selectedIndex == 4,
+          ),
+        AccueLisTile(
+  title: "Déconnexion",
+  icon: Icon(Icons.logout),
+  press: () {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          title: const Text('Déconnexion'),
+          content: Container(
+            width: 400,
+            padding: const EdgeInsets.all(15.0),
+            child: const Text('Voulez-vous vous déconnecter?'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Annuler',
+                style: TextStyle(color: Color(0xFF5BADE9)),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyHomePage(), // Supprimez 'const' ici
+                  ),
+                );
+              },
+              child: const Text(
+                'Déconnexion',
+                style: TextStyle(color: Color(0xFF5BADE9)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  },
+  isSelected: selectedIndex == 5,
+),
         ],
+      ),
+      ),
+      ),],
+      ),
       ),
     );
   }
 }
 
+class AccueLisTile extends StatelessWidget {
+  const AccueLisTile({
+    Key? key,
+    required this.title,
+    required this.icon,
+    required this.press,
+    required this.isSelected,
+  }) : super(key: key);
+
+  final String title;
+  final Icon icon;
+  final VoidCallback press;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(
+              height: 50,
+              decoration: isSelected ? BoxDecoration(
+                color: Color.fromARGB(255, 73, 167, 226),
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ) : null,
+            ),
+          ),
+          Container(
+            height: 40,
+            child: ListTile(
+              visualDensity: VisualDensity(vertical: -4),
+              dense: true,
+              onTap: press,
+              leading: icon,
+              title: Text(
+                title,
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 class Home extends StatelessWidget {
-  const Home({Key? key});
+  const Home({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const Center(
       child: Text('Accueil'),
-    );
-  }
+);
+}
 }
