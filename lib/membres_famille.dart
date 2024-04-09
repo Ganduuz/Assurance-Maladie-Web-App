@@ -634,7 +634,6 @@ void _deleteMember(memberId) async {
                   onPressed: () {
                     if (_formMemb.currentState!.validate()) {
                         _addMember();
-                        Navigator.of(context).pop();
                       }
                     
                     setState(() {

@@ -43,7 +43,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/Employés')
 
 // Définition du modèle de la collection users avec Mongoose (utilisation du singulier pour le modèle)
 const usersSchema = new mongoose.Schema({
-    cin:String,
+    cin : String,
     mail: String,
     nom: String,
     prenom: String,
@@ -56,7 +56,7 @@ const usersSchema = new mongoose.Schema({
     plafond: Number,
     reste:Number,
     consome:Number,
-    verif:Boolean
+    verif:String
 
 });
 
@@ -86,6 +86,39 @@ const familyMemberSchema = new mongoose.Schema({
 const FamilyMember = mongoose.model('membres', familyMemberSchema);
 
 module.exports = FamilyMember;
+app.get('/api/employes', async (req, res) => {
+    try {
+        // Recherche des employés avec un plafond de 1500
+        const employes = await usersModel.find({ plafond: 1500 });
+
+        if (employes.length > 0) {
+            // Créer un tableau pour stocker les détails de chaque employé
+            const employesDetails = employes.map(employe => {
+                return {
+                    _id: employe._id,
+                    cin: employe.cin,
+                    nom: employe.nom,
+                    prenom: employe.prenom,
+                    mail: employe.mail,
+                    emploi:employe.emploi,
+                    verif: employe.verif,
+                    plafond: employe.plafond,
+                    reste: employe.reste, // Inclure le champ reste dans la réponse JSON
+                    consome: employe.consome, // Inclure le champ consome dans la réponse JSON
+                };
+            });
+            console.log('Employés récupérés');
+            res.status(200).json({ message: 'Détails des employés récupérés', employesDetails });
+        } else {
+            res.status(404).json({ message: 'Aucun employé trouvé ' });
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des détails des employés : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des employés' });
+    }
+});
+
+
 
 app.post('/api/employe/add', async (req, res) => {
     try {
