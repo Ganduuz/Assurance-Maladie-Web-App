@@ -56,6 +56,8 @@ const usersSchema = new mongoose.Schema({
     plafond: Number,
     reste:Number,
     consome:Number,
+    verif:Boolean
+
 });
 
 usersSchema.methods.createResetPasswordToken = function () {
@@ -98,9 +100,10 @@ app.post('/api/employe/add', async (req, res) => {
             password: cin, 
             emploi,
             adresse:'', 
-            plafond: 1500.00, // Plafond initialisé à 1500.00 par défaut
-            reste: 1500.00, // Reste initialisé au plafond par défaut
-            consome: 0, // Aucune consommation initiale par défaut
+            plafond: 1500.00, 
+            reste: 1500.00, 
+            consome: 0,
+            verif:false
         });
 
         const message = `Cher/Chère ${prenom},
@@ -149,7 +152,7 @@ app.post('/api/login', async (req, res) => {
 
         if (user) {
             req.session.user_id = user._id.toString(); // Stocker l'ID de l'utilisateur dans la session
-            res.status(200).json({ message: 'Connexion réussie', user_id: user._id.toString(), mail: user.mail, username: user.username });
+            res.status(200).json({ message: 'Connexion réussie', user_id: user._id.toString(), mail: user.mail, username: user.username ,verif:user.verif});
             console.log('Connexion réussie pour', req.session.user_id);
             const token = jwt.sign({ user_id: user._id }, 'your_secret_key', { expiresIn: '1h' }); // Utilisez votre propre clé secrète et définissez l'expiration souhaitée
         } else {

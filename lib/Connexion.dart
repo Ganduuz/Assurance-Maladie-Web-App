@@ -5,6 +5,8 @@ import 'local_storage_service.dart';
 import 'ForgotPasswordPage.dart';
 import 'Accueil.dart';
 import 'accAdmin.dart';
+import 'MonCompte.dart';
+
 
 class MyHomePage extends StatelessWidget {
   final TextEditingController mailController = TextEditingController();
@@ -29,11 +31,22 @@ class MyHomePage extends StatelessWidget {
           MaterialPageRoute(builder: (context) => AccueilAdmin()),
           );
         }else{
-        Navigator.push(
+          if(data['verif']=true){
+            Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Accueil()),
         );
-        LocalStorageService.saveData('user_id', data["user_id"]);}
+        LocalStorageService.saveData('user_id', data["user_id"]);
+            
+          }else{
+            LocalStorageService.saveData('user_id', data["user_id"]);
+            Navigator.push(
+              context,
+               MaterialPageRoute(builder: (context) => MonCompte()),
+               );
+
+          }
+        }
       } else {
         showDialog(
           context: context,

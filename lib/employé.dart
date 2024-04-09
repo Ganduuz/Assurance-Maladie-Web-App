@@ -261,7 +261,7 @@ void _addEmpl() async {
                           margin: EdgeInsets.symmetric(vertical: 15),
                           child: Row(
                             children: [
-                              SizedBox(width: 10,),
+                              SizedBox(width: 15,),
                               Expanded(
                                 child: Text(employee.email),
                               ),
