@@ -37,6 +37,7 @@ class Employeee extends StatefulWidget {
 
 class _EmployeeeState extends State<Employeee> {
   List<Employee> employeesDetails = [];
+  String verification='';
   String _cin = '';
   String _nom = '';
   String _prenom = '';
@@ -45,6 +46,9 @@ class _EmployeeeState extends State<Employeee> {
   int _currentPage = 0;
   int _employeesPerPage = 6;
   String _searchText = '';
+   final _formKey = GlobalKey<FormState>();
+      final _editKey = GlobalKey<FormState>();
+
 
   @override
   void initState() {
@@ -96,38 +100,89 @@ class _EmployeeeState extends State<Employeee> {
       throw Exception('Failed to load employees details');
     }
   }
+Future<bool> addEmployee(BuildContext context) async {
+  bool success = true;
+  try {
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:5000/api/employe/add'),
+      body: jsonEncode({
+        'cin': _cin,
+        'nom': _nom,
+        'prenom': _prenom,
+        'mail': _mail,
+        'emploi': _emploi,
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
 
-  void _addEmpl() async {
-    try {
-      final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/employe/add'),
-        body: jsonEncode({
-          'cin': _cin,
-          'nom': _nom,
-          'prenom': _prenom,
-          'mail': _mail,
-          'emploi': _emploi,
-        }),
-        headers: {
-          'Content-Type': 'application/json'
+    if (response.statusCode == 400) {
+            success = false;
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Employé existe déjà'),
+            content: Text(
+                'Un employé avec cette adresse e-mail ou ce numéro de CIN est déjà enregistré dans l\'application.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
         },
       );
-
-      if (response.statusCode == 200) {
-        print('Nouvel employé ajouté.');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Membre ajouté avec succès'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      } else {
-        print('Erreur lors de l\'ajout de l\'employé: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Erreur de connexion: $error');
+    } else if (response.statusCode == 200) {
+      success = true;
+      print('Nouvel employé ajouté.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Employé ajouté avec succès'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } else {
+      // Gérer les autres codes d'état si nécessaire
     }
+  } catch (error) {
+    print('Erreur de connexion: $error');
+    // Gérer les erreurs inattendues
   }
+
+  return success;
+}
+
+
+
+Future<void> _archiveEmployee(String cin, BuildContext context) async {
+  try {
+    final response = await http.put(
+      Uri.parse('http://127.0.0.1:5000/api/employe/archive/$cin'),
+      body: jsonEncode({}),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      print('Employé archivé.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Employé archivé avec succès'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } else {
+      print('Erreur lors de l\'archivage. Code d\'état: ${response.statusCode}');
+      
+    }
+  } catch (error) {
+    print('Erreur de connexion: $error');
+    
+  }
+}
+
 
   void _updateSearchText(String value) {
     setState(() {
@@ -236,13 +291,12 @@ class _EmployeeeState extends State<Employeee> {
                       ),
                     ),
                     children: [
-                      tableHeader("     Nom complet"),
+                      tableHeader("       Nom complet"),
                       tableHeader("                     CIN"),
                       tableHeader("                  E-mail"),
-                      tableHeader("                  Poste"),
-                      tableHeader("     Vérification"),
-                      tableHeader("      Actions"),
-                      //tableHeader(""),
+                      tableHeader("                   Poste"),
+                      tableHeader("                Vérification"),
+                      tableHeader("               Actions"),
                     ],
                   ),
 
@@ -258,15 +312,9 @@ class _EmployeeeState extends State<Employeee> {
                       ),
                       children: [
                         Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          margin: EdgeInsets.symmetric(vertical: 15),
+                          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 8),
                           child: Row(
-                            
                             children: [
-                              SizedBox(width: 8),
-
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(1000),
                                 child: Image.asset(
@@ -274,84 +322,68 @@ class _EmployeeeState extends State<Employeee> {
                                   width: 30,
                                 ),
                               ),
-                              SizedBox(width: 10,),
+                              SizedBox(width: 10),
                               Expanded(
-                                child: Text(employee.fullname,
-                                style: TextStyle(fontSize: 13),
+                                child: Text(
+                                  employee.fullname,
+                                  style: TextStyle(fontSize: 13),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        Container(
-                          margin: EdgeInsets.symmetric(vertical: 15),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center, // Centrer horizontalement
-                            children: [
-                              SizedBox(width: 10,),
-                              Expanded(
-                                child: Text(
-                                  employee.cin,
-                                  style: TextStyle(fontSize: 13),
-                                  textAlign: TextAlign.center, // Centrer le texte à l'intérieur du conteneur
-                                ),
-                              ),
-                            ],
+                        TableCell(
+                          verticalAlignment: TableCellVerticalAlignment.middle,
+                          child: Text(
+                            employee.cin,
+                            style: TextStyle(fontSize: 13),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                        Container(
-                          margin: EdgeInsets.symmetric(vertical: 15),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center, // Centrer horizontalement
-                            children: [
-                              SizedBox(width: 15,),
-                              Expanded(
-                                child: Text(
-                                  employee.email,
-                                  style: TextStyle(fontSize: 13),
-                                  textAlign: TextAlign.center, // Centrer le texte à l'intérieur du conteneur
-                                ),
-                              ),
-                            ],
+                        TableCell(
+                          verticalAlignment: TableCellVerticalAlignment.middle,
+                          child: Text(
+                            employee.email,
+                            style: TextStyle(fontSize: 13),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                        Container(
-                          margin: EdgeInsets.symmetric(vertical: 15),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center, // Centrer horizontalement
-                            children: [
-                              SizedBox(width: 15,),
-                              Expanded(
-                                child: Text(
-                                  employee.poste,
-                                  style: TextStyle(fontSize: 13),
-                                  textAlign: TextAlign.center, // Centrer le texte à l'intérieur du conteneur
-                                ),
-                              ),
-                            ],
+                        TableCell(
+                          verticalAlignment: TableCellVerticalAlignment.middle,
+                          child: Text(
+                            employee.poste,
+                            style: TextStyle(fontSize: 13),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        TableCell(
+                          verticalAlignment: TableCellVerticalAlignment.middle,
+                          child: Text(
+                            (employee.verification == "true") ? "verifié" : "non verifié",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: (employee.verification == "true") ? Colors.green : Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ),
 
-                        SizedBox(),
-                        Container(
-                          padding: EdgeInsets.fromLTRB(0, 0, 130, 0),
+                        TableCell(
+                          verticalAlignment: TableCellVerticalAlignment.middle,
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(
-                                child: IconButton(
-                                  icon: Icon(Icons.archive, color: Colors.red),
-                                  onPressed: () {
-                                    _archiverEmployee(employee);
-                                  },
-                                ),
+                              IconButton(
+                                icon: Icon(Icons.archive, color: Colors.red),
+                                onPressed: () {
+                                   _archiverEmployee(employee, context);
+                                },
                               ),
-                              Expanded(
-                                child: IconButton(
-                                  icon: Icon(Icons.edit, color: Colors.blue),
-                                  onPressed: () {
-                                    _showEditEmployeeDialog(employee);
-                                  },
-                                ),
+                              IconButton(
+                                icon: Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () {
+                                  _showEditEmployeeDialog(employee);
+                                },
                               ),
                             ],
                           ),
@@ -361,6 +393,7 @@ class _EmployeeeState extends State<Employeee> {
                   }).toList(),
                 ],
               ),
+
             ),
             Container(
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),),
@@ -415,43 +448,56 @@ class _EmployeeeState extends State<Employeee> {
     );
   }
 
-  void _showAddEmployeeDialog(BuildContext context) {
-    String name = ''; // Ajout des champs name, CIN, email, poste, et verification avec une valeur initiale vide
-    String username='';
-    String CIN = '';
-    String email = '';
-    String poste = '';
-    String verification='';
-    
+ void _showAddEmployeeDialog(BuildContext context) {
+  String name = '';
+  String username = '';
+  String CIN = '';
+  String email = '';
+  String poste = '';
+  String verification = '';
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5.0),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        elevation: 0.0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: 700,
+          height: 650,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: Colors.white,
           ),
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: 700,
-            height: 650,
-            decoration: BoxDecoration(
-              borderRadius:BorderRadius.circular(5),
-              color: Colors.white,
-            ),
-            padding: EdgeInsets.all(20.0),
+          padding: EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Nouveau employé",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                Text(
+                  "Nouveau employé",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
                 SizedBox(height: 30,),
-                TextField(
+                TextFormField(
                   onChanged: (value) {
                     setState(() {
                       name = value; 
                       _nom = value; 
                     });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer un nom';
+                    }
+                    if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+                      return 'Le nom doit contenir uniquement des caractères alphabétiques';
+                    }
+                    return null;
                   },
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   decoration: InputDecoration(
@@ -468,14 +514,22 @@ class _EmployeeeState extends State<Employeee> {
                     ),
                   ),
                 ),
-                
                 SizedBox(height: 30,),
-                TextField(
+                TextFormField(
                   onChanged: (value) {
                     setState(() {
                       username = value; 
                       _prenom = value; 
                     });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer un prénom';
+                    }
+                    if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+                      return 'Le prénom doit contenir uniquement des caractères alphabétiques';
+                    }
+                    return null;
                   },
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   decoration: InputDecoration(
@@ -493,12 +547,24 @@ class _EmployeeeState extends State<Employeee> {
                   ),
                 ),
                 SizedBox(height: 20),
-                TextField(
+                TextFormField(
                   onChanged: (value) {
                     setState(() {
                       CIN = value; 
                       _cin = value; 
                     });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer un CIN';
+                    }
+                    if (value.length != 8) {
+                      return 'Entrez un CIN valide de 8 chiffres';
+                    }
+                    if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                      return 'Le CIN doit contenir uniquement des chiffres';
+                    }
+                    return null;
                   },
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   decoration: InputDecoration(
@@ -516,12 +582,23 @@ class _EmployeeeState extends State<Employeee> {
                   ),
                 ),
                 SizedBox(height: 20),
-                TextField(
+                TextFormField(
                   onChanged: (value) {
                     setState(() {
                       email = value; 
                       _mail = value; 
                     });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer une adresse mail ';
+                    }
+                   if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
+                      return 'L\'adresse e-mail n\'est pas valide';
+                  }
+
+
+                    return null;
                   },
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   decoration: InputDecoration(
@@ -539,12 +616,21 @@ class _EmployeeeState extends State<Employeee> {
                   ),
                 ),
                 SizedBox(height: 20),
-                TextField(
+                TextFormField(
                   onChanged: (value) {
                     setState(() {
                       poste = value; 
                       _emploi = value; 
                     });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer le poste de l employé';
+                    }
+                    if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+                      return "Le poste doit contenir uniquement des caractères alphabétiques";
+                    }
+                    return null;
                   },
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   decoration: InputDecoration(
@@ -561,8 +647,6 @@ class _EmployeeeState extends State<Employeee> {
                     ),
                   ),
                 ),
-               
-                
                 SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -584,19 +668,22 @@ class _EmployeeeState extends State<Employeee> {
                     ),
                     SizedBox(width: 10),
                     ElevatedButton(
-                      onPressed: () {
-                        _addEmpl();
-                        setState(() {
-                          employeesDetails.add(Employee(
-                            fullname: '$name $username',                           
-                            cin: CIN,
-                            email: email,
-                            poste: poste,
-                            verification: verification,
-                           
-                          ));
-                        });
-                        Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          bool success = await addEmployee(context) ; 
+                          if (success) { 
+                            setState(() {
+                              employeesDetails.add(Employee(
+                                fullname: '$name $username',                           
+                                cin: CIN,
+                                email: email,
+                                poste: poste,
+                                verification: verification,
+                              ));
+                            });
+                            Navigator.of(context).pop(); // Close the dialog
+                          }
+                        }
                       },
                       child: Text(
                         'Ajouter',
@@ -609,56 +696,81 @@ class _EmployeeeState extends State<Employeee> {
                         ),
                       ),
                     ),
+
                   ],
                 ),
               ],
             ),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
-  void _archiverEmployee(Employee employee) {
-    // Implémentez la logique pour archiver l'employé ici
-  }
 
-  void _showEditEmployeeDialog(Employee employee) {
-    // Implémentez le dialog de modification de l'employé ici
+  void _archiverEmployee(Employee employee, BuildContext context) {
+  String cin = employee.cin;
+
+
   
-    String editedFullName = employee.fullname;
-    
-    String editedCIN = employee.cin;
-    String editedEmail = employee.email;
-    String editedPoste = employee.poste;
-   
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5.0),
+  _archiveEmployee(cin, context);
+  setState(() {
+      employeesDetails.remove(employee);  // Assuming employees is a list containing Employee objects
+    });
+
+}
+
+
+
+void _showEditEmployeeDialog(Employee employee) {
+  String editedFullName = employee.fullname;
+  String editedCIN = employee.cin;
+  String editedEmail = employee.email;
+  String editedPoste = employee.poste;
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        elevation: 0.0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: 650,
+          height: 500,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: Colors.white,
           ),
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: 650,
-            height: 500,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              color: Colors.white,
-            ),
-            padding: EdgeInsets.all(20.0),
+          padding: EdgeInsets.all(20.0),
+          child: Form(
+            key: _editKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Modifier un employé",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                Text(
+                  "Modifier un employé",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
                 SizedBox(height: 30),
-                TextField(
+                TextFormField(
+                  initialValue: editedFullName,
                   onChanged: (value) => editedFullName = value,
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer le nom complet';
+                    }
+                    if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+                      return 'Le nom complet doit contenir uniquement des caractères alphabétiques';
+                    }
+                    return null;
+                  },
                   decoration: InputDecoration(
-                    labelText: 'Nom ',
+                    labelText: 'Nom Complet',
                     labelStyle: TextStyle(
                       color: Color.fromRGBO(209, 216, 223, 1),
                     ),
@@ -670,11 +782,23 @@ class _EmployeeeState extends State<Employeee> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  controller: TextEditingController(text: employee.fullname),
                 ),
                 SizedBox(height: 20),
-                TextField(
+                TextFormField(
+                  initialValue: editedCIN,
                   onChanged: (value) => editedCIN = value,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer un CIN';
+                    }
+                    if (value.length != 8) {
+                      return 'Entrez un CIN valide de 8 chiffres';
+                    }
+                    if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                      return 'Le CIN doit contenir uniquement des chiffres';
+                    }
+                    return null;
+                  },
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   decoration: InputDecoration(
                     labelText: 'CIN',
@@ -689,11 +813,22 @@ class _EmployeeeState extends State<Employeee> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  controller: TextEditingController(text: employee.cin),
                 ),
                 SizedBox(height: 20),
-                TextField(
-                  onChanged: (value) => editedEmail = value,style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+                TextFormField(
+                  initialValue: editedEmail,
+                  onChanged: (value) => editedEmail = value,
+                  style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer une adresse mail ';
+                    }
+                   if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
+                      return 'L\'adresse e-mail n\'est pas valide';
+                  }
+                    // Ajoutez ici la vérification de validité de l'adresse e-mail si nécessaire
+                    return null;
+                  },
                   decoration: InputDecoration(
                     labelText: 'E-mail',
                     labelStyle: TextStyle(
@@ -707,12 +842,21 @@ class _EmployeeeState extends State<Employeee> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  controller: TextEditingController(text: employee.email),
                 ),
                 SizedBox(height: 20),
-                TextField(
+                TextFormField(
+                  initialValue: editedPoste,
                   onChanged: (value) => editedPoste = value,
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer le poste de l\'employé';
+                    }
+                    if (!RegExp(r'^[a-zA-Z ]+$').hasMatch(value)) {
+                      return "Le poste doit contenir uniquement des caractères alphabétiques";
+                    }
+                    return null;
+                  },
                   decoration: InputDecoration(
                     labelText: 'Poste',
                     labelStyle: TextStyle(
@@ -726,9 +870,7 @@ class _EmployeeeState extends State<Employeee> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  controller: TextEditingController(text: employee.poste),
                 ),
-                
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -751,15 +893,16 @@ class _EmployeeeState extends State<Employeee> {
                     SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                          // Mettre à jour les informations de l'employé dans la liste
-                          employee.fullname = editedFullName;
-                          employee.cin = editedCIN;
-                          employee.email = editedEmail;
-                          employee.poste = editedPoste;
-                          
-                        });
-                        Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                        if (_editKey.currentState!.validate()) {
+                          setState(() {
+                            // Mettre à jour les informations de l'employé dans la liste
+                            employee.fullname = editedFullName;
+                            employee.cin = editedCIN;
+                            employee.email = editedEmail;
+                            employee.poste = editedPoste;
+                          });
+                          Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                        }
                       },
                       child: Text(
                         'Enregistrer',
@@ -777,8 +920,9 @@ class _EmployeeeState extends State<Employeee> {
               ],
             ),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 }

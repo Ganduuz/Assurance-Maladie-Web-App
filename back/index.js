@@ -60,6 +60,26 @@ const usersSchema = new mongoose.Schema({
 
 });
 
+const usersArchiveSchema = new mongoose.Schema({
+    id: String,
+    cin: String,
+    mail: String,
+    nom: String,
+    prenom: String,
+    password: String,
+    adresse: String,
+    emploi: String,
+    image: String,
+    passwordResetToken: String,
+    passwordResetTokenExpired: Date,
+    plafond: Number,
+    reste: Number,
+    consome: Number,
+    verif: String
+});
+
+
+
 usersSchema.methods.createResetPasswordToken = function () {
     const resetToken = crypto.randomBytes(32).toString('hex');
     this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
@@ -70,6 +90,8 @@ usersSchema.methods.createResetPasswordToken = function () {
 
 // Définition du modèle users à partir du schéma
 const usersModel = mongoose.model('users', usersSchema);
+const usersArchiveModel = mongoose.model('usersArchive', usersArchiveSchema);
+
 
 const familyMemberSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Référence à l'utilisateur
@@ -92,6 +114,7 @@ app.get('/api/employes', async (req, res) => {
         const employes = await usersModel.find({ plafond: 1500 });
 
         if (employes.length > 0) {
+            const nombre= employes.length ;
             // Créer un tableau pour stocker les détails de chaque employé
             const employesDetails = employes.map(employe => {
                 return {
@@ -108,7 +131,7 @@ app.get('/api/employes', async (req, res) => {
                 };
             });
             console.log('Employés récupérés');
-            res.status(200).json({ message: 'Détails des employés récupérés', employesDetails });
+            res.status(200).json({ message: 'Détails des employés récupérés',nombre, employesDetails });
         } else {
             res.status(404).json({ message: 'Aucun employé trouvé ' });
         }
@@ -123,6 +146,14 @@ app.get('/api/employes', async (req, res) => {
 app.post('/api/employe/add', async (req, res) => {
     try {
         const { cin, nom, prenom, mail, emploi } = req.body; 
+
+        // Vérifier si un employé existe déjà avec le même email ou le même numéro de CIN
+        const existingEmployee = await usersModel.findOne({ $or: [{ cin: cin }, { mail: mail }] });
+
+        if(existingEmployee) {
+            // Si un employé existe déjà avec le même email ou le même numéro de CIN, retourner une erreur
+            return res.status(400).json({ message: 'Employé existe déjà' });
+        }
 
         // Ajouter le nouveau membre avec le mot de passe initialisé à la valeur du cin, le plafond déterminé, reste et consommé
         const newEmploye = await usersModel.create({ 
@@ -173,6 +204,51 @@ app.post('/api/employe/add', async (req, res) => {
     }
 });
 
+
+
+app.put('/api/employe/update/:userId', async (req, res) => {
+    try {
+        const userId = new mongoose.Types.ObjectId(req.params.userId);
+        const { Fullname, poste, cin, mail } = req.body;
+    
+        // Séparer le nom complet en nom et prénom
+        const [prenom, ...nomArray] = Fullname.split(' ');
+        const nom = nomArray.join(' ');
+
+        const updateduser = await usersModel.findByIdAndUpdate(userId, { nom, prenom, emploi:poste, mail, cin }, { new: true });
+        res.status(200).json({ message: 'Membre mis à jour', updateduser }); // Changer l'objet JSON pour inclure le message et le nouveau membre
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour d\'un membre de la famille : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour d\'un membre de la famille' });
+    }
+});
+
+
+
+app.put('/api/employe/archive/:cin', async (req, res) => {
+    try {
+        const cin = req.params.cin;
+
+        // Trouver et récupérer l'utilisateur de la collection users
+        const user = await usersModel.findOne({ cin: cin });
+
+        // Insérer cet utilisateur dans la collection usersArchive
+        const archivedUser = await usersArchiveModel.create(user._doc);
+
+        // Supprimer cet utilisateur de la collection users
+        await usersModel.findOneAndDelete({ cin: cin });
+
+        res.status(200).json({ message: 'Utilisateur déplacé vers la collection usersArchive', archivedUser });
+    } catch (error) {
+        console.error('Erreur lors du déplacement de l\'utilisateur vers la collection usersArchive : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors du déplacement de l\'utilisateur vers la collection usersArchive' });
+    }
+});
+
+
+
+
+
 // Endpoint pour se connecter
 app.post('/api/login', async (req, res) => {
     try {
@@ -182,12 +258,15 @@ app.post('/api/login', async (req, res) => {
         // Recherche de l'utilisateur dans la base de données
         const user = await usersModel.findOne({ mail: mail, password: password });
         console.log(user)
-
+        
         if (user) {
+            user.verif = true;
+            await user.save();
             req.session.user_id = user._id.toString(); // Stocker l'ID de l'utilisateur dans la session
             res.status(200).json({ message: 'Connexion réussie', user_id: user._id.toString(), mail: user.mail, username: user.username ,verif:user.verif});
             console.log('Connexion réussie pour', req.session.user_id);
-            const token = jwt.sign({ user_id: user._id }, 'your_secret_key', { expiresIn: '1h' }); // Utilisez votre propre clé secrète et définissez l'expiration souhaitée
+            const token = jwt.sign({ user_id: user._id }, 'your_secret_key', { expiresIn: '1h' });
+            
         } else {
             res.status(404).json({ message: 'Utilisateur introuvable' });
             console.log('Utilisateur introuvable');
