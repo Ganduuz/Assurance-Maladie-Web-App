@@ -206,20 +206,52 @@ app.post('/api/employe/add', async (req, res) => {
 
 
 
-app.put('/api/employe/update/:userId', async (req, res) => {
+app.put('/api/employe/update/:cinn', async (req, res) => {
     try {
-        const userId = new mongoose.Types.ObjectId(req.params.userId);
+        const cinn = req.params.cinn;
+        const user = await usersModel.findOne({ cin: cinn });
         const { Fullname, poste, cin, mail } = req.body;
     
-        // Séparer le nom complet en nom et prénom
-        const [prenom, ...nomArray] = Fullname.split(' ');
-        const nom = nomArray.join(' ');
+        
+            const [nom, ...prenomArray] = Fullname.split(' ');
+            const prenom = prenomArray.join(' ');
+if (mail!=user.mail){
+    const message = `Cher/Chère ${prenom},
 
-        const updateduser = await usersModel.findByIdAndUpdate(userId, { nom, prenom, emploi:poste, mail, cin }, { new: true });
-        res.status(200).json({ message: 'Membre mis à jour', updateduser }); // Changer l'objet JSON pour inclure le message et le nouveau membre
+                Nous sommes enchantés de vous accueillir dans notre système de suivi de remboursement médical, spécialement conçu pour les employés de Capgemini Tunisie ! 🎉
+
+                Votre inscription a été validée avec succès et vous avez maintenant accès à notre plateforme intuitive et conviviale.
+
+                Voici vos informations de connexion :
+
+                Identifiant (adresse e-mail) : ${mail}
+                Mot de passe : ${cin}
+
+                Avec ces informations, vous pouvez dès maintenant explorer toutes les fonctionnalités de notre application, suivre vos remboursements médicaux et gérer vos demandes en 
+                toute simplicité.
+
+                Nous nous engageons à vous offrir une expérience utilisateur de qualité et nous restons à votre disposition pour toute question ou assistance supplémentaire.
+
+                Bienvenue à bord de notre système de suivi de remboursement médical dédié aux employés de Capgemini Tunisie !
+
+                Cordialement,`;
+
+        await sendEmail({
+            email: mail,
+            subject: 'Bienvenue dans notre système de suivi de remboursement médical !',
+            message: message
+        });
+}
+
+        const updateduser = await usersModel.findOneAndUpdate(
+            { cin: cinn }, // Critère de recherche
+            { nom, prenom, emploi: poste, mail,cin,password:cin}, // Nouvelles données à mettre à jour
+            { new: true } // Options pour renvoyer le nouvel objet mis à jour
+        );
+        res.status(200).json({ message: 'Employé mis à jour', updateduser }); // Changer l'objet JSON pour inclure le message et le nouveau membre
     } catch (error) {
-        console.error('Erreur lors de la mise à jour d\'un membre de la famille : ', error);
-        res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour d\'un membre de la famille' });
+        console.error('Erreur lors de la mise à jour d\'un employé : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour d\'un employé' });
     }
 });
 

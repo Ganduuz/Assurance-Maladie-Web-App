@@ -36,8 +36,10 @@ class Employeee extends StatefulWidget {
 }
 
 class _EmployeeeState extends State<Employeee> {
+  int nombre=0;
   List<Employee> employeesDetails = [];
   String verification='';
+  String _full='';
   String _cin = '';
   String _nom = '';
   String _prenom = '';
@@ -90,6 +92,10 @@ class _EmployeeeState extends State<Employeee> {
 
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);
+      setState(() {
+          nombre = jsonData['nombre'] ?? '';
+               
+        });
         final List<dynamic> membersJson = jsonData['employesDetails'];
         List<Employee> employeesDetails =
             membersJson.map((json) => Employee.fromJson(json)).toList();
@@ -155,6 +161,40 @@ Future<bool> addEmployee(BuildContext context) async {
   return success;
 }
 
+Future<void> modifEmployee(String cin,BuildContext context) async {
+  try {
+    final response = await http.put(
+      Uri.parse('http://127.0.0.1:5000/api/employe/update/$cin'),
+      body: jsonEncode({
+        'Fullname': _full,
+        'poste': _emploi,
+        'cin': _cin,
+        'mail': _mail,
+        
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    
+     if (response.statusCode == 200) {
+      
+      print('employé mis à jour.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Employé mis à jour succès'),
+          duration: Duration(seconds: 4),
+        ),
+      );
+    } else {
+      // Gérer les autres codes d'état si nécessaire
+    }
+  } catch (error) {
+    print('Erreur de connexion: $error');
+    // Gérer les erreurs inattendues
+  }
+
+  
+}
 
 
 Future<void> _archiveEmployee(String cin, BuildContext context) async {
@@ -208,10 +248,11 @@ Future<void> _archiveEmployee(String cin, BuildContext context) async {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Text(
-                      'Liste des employés',
+                      'Liste des employés ($nombre)',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 22,
+                        color:Colors.grey,
                       ),
                     ),
                   ),
@@ -382,7 +423,7 @@ Future<void> _archiveEmployee(String cin, BuildContext context) async {
                               IconButton(
                                 icon: Icon(Icons.edit, color: Colors.blue),
                                 onPressed: () {
-                                  _showEditEmployeeDialog(employee);
+                                  _showEditEmployeeDialog(employee,context);
                                 },
                               ),
                             ],
@@ -723,7 +764,12 @@ Future<void> _archiveEmployee(String cin, BuildContext context) async {
 
 
 
-void _showEditEmployeeDialog(Employee employee) {
+void _showEditEmployeeDialog(Employee employee, BuildContext context) {
+  String cin = employee.cin;
+  _full = employee.fullname;
+  _cin = employee.cin;
+  _emploi = employee.poste;
+  _mail = employee.email;
   String editedFullName = employee.fullname;
   String editedCIN = employee.cin;
   String editedEmail = employee.email;
@@ -758,7 +804,12 @@ void _showEditEmployeeDialog(Employee employee) {
                 SizedBox(height: 30),
                 TextFormField(
                   initialValue: editedFullName,
-                  onChanged: (value) => editedFullName = value,
+                  onChanged: (value) {
+                    setState(() {
+                      editedFullName = value;
+                      _full = editedFullName;
+                    });
+                  },
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -786,7 +837,12 @@ void _showEditEmployeeDialog(Employee employee) {
                 SizedBox(height: 20),
                 TextFormField(
                   initialValue: editedCIN,
-                  onChanged: (value) => editedCIN = value,
+                  onChanged: (value) {
+                    setState(() {
+                      editedCIN = value;
+                      _cin = editedCIN;
+                    });
+                  },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer un CIN';
@@ -817,15 +873,20 @@ void _showEditEmployeeDialog(Employee employee) {
                 SizedBox(height: 20),
                 TextFormField(
                   initialValue: editedEmail,
-                  onChanged: (value) => editedEmail = value,
+                  onChanged: (value) {
+                    setState(() {
+                      editedEmail = value;
+                      _mail = editedEmail;
+                    });
+                  },
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer une adresse mail ';
                     }
-                   if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
+                    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
                       return 'L\'adresse e-mail n\'est pas valide';
-                  }
+                    }
                     // Ajoutez ici la vérification de validité de l'adresse e-mail si nécessaire
                     return null;
                   },
@@ -846,7 +907,12 @@ void _showEditEmployeeDialog(Employee employee) {
                 SizedBox(height: 20),
                 TextFormField(
                   initialValue: editedPoste,
-                  onChanged: (value) => editedPoste = value,
+                  onChanged: (value) {
+                    setState(() {
+                      editedPoste = value;
+                      _emploi = editedPoste;
+                    });
+                  },
                   style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -894,7 +960,9 @@ void _showEditEmployeeDialog(Employee employee) {
                     ElevatedButton(
                       onPressed: () {
                         if (_editKey.currentState!.validate()) {
+                          modifEmployee(cin, context);
                           setState(() {
+                            
                             // Mettre à jour les informations de l'employé dans la liste
                             employee.fullname = editedFullName;
                             employee.cin = editedCIN;
@@ -925,4 +993,5 @@ void _showEditEmployeeDialog(Employee employee) {
     },
   );
 }
+
 }
