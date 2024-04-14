@@ -323,8 +323,10 @@ app.post('/api/user', async (req, res) => {
                 res.status(200).json({
                     message: 'Données récupérées',
                     username: username,
-                    mail: user.mail,
-                    membre: user.membre
+                    mail: user.mail,                   
+                    plafond:user.plafond,
+                    consome:user.consome,
+                    reste:user.reste
                 });
             } else {
                 res.status(404).json({ message: 'Utilisateur introuvable' });
@@ -611,8 +613,11 @@ app.post('/api/family-members/add', async (req, res) => {
 // Endpoint pour mettre à jour un membre de la famille
 app.put('/api/family-members/update/:memberId', async (req, res) => {
     try {
-        const memberId = mongoose.Types.ObjectId(req.params.memberId);
-        const { nom,prenom,relation,naissance } = req.body;
+        const memberId = new mongoose.Types.ObjectId(req.params.memberId); // Utilisez 'new'
+        const { nom, prenom, relation, naissance } = req.body;
+
+        // Valider les données entrantes ici si nécessaire
+        
         let plafond;
         // Déterminer le plafond en fonction de la relation
         if (relation === "Enfant") {
@@ -620,8 +625,14 @@ app.put('/api/family-members/update/:memberId', async (req, res) => {
         } else if (relation === "Conjoint") {
             plafond = 1000.00;
         }
-        const updatedMember = await FamilyMember.findByIdAndUpdate(memberId, { nom,prenom,relation,naissance,plafond,reste:plafond}, { new: true });
-        res.status(200).json({ message: 'Membre mis a jour', updatedMember }); // Changer l'objet JSON pour inclure le message et le nouveau membre
+
+        const updatedMember = await FamilyMember.findByIdAndUpdate(memberId, { nom, prenom, relation, naissance, plafond, reste: plafond }, { new: true });
+
+        if (!updatedMember) {
+            return res.status(404).json({ message: 'Membre introuvable' });
+        }
+
+        res.status(200).json({ message: 'Membre mis à jour avec succès', updatedMember });
     } catch (error) {
         console.error('Erreur lors de la mise à jour d\'un membre de la famille : ', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour d\'un membre de la famille' });

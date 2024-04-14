@@ -72,16 +72,30 @@ class RadiobtnState extends State<Radiobtn> {
 }
 
 
+
+
+
 class FamilyMemberPage extends StatefulWidget {
+  final String username='';
+  final double plafond=0;
+  final double rembourssement=0;
+  final double reste=0;
+
+
   @override
   _FamilyMemberPageState createState() => _FamilyMemberPageState();
    final TextEditingController mailController = TextEditingController();
 }
 
 class _FamilyMemberPageState extends State<FamilyMemberPage> {
+  double _plafond=0;
+  double _rembourssement=0;
+  double _reste=0;
+  String _username='';
   String _nom = '';
   String _prenom = '';
   String _naissance='';
+  String relation='';
   String memberId='';
   TextEditingController nomController = TextEditingController();
   TextEditingController prenomController = TextEditingController();
@@ -194,7 +208,43 @@ class _FamilyMemberPageState extends State<FamilyMemberPage> {
   void initState() {
   super.initState();
   _loadFamilyMembers(); 
+   _getUserData();
 }
+
+
+Future<void> _getUserData() async {
+    try {
+      var user_id = LocalStorageService.getData('user_id');
+      print("user_id :" + LocalStorageService.getData('user_id'));
+
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:5000/api/user'), 
+        body: jsonEncode({'user_id': user_id}), 
+        headers: {
+          'Content-Type': 'application/json'
+        }, 
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _username = data['username'] ?? '';
+          _plafond = data['plafond'] ?? '';
+          _rembourssement = data['consome']?? '';  
+          _reste = data['reste']?? '';     
+   
+        });
+      } else {
+        // Gérer les erreurs de réponse du serveur
+        print(
+            'Erreur de chargement des données utilisateur: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Gérer les erreurs de connexion
+      print('Erreur de connexion: $error');
+    }
+  }
+
+
 
 Future<void> _loadFamilyMembers() async {
   try {
@@ -268,11 +318,11 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
 }
 
 
-  void _updateMember(String memberId) async {
+  void _modifMem(String memberId,BuildContext context) async {
   try {
        String relation = _value == 1 ? "Enfant" : "Conjoint";
 
-          final response = await http.post(
+          final response = await http.put(
       Uri.parse('http://127.0.0.1:5000/api/family-members/update/$memberId'), 
       body: jsonEncode({  
         'nom': _nom,
@@ -290,7 +340,7 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Membre mis à jour avec succès'),
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 4),
         ),
       );
     } else {
@@ -340,9 +390,152 @@ void _deleteMember(memberId) async {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
+          SizedBox(height: 50,),
+          
+          Container(
+            height: 120,
+            width: 1920,
+            margin: EdgeInsets.all(30),
+            padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.blue.shade300),
+                            color: Color.fromARGB(255, 255, 255, 255),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color.fromRGBO(208, 230, 244, 0.804),
+                                blurRadius: 20.0,
+                                offset: Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          
+                          child: Row(
+                            
+                          children: [ 
+                            
+                            
+                            Text( _username,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.blue.shade200,
+                            fontWeight: FontWeight.bold,
+                            ),
+                            ),
+                          SizedBox(width: 550),
+                          SizedBox(height: 20,),
+                          Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [Text("Reste" ,
+                                      style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color.fromARGB(255, 54, 249, 0),
+                                      fontFamily: 'Istok web',
+                                      ),),
+                                      SizedBox(height: 5,),
+                          
+                                    SizedBox(
+                                      height: 30,
+                                      width: 70,
+                                      child: TextButton(
+                                        onPressed: () {},
+                                        child: Text(
+                                          _reste.toStringAsFixed(2),
+                                          style: TextStyle(
+                                            color: Color.fromARGB(255, 54, 249, 0),
+                                            fontFamily: 'Istok web',
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(5.0),
+                                            side: BorderSide(
+                                              color: Color.fromARGB(255, 54, 249, 0),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),],),
+
+                                    SizedBox(width: 40,),
+                                    Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [Text("Rembourssement", 
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color.fromARGB(255, 241, 52, 0),
+                              fontFamily: 'Istok web',
+                                 ),),
+                            SizedBox(height: 5,),
+                          
+                                    SizedBox(
+                                      height: 30,
+                                      width: 70,
+                                      child: TextButton(
+                                        onPressed: () {},
+                                        child: Text(
+                                          '$_rembourssement',
+                                          style: TextStyle(
+                                            color: Color.fromARGB(255, 241, 52, 0),
+                                            fontFamily: 'Istok web',
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(5.0),
+                                            side: BorderSide(
+                                              color: Color.fromARGB(255, 241, 52, 0),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),],),
+                                     SizedBox(width: 40,),
+                                     Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [Text("Plafond", 
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color.fromARGB(255, 241, 189, 0),
+                              fontFamily: 'Istok web',
+                            ),
+                           ),
+                            SizedBox(height: 5,),
+                          
+                           SizedBox(
+                                      height: 30,
+                                      width: 70,
+                                      child: TextButton(
+                                        onPressed: () {},
+                                        child: Text(
+                                          '$_plafond',
+                                          style: TextStyle(
+                                            color: Color.fromARGB(255, 241, 189, 0),
+                                            fontFamily: 'Istok web',
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(5.0),
+                                            side: BorderSide(
+                                              color: Color.fromARGB(255, 241, 189, 0),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),],),
+                          ],
+                       ),
+          ),
           Center(
             child: Padding(
-              padding: const EdgeInsets.only(top: 60.0),
+              padding: const EdgeInsets.only(top: 130.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -754,7 +947,9 @@ void _deleteMember(memberId) async {
   }
 
   void _modifierMembreFamille(BuildContext context, int index, FamilyMember member) {
-    // Utilisez "index" pour accéder à l'élément spécifique dans la liste "familyMembers"
+    _nom=member.nom;
+    _prenom=member.prenom;
+    relation=member.type;
     nomController.text = member.nom;
     prenomController.text = member.prenom;
     dobController.text = member.dob;
@@ -817,18 +1012,16 @@ void _deleteMember(memberId) async {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        if (_formMemb.currentState!.validate()) {
-                        _updateMember(member.id);
-                        Navigator.of(context).pop();
-                      }
                         
+                        _modifMem(member.id,context);
+ 
                         setState(() {
                           familyMembers[index].nom = nomController.text;
                           familyMembers[index].prenom = prenomController.text;
                           familyMembers[index].dob = dobController.text;
                           familyMembers[index].type= _value ==1 ? "Enfant" : "Conjoint" ;
                         });
-                        Navigator.pop(context);
+                       Navigator.of(context).pop();
                       },
                       child: Text('Enregistrer', style: TextStyle(color: Colors.white, fontFamily: 'Istok web')),
                       style: ElevatedButton.styleFrom(
