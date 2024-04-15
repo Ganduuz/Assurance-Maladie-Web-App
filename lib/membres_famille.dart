@@ -476,7 +476,7 @@ void _deleteMember(String memberId,BuildContext context) async {
                                       child: TextButton(
                                         onPressed: () {},
                                         child: Text(
-                                          '$_rembourssement',
+                                          _rembourssement.toStringAsFixed(2),
                                           style: TextStyle(
                                             color: Color.fromARGB(255, 241, 52, 0),
                                             fontFamily: 'Istok web',
@@ -512,7 +512,7 @@ void _deleteMember(String memberId,BuildContext context) async {
                                       child: TextButton(
                                         onPressed: () {},
                                         child: Text(
-                                          '$_plafond',
+                                          _plafond.toStringAsFixed(2),
                                           style: TextStyle(
                                             color: Color.fromARGB(255, 241, 189, 0),
                                             fontFamily: 'Istok web',

@@ -34,32 +34,33 @@ void initState() {
     _getUserData();
     _getUserImage();
   }
-
 Future<void> _getUserImage() async {
-    try {
-      var user_id = LocalStorageService.getData('user_id');
-      final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/user/get-image'),
-        body: jsonEncode({'user_id': user_id}),
-        headers: {'Content-Type': 'application/json'},
-      );
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final imageUrl = data['_imageUrl'];
-        final imageResponse = await http.get(Uri.parse(imageUrl));
-           
-        if (imageResponse.statusCode == 200) {
+  try {
+    var user_id = LocalStorageService.getData('user_id');
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:5000/api/user/get-image'),
+      body: jsonEncode({'user_id': user_id}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final imageUrl = data['_imageUrl'];
+      final imageResponse = await http.get(Uri.parse(imageUrl));
+      
+      if (imageResponse.statusCode == 200) {
         setState(() {
           _imageBytes = imageResponse.bodyBytes;
         });
-      }
       } else {
-        print('Erreur lors de la récupération de l\'image: ${response.statusCode}');
+        print('Erreur lors du téléchargement de l\'image: ${imageResponse.statusCode}');
       }
-    } catch (error) {
-      print('Erreur de connexion: $error');
+    } else {
+      print('Erreur lors de la récupération de l\'image: ${response.statusCode}');
     }
+  } catch (error) {
+    print('Erreur de connexion: $error');
   }
+}
 
 
   Future<void> _getUserData() async {
