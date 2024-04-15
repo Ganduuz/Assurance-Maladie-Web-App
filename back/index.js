@@ -94,7 +94,7 @@ const usersArchiveModel = mongoose.model('usersArchive', usersArchiveSchema);
 
 
 const familyMemberSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Référence à l'utilisateur
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },                                                                                                                                                                                                                                                                                                                                      
     nom: String,
     prenom:String,
     relation: String,
@@ -616,17 +616,35 @@ app.put('/api/family-members/update/:memberId', async (req, res) => {
         const memberId = new mongoose.Types.ObjectId(req.params.memberId); // Utilisez 'new'
         const { nom, prenom, relation, naissance } = req.body;
 
-        // Valider les données entrantes ici si nécessaire
+
+        if (!naissance || typeof naissance !== 'string') {
+            return res.status(400).json({ message: 'La date de naissance est requise et doit être une chaîne de caractères' });
+        }
+
+        // Séparer les composants de la date
+        const dateComponents = naissance.split('/');
+        if (dateComponents.length !== 3) {
+            return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
+        }
+
+        const [day, month, year] = dateComponents.map(Number);
+
+        // Vérifier si les composants sont valides
+        if (isNaN(day) || isNaN(month) || isNaN(year)) {
+            return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
+        }
+
+        // Créer un nouvel objet Date
+        const formattedDate = new Date(year, month - 1, day);
         
         let plafond;
-        // Déterminer le plafond en fonction de la relation
         if (relation === "Enfant") {
             plafond = 500.00;
         } else if (relation === "Conjoint") {
             plafond = 1000.00;
         }
 
-        const updatedMember = await FamilyMember.findByIdAndUpdate(memberId, { nom, prenom, relation, naissance, plafond, reste: plafond }, { new: true });
+        const updatedMember = await FamilyMember.findByIdAndUpdate(memberId, { nom, prenom, relation, naissance:formattedDate, plafond, reste: plafond }, { new: true });
 
         if (!updatedMember) {
             return res.status(404).json({ message: 'Membre introuvable' });

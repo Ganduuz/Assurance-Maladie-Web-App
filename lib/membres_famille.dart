@@ -355,10 +355,10 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
 
 
 
-void _deleteMember(memberId) async {
+void _deleteMember(String memberId,BuildContext context) async {
   try {
-          final response = await http.post(
-      Uri.parse('http://127.0.0.1:5000/api/family-members/update/$memberId'), 
+          final response = await http.delete(
+      Uri.parse('http://127.0.0.1:5000/api/family-members/delete/$memberId'), 
       body: jsonEncode({  
       
       }),
@@ -371,7 +371,7 @@ void _deleteMember(memberId) async {
       print('Membre supprimé.');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Membre mis à jour avec succès'),
+          content: Text('Membre supprimé .'),
           duration: Duration(seconds: 3),
         ),
       );
@@ -708,7 +708,7 @@ void _deleteMember(memberId) async {
                                   width: double.infinity, // Pour étendre sur toute la largeur
                                   child: TextButton(
                                     onPressed: () {
-                                      _supprimerMembre(context, index);
+                                      _supprimerMembre(context, index,familyMembers[index]);
                                     },
                                     child: Text(
                                       'Supprimer membre ',
@@ -893,7 +893,7 @@ void _deleteMember(memberId) async {
     );
   }
 
-  void _supprimerMembre(BuildContext context, int index) {
+  void _supprimerMembre(BuildContext context, int index,FamilyMember member) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -927,7 +927,7 @@ void _deleteMember(memberId) async {
             ),
             TextButton(
               onPressed: () {
-                _deleteMember(memberId);
+                _deleteMember(member.id,context);
                 setState(() {
                   familyMembers.removeAt(index); 
                 });
