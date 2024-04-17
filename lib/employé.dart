@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -39,6 +38,7 @@ class _EmployeeeState extends State<Employeee> {
   int nombre=0;
   List<Employee> employeesDetails = [];
   List<Employee> archivedEmployees = [];
+List<Employee> _currentEmployeesArchh = [];
 
   String verification='';
   String _full='';
@@ -60,7 +60,7 @@ class _EmployeeeState extends State<Employeee> {
   @override
   void initState() {
     super.initState();
-    _loadFamilyMembers();
+    _loadEmpls();
     _loadEmployesArch();
   }
 
@@ -81,13 +81,13 @@ class _EmployeeeState extends State<Employeee> {
         startIndex, endIndex.clamp(0, _filteredEmployees.length));
   }
 
-  Future<void> _loadFamilyMembers() async {
+  Future<void> _loadEmpls() async {
     try {
       List<Employee> employee = await fetchEmployeesDetails();
       setState(() {
         employeesDetails = employee;
       });
-    } catch (error) {
+    } catch (error) {  
       print('Erreur lors du chargement des employés: $error');
     }
   }
@@ -117,6 +117,7 @@ class _EmployeeeState extends State<Employeee> {
 
 
 
+ 
 
 
 
@@ -129,19 +130,35 @@ class _EmployeeeState extends State<Employeee> {
       return [];
     }
   }
+void updateCurrentEmployees() {
+  final startIndexxx = _currentPagee * _employeesPerPagee;
+  final endIndexxx = startIndexxx + _employeesPerPagee;
+  _currentEmployeesArchh = archivedEmployees.sublist(startIndexxx, endIndexxx);
+}
+List<Employee> get _currentEmployeesArch {
+  final startIndexx = _currentPagee * _employeesPerPagee;
+  final endIndexx = (_currentPagee + 1) * _employeesPerPagee;
+  final filteredLength = _filteredEmployeesArch.length;
+  
+  // Ajuster endIndexx pour qu'il ne dépasse pas la longueur de la liste
+  final adjustedEndIndex = endIndexx.clamp(0, filteredLength);
 
- List<Employee> get _currentEmployeesArch {
-  final startIndex = _currentPagee * _employeesPerPagee;
-  final endIndex = (_currentPagee + 1) * _employeesPerPagee;
-  return _filteredEmployeesArch.sublist(startIndex, endIndex.clamp(0, _filteredEmployeesArch.length));
+  if (startIndexx >= filteredLength || adjustedEndIndex <= 0) {
+    return []; // Si startIndexx est hors limites ou endIndexx est invalide, retourner une liste vide
+  }
+  
+  return _filteredEmployeesArch.sublist(startIndexx, adjustedEndIndex);
 }
 
- Future<void> _loadEmployesArch() async {
+
+
+Future<void> _loadEmployesArch() async {
   try {
     List<Employee> employees = await fetchEmployeesArch();
     setState(() {
       archivedEmployees = employees;
-      _currentPagee = 0; // Réinitialiser _currentPagee lorsque la liste est mise à jour
+      _currentPagee = 0;
+      updateCurrentEmployees(); // Appeler updateCurrentEmployees après avoir mis à jour la liste des employés archivés
     });
   } catch (error) {
     print('Erreur lors du chargement des employés: $error');
@@ -154,10 +171,7 @@ class _EmployeeeState extends State<Employeee> {
 
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);
-      setState(() {
-          nombre = jsonData['nombre'] ?? '';
-               
-        });
+     
         final List<dynamic> membersJson = jsonData['archivedEmployees'];
         List<Employee> archivedEmployees =
             membersJson.map((json) => Employee.fromJson(json)).toList();
@@ -224,11 +238,10 @@ Future<bool> addEmployee(BuildContext context) async {
         ),
       );
     } else {
-      // Gérer les autres codes d'état si nécessaire
     }
   } catch (error) {
     print('Erreur de connexion: $error');
-    // Gérer les erreurs inattendues
+    
   }
 
   return success;
@@ -259,11 +272,9 @@ Future<void> modifEmployee(String cin,BuildContext context) async {
         ),
       );
     } else {
-      // Gérer les autres codes d'état si nécessaire
     }
   } catch (error) {
     print('Erreur de connexion: $error');
-    // Gérer les erreurs inattendues
   }
 
   
@@ -330,6 +341,7 @@ Future<void> _disarchiveEmployee(String cin, BuildContext context) async {
       _searchText = value;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -405,9 +417,12 @@ Future<void> _disarchiveEmployee(String cin, BuildContext context) async {
             SizedBox(width: 10,),
 ElevatedButton(
   onPressed: () {
+    _currentPagee=0;
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
         return Dialog(
           child: Container(
   width: 1200,
@@ -524,6 +539,9 @@ ElevatedButton(
                   icon: Image.asset("assets/disarchiver.png"),
                   onPressed: () {
                     _disarchiverEmployee(employee,context);
+                     setState(() {
+                       nombre ++;
+                      });
                   },
                 ),
               ],
@@ -539,24 +557,31 @@ ElevatedButton(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             IconButton(
-              onPressed: _currentPagee > 0 ? () {
-                setState(() {
-                  _currentPagee--; // Décrémentation de _currentPagee
-                });
-              } : null,
-              icon: Icon(Icons.chevron_left, color: Colors.blue.shade300, size: 18),
-            ),
-            Text(
-              "Page ${_currentPagee + 1} de ${(_employeesPerPagee > 0) ? (archivedEmployees.length / _employeesPerPagee).ceil() : 1}",
-            ),
-            IconButton(
-              onPressed: _currentPagee < (archivedEmployees.length / _employeesPerPagee).ceil() - 1 ? () {
-                setState(() {
-                  _currentPagee++; // Incrémentation de _currentPagee
-                });
-              } : null,
-              icon: Icon(Icons.chevron_right, color: Colors.blue.shade300, size: 18),
-            ),
+  onPressed: _currentPagee > 0 ? () {
+    setState(() {
+      _currentPagee = _currentPagee - 1;
+      
+    });
+    updateCurrentEmployees();
+  } : null,
+  icon: Icon(Icons.chevron_left, color: Colors.blue.shade300, size: 18),
+),
+
+Text(
+  "Page ${_currentPagee + 1} de ${(_employeesPerPagee > 0) ? (archivedEmployees.length / _employeesPerPagee).ceil() : 1}",
+),
+
+IconButton(
+  onPressed: _currentPagee < (archivedEmployees.length / _employeesPerPagee).ceil() - 1 ? () {
+    setState(() {
+      _currentPagee = _currentPagee + 1;
+      
+    });
+    updateCurrentEmployees();
+  } : null,
+  icon: Icon(Icons.chevron_right, color: Colors.blue.shade300, size: 18),
+),
+
             SizedBox(width: 20),
           ],
         ),
@@ -565,6 +590,8 @@ ElevatedButton(
   ),
 ),
 
+        );
+      },
         );
       },
     );
@@ -701,7 +728,9 @@ ElevatedButton(
                                 icon: Icon(Icons.archive, color: Colors.red),
                                 onPressed: () {
                                    _archiverEmployee(employee, context);
-                                   
+                                    setState(() {
+                                      nombre --;
+                                      });
                                 },
                               ),
                               IconButton(
@@ -721,38 +750,48 @@ ElevatedButton(
 
             ),
             Container(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),),
-              padding: EdgeInsets.all(7),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    onPressed: _currentPage > 0 ? () => setState(() => _currentPage--) : null,
-                    icon: Icon(Icons.chevron_left,color: Colors.blue.shade300,size: 18,),
-                  ),
-                  Text("Page ${_currentPage + 1} de ${(_employeesPerPage > 0) ? (employeesDetails.length / _employeesPerPage).ceil() : 1}"),
-                  IconButton(
-                    onPressed: _currentPage < (employeesDetails.length / _employeesPerPage).ceil() - 1 ? () => setState(() => _currentPage++) : null,
-                    icon: Icon(Icons.chevron_right,color: Colors.blue.shade300,size: 18,),
-                  ),
-                  SizedBox(width: 20), // Ajout d'un espace entre les flèches et le DropdownButton
-                  DropdownButton<int>(
-                    value: _employeesPerPage,
-                    onChanged: (value) {
-                      setState(() {
-                        _employeesPerPage = value!;
-                      });
-                    },
-                    items: [6, 10, 20, 50].map((value) {
-                      return DropdownMenuItem<int>(
-                        value: value,
-                        child: Text(' $value '),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(5),
+  ),
+  padding: EdgeInsets.all(7),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      IconButton(
+        onPressed: _currentPage > 0 ? () {
+          setState(() {
+            _currentPage = _currentPage - 1;
+          });
+          updateCurrentEmployees();
+        } : null,
+        icon: Icon(Icons.chevron_left, color: Colors.blue.shade300, size: 18),
+      ),
+      Text(
+        "Page ${_currentPage + 1} de ${(_employeesPerPage > 0) ? (employeesDetails.length / _employeesPerPage).ceil() : 1}",
+      ),
+      IconButton(
+        onPressed: _currentPage < (employeesDetails.length / _employeesPerPage).ceil() - 1 ? () => setState(() => _currentPage++) : null,
+        icon: Icon(Icons.chevron_right, color: Colors.blue.shade300, size: 18,),
+      ),
+      SizedBox(width: 20), // Ajout d'un espace entre les flèches et le DropdownButton
+      DropdownButton<int>(
+        value: _employeesPerPage,
+        onChanged: (value) {
+          setState(() {
+            _employeesPerPage = value!;
+          });
+        },
+        items: [6, 10, 20, 50].map((value) {
+          return DropdownMenuItem<int>(
+            value: value,
+            child: Text('$value'),
+          );
+        }).toList(),
+      ),
+    ],
+  ),
+),
+
           ],
         ),
       ),
@@ -1036,27 +1075,22 @@ ElevatedButton(
 
 void _archiverEmployee(Employee employee, BuildContext context) {
 String cin = employee.cin;
-
-
-  
 _archiveEmployee(cin, context);
   setState(() {
       employeesDetails.remove(employee); 
       archivedEmployees.add(employee);
-      nbr=nombre -1; 
-      nombre=nbr;
+      
     });
 
 }
+
 void _disarchiverEmployee(Employee employee, BuildContext context) {
   String cin =employee.cin;
   _disarchiveEmployee(cin, context);
   setState(() {
      archivedEmployees.remove(employee);
      employeesDetails.add(employee);
-      nbr=nombre+ 1; 
-      nombre=nbr;
-
+      
 
    
 
