@@ -169,7 +169,7 @@ void _updatePassword() async {
       }
     } catch (error) {
       print('Erreur de connexion: $error');
-      // Affichez un message à l'utilisateur pour lui indiquer qu'une erreur s'est produite
+      
     }
   
 }
@@ -253,22 +253,21 @@ Future<void> _importImage() async {
                     child: Column(
                       children: [
                         GestureDetector(
+                          onTap: () => _importImage(), 
                           child: Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                             ),
-                             child: CircleAvatar(
+                            child: CircleAvatar(
                               radius: 80.0,
-                              backgroundImage: _imageBytes != null
-                                  ? MemoryImage(_imageBytes!)
-                                  : null,
-                              child: _imageBytes == null ? null : null,
+                              backgroundImage: _imageBytes != null ? MemoryImage(_imageBytes!) : null,
+                              child: _imageBytes == null ? Icon(Icons.add_a_photo, size: 40.0) : null, 
                             ),
                           ),
                         ),
                         const SizedBox(height: 16.0),
                         ElevatedButton(
-                          onPressed: () => _importImage(),
+                          onPressed: () => _importImage(), 
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5.0),
@@ -276,8 +275,7 @@ Future<void> _importImage() async {
                             backgroundColor: Color(0xFF5BADE9),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15.0, vertical: 10.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
                             child: Text(
                               'Choose File',
                               style: TextStyle(color: Colors.white),
@@ -286,6 +284,7 @@ Future<void> _importImage() async {
                         ),
                       ],
                     ),
+
                   ),
                   const SizedBox(width: 20.0),
                   // Texte pour les informations personnelles

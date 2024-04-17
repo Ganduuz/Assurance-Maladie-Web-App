@@ -60,7 +60,7 @@ Future<void> _getUserData() async {
   static final List<Widget> _widgetOptions = <Widget>[
     Home(),
     FamilyMemberPage(),
-     BulletinsSoins(),
+     bs(),
      actesMed(),
     const MonCompte(),
    

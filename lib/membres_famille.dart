@@ -110,99 +110,102 @@ class _FamilyMemberPageState extends State<FamilyMemberPage> {
 
    
 
-
-  void buildCalendarWidget(BuildContext context) {
-  
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            elevation: 0.0,
-            backgroundColor: Colors.transparent,
-            child: SizedBox(
-              height: 380,
-              width: 380,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    TableCalendar(
-                      focusedDay: _focusedDay,
-                      firstDay: DateTime.utc(1950),
-                      lastDay: DateTime.utc(2100),
-                      rowHeight: 35,
-                      daysOfWeekStyle: DaysOfWeekStyle(weekdayStyle: TextStyle(fontWeight: FontWeight.w400),
-                      weekendStyle:TextStyle(fontWeight: FontWeight.w400), ),
-                      onDaySelected: (DateTime selectDay,DateTime focusDay) {
-                        setState(() {
-                          _selectedDay=selectDay;
-                          _focusedDay=focusDay;
-                         dobController.text = DateFormat('dd/MM/yyyy').format(_selectedDay);
+void buildCalendarWidget(BuildContext context) {
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              elevation: 0.0,
+              backgroundColor: Colors.transparent,
+              child: SizedBox(
+                height: 380,
+                width: 380,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      TableCalendar(
+                        
+                        focusedDay: _focusedDay,
+                        firstDay: DateTime.utc(1950),
+                        lastDay: DateTime.utc(2100),
+                        rowHeight: 35,
+                        daysOfWeekStyle: DaysOfWeekStyle(
+                          weekdayStyle: TextStyle(fontWeight: FontWeight.w400),
+                          weekendStyle:TextStyle(fontWeight: FontWeight.w400),
+                        ),
+                        onDaySelected: (DateTime selectDay,DateTime focusDay) {
+                          _selectedDay = DateTime.now();
+                          setState(() {
+                            _selectedDay=selectDay;
+                            _focusedDay=focusDay;
+                            dobController.text = DateFormat('dd/MM/yyyy').format(_selectedDay);
                          _naissance = DateFormat('dd/MM/yyyy').format(_selectedDay);
-                        _selectedDay = DateTime.now();
-                        _focusedDay=DateTime.now();
-                        },);
-                      },
-                      headerStyle: HeaderStyle(formatButtonVisible: false, titleCentered: true),
-                      calendarStyle:CalendarStyle(
-                        isTodayHighlighted: true,
-                        selectedDecoration: BoxDecoration(
-                          color: Colors.blue.shade200,
-                          shape: BoxShape.circle,
-                        ),
-                        todayDecoration: BoxDecoration(
-                          color: Colors.blue,
-                          shape: BoxShape.circle,
-                        ),
-                        selectedTextStyle: TextStyle(color: Color.fromARGB(255, 149, 167, 158)),
-                      ) ,
-                      selectedDayPredicate: (DateTime date) {
-                        return isSameDay(_selectedDay, date);
-                      },
-                    ),
-                    SizedBox(height: 10,),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(child: TextButton(
-                          onPressed: () {   
-                            Navigator.pop(context, _selectedDay);
-                          },
-                          child: Text(
-                            "OK",
-                            style: TextStyle(color: Colors.blue.shade300),
+                                                      
+
+                          });
+                        },
+                        headerStyle: HeaderStyle(formatButtonVisible: false, titleCentered: true),
+                        calendarStyle:CalendarStyle(
+                          isTodayHighlighted: true,
+                          selectedDecoration: BoxDecoration(
+                            color: Colors.blue.shade200,
+                            shape: BoxShape.circle,
                           ),
-                        ),),
-                        SizedBox(),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text(
-                            "Annuler",
-                            style: TextStyle(color: Colors.blue.shade300),
+                          todayDecoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          selectedTextStyle: TextStyle(color: Colors.white),
+                        ) ,
+                        selectedDayPredicate: (DateTime date) {
+                          return isSameDay(_selectedDay, date);
+                        },
+                      ),
+                      SizedBox(height: 10,),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(child: TextButton(
+                            onPressed: () {
+                              Navigator.pop(context, _selectedDay);
+                            },
+                            child: Text(
+                              "OK",
+                              style: TextStyle(color: Colors.blue.shade300),
+                            ),
+                          ),),
+                          SizedBox(),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              "Annuler",
+                              style: TextStyle(color: Colors.blue.shade300),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-      );
-},
+            );
+          },
+        );
+  },
 );
 }
   void initState() {

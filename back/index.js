@@ -108,6 +108,39 @@ const familyMemberSchema = new mongoose.Schema({
 const FamilyMember = mongoose.model('membres', familyMemberSchema);
 
 module.exports = FamilyMember;
+app.get('/api/employesArch', async (req, res) => {
+    try {
+        // Recherche des employés avec un plafond de 1500
+        const employes = await usersArchiveModel.find({ plafond: 1500 });
+
+        if (employes.length > 0) {
+            const nombre= employes.length ;
+            // Créer un tableau pour stocker les détails de chaque employé
+            const archivedEmployees = employes.map(employe => {
+                return {
+                    _id: employe._id,
+                    cin: employe.cin,
+                    nom: employe.nom,
+                    prenom: employe.prenom,
+                    mail: employe.mail,
+                    emploi:employe.emploi,
+                    verif: employe.verif,
+                    plafond: employe.plafond,
+                    reste: employe.reste, // Inclure le champ reste dans la réponse JSON
+                    consome: employe.consome, // Inclure le champ consome dans la réponse JSON
+                };
+            });
+            console.log('Employés Archivés récupérés');
+            res.status(200).json({ message: 'Détails des employés archivés récupérés',nombre, archivedEmployees });
+        } else {
+            res.status(404).json({ message: 'Aucun employé trouvé ' });
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des détails des employés : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des employés' });
+    }
+});
+
 app.get('/api/employes', async (req, res) => {
     try {
         // Recherche des employés avec un plafond de 1500
@@ -140,8 +173,6 @@ app.get('/api/employes', async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des employés' });
     }
 });
-
-
 
 app.post('/api/employe/add', async (req, res) => {
     try {
@@ -273,6 +304,32 @@ app.put('/api/employe/archive/:cin', async (req, res) => {
         res.status(200).json({ message: 'Utilisateur déplacé vers la collection usersArchive', archivedUser });
     } catch (error) {
         console.error('Erreur lors du déplacement de l\'utilisateur vers la collection usersArchive : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors du déplacement de l\'utilisateur vers la collection usersArchive' });
+    }
+});
+
+
+app.put('/api/employe/desarchive/:cin', async (req, res) => {
+    try {
+        const cin = req.params.cin;
+
+        // Rechercher l'utilisateur dans la collection usersArchive
+        const dearchivedUser = await usersArchiveModel.findOne({ cin: cin });
+
+        // Vérifier si l'utilisateur a été trouvé
+        if (!dearchivedUser) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé dans la collection usersArchive' });
+        }
+
+        // Insérer cet utilisateur dans la collection users
+        const user = await usersModel.create(dearchivedUser._doc);
+
+        // Supprimer cet utilisateur de la collection usersArchive
+        await usersArchiveModel.findOneAndDelete({ cin: cin });
+
+        res.status(200).json({ message: 'Utilisateur déplacé vers la collection users', user });
+    } catch (error) {
+        console.error('Erreur lors du déplacement de l\'utilisateur vers la collection users : ', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors du déplacement de l\'utilisateur vers la collection usersArchive' });
     }
 });

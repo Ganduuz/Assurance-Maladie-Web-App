@@ -45,6 +45,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   intl: ^0.19.0
+  awesome_dialog: ^3.2.0
 
 dev_dependencies:
   flutter_test:
@@ -119,6 +120,7 @@ flutter:
   - assets/edit (1).png
   - assets/update.png
   - assets/remove-user.png
+  - assets/disarchiver.png
   fonts:  
     - family: Julius Sans One
       fonts:

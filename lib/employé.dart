@@ -38,6 +38,8 @@ class Employeee extends StatefulWidget {
 class _EmployeeeState extends State<Employeee> {
   int nombre=0;
   List<Employee> employeesDetails = [];
+  List<Employee> archivedEmployees = [];
+
   String verification='';
   String _full='';
   String _cin = '';
@@ -47,6 +49,9 @@ class _EmployeeeState extends State<Employeee> {
   String _emploi='';
   int _currentPage = 0;
   int _employeesPerPage = 6;
+  int _currentPagee = 0;
+  int _employeesPerPagee = 8;
+  int nbr=0;
   String _searchText = '';
    final _formKey = GlobalKey<FormState>();
       final _editKey = GlobalKey<FormState>();
@@ -56,6 +61,7 @@ class _EmployeeeState extends State<Employeee> {
   void initState() {
     super.initState();
     _loadFamilyMembers();
+    _loadEmployesArch();
   }
 
   List<Employee> get _filteredEmployees {
@@ -106,6 +112,73 @@ class _EmployeeeState extends State<Employeee> {
       throw Exception('Failed to load employees details');
     }
   }
+
+
+
+
+
+
+
+
+  List<Employee> get _filteredEmployeesArch {
+    if (archivedEmployees.isNotEmpty) {
+      return archivedEmployees.where((employee) {
+        return employee.fullname.toLowerCase().contains(_searchText.toLowerCase());
+      }).toList();
+    } else {
+      return [];
+    }
+  }
+
+ List<Employee> get _currentEmployeesArch {
+  final startIndex = _currentPagee * _employeesPerPagee;
+  final endIndex = (_currentPagee + 1) * _employeesPerPagee;
+  return _filteredEmployeesArch.sublist(startIndex, endIndex.clamp(0, _filteredEmployeesArch.length));
+}
+
+ Future<void> _loadEmployesArch() async {
+  try {
+    List<Employee> employees = await fetchEmployeesArch();
+    setState(() {
+      archivedEmployees = employees;
+      _currentPagee = 0; // Réinitialiser _currentPagee lorsque la liste est mise à jour
+    });
+  } catch (error) {
+    print('Erreur lors du chargement des employés: $error');
+  }
+}
+
+  Future<List<Employee>> fetchEmployeesArch() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:5000/api/employesArch'));
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      setState(() {
+          nombre = jsonData['nombre'] ?? '';
+               
+        });
+        final List<dynamic> membersJson = jsonData['archivedEmployees'];
+        List<Employee> archivedEmployees =
+            membersJson.map((json) => Employee.fromJson(json)).toList();
+
+        return archivedEmployees;
+        
+    } else {
+      throw Exception('Failed to load employees archived');
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+  
 Future<bool> addEmployee(BuildContext context) async {
   bool success = true;
   try {
@@ -224,6 +297,34 @@ Future<void> _archiveEmployee(String cin, BuildContext context) async {
 }
 
 
+
+
+Future<void> _disarchiveEmployee(String cin, BuildContext context) async {
+  try {
+    final response = await http.put(
+      Uri.parse('http://127.0.0.1:5000/api/employe/desarchive/$cin'),
+      body: jsonEncode({}),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      print('Employé désarchivé.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Employé désarchivé avec succès'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } else {
+      print('Erreur lors de l\'archivage. Code d\'état: ${response.statusCode}');
+      
+    }
+  } catch (error) {
+    print('Erreur de connexion: $error');
+    
+  }
+}
+
   void _updateSearchText(String value) {
     setState(() {
       _searchText = value;
@@ -275,8 +376,6 @@ Future<void> _archiveEmployee(String cin, BuildContext context) async {
                       suffixIcon: IconButton(
                         icon: Icon(Icons.search),
                         onPressed: () {
-                          // Appliquer la recherche lors du clic sur l'icône de recherche
-                          // Vous pouvez mettre ici toute logique supplémentaire que vous souhaitez effectuer après la recherche
                           print("Effectuer la recherche avec le texte: $_searchText");
                         },
                       ),
@@ -302,8 +401,192 @@ Future<void> _archiveEmployee(String cin, BuildContext context) async {
                     ),
                   ),
                 ),
-              ],
+                
+            SizedBox(width: 10,),
+ElevatedButton(
+  onPressed: () {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+  width: 1200,
+  height: 900,
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(10),
+    boxShadow: [
+      BoxShadow(
+        color: const Color.fromARGB(255, 193, 193, 193).withOpacity(0.5),
+        spreadRadius: 5,
+        blurRadius: 7,
+        offset: Offset(0, 2),
+      ),
+    ],
+  ),
+  child: Column(
+    children: [
+      SizedBox(height: 8),
+      Text(
+        "Employés archivés",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+          color: Colors.blue.shade200,
+        ),
+      ),
+      SizedBox(height: 20),
+      Table(
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        children: [
+          TableRow(
+            decoration: BoxDecoration(
+              color: Colors.blueAccent,
+              borderRadius: BorderRadius.circular(10), // Coins arrondis
             ),
+            children: [
+               tableHeader("       Nom complet"),
+                tableHeader("                     CIN"),
+                tableHeader("                  E-mail"),
+                tableHeader("                   Poste"),
+                  tableHeader("                Vérification"),
+                tableHeader("                      "),
+            ],
+          ),
+          ..._currentEmployeesArch.map((employee) {
+            return TableRow(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: const Color.fromARGB(255, 193, 191, 191),
+                    width: 0.3,
+                  ),
+                ),
+              ),
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 8),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(1000),
+                        child: Image.asset(
+                          'assets/user (1).png',
+                          width: 30,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          employee.fullname,
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: Text(
+                    employee.cin,
+                    style: TextStyle(fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: Text(
+                    employee.email,
+                    style: TextStyle(fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: Text(
+                    employee.poste,
+                    style: TextStyle(fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: Text(
+                    (employee.verification == "true") ? "verifié" : "non verifié",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: (employee.verification == "true") ? Colors.green : Colors.red,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                IconButton(
+                  icon: Image.asset("assets/disarchiver.png"),
+                  onPressed: () {
+                    _disarchiverEmployee(employee,context);
+                  },
+                ),
+              ],
+            );
+          }).toList(),
+        ],
+      ),
+      SizedBox(height: 20),
+      Container(
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5)),
+        padding: EdgeInsets.all(7),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              onPressed: _currentPagee > 0 ? () {
+                setState(() {
+                  _currentPagee--; // Décrémentation de _currentPagee
+                });
+              } : null,
+              icon: Icon(Icons.chevron_left, color: Colors.blue.shade300, size: 18),
+            ),
+            Text(
+              "Page ${_currentPagee + 1} de ${(_employeesPerPagee > 0) ? (archivedEmployees.length / _employeesPerPagee).ceil() : 1}",
+            ),
+            IconButton(
+              onPressed: _currentPagee < (archivedEmployees.length / _employeesPerPagee).ceil() - 1 ? () {
+                setState(() {
+                  _currentPagee++; // Incrémentation de _currentPagee
+                });
+              } : null,
+              icon: Icon(Icons.chevron_right, color: Colors.blue.shade300, size: 18),
+            ),
+            SizedBox(width: 20),
+          ],
+        ),
+      ),
+    ],
+  ),
+),
+
+        );
+      },
+    );
+  },
+  child: Text(
+    "Archive",
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+  ),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color.fromARGB(255, 246, 156, 100),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(5.0),
+    ),
+    ),
+   ),
+  ],
+),
+
+
             SizedBox(height: 40),
             Container(
               margin: EdgeInsets.all(5),
@@ -337,7 +620,7 @@ Future<void> _archiveEmployee(String cin, BuildContext context) async {
                       tableHeader("                  E-mail"),
                       tableHeader("                   Poste"),
                       tableHeader("                Vérification"),
-                      tableHeader("               Actions"),
+                      tableHeader("                      "),
                     ],
                   ),
 
@@ -418,6 +701,7 @@ Future<void> _archiveEmployee(String cin, BuildContext context) async {
                                 icon: Icon(Icons.archive, color: Colors.red),
                                 onPressed: () {
                                    _archiverEmployee(employee, context);
+                                   
                                 },
                               ),
                               IconButton(
@@ -750,18 +1034,34 @@ Future<void> _archiveEmployee(String cin, BuildContext context) async {
 }
 
 
-  void _archiverEmployee(Employee employee, BuildContext context) {
-  String cin = employee.cin;
+void _archiverEmployee(Employee employee, BuildContext context) {
+String cin = employee.cin;
 
 
   
-  _archiveEmployee(cin, context);
+_archiveEmployee(cin, context);
   setState(() {
-      employeesDetails.remove(employee);  // Assuming employees is a list containing Employee objects
+      employeesDetails.remove(employee); 
+      archivedEmployees.add(employee);
+      nbr=nombre -1; 
+      nombre=nbr;
     });
 
 }
+void _disarchiverEmployee(Employee employee, BuildContext context) {
+  String cin =employee.cin;
+  _disarchiveEmployee(cin, context);
+  setState(() {
+     archivedEmployees.remove(employee);
+     employeesDetails.add(employee);
+      nbr=nombre+ 1; 
+      nombre=nbr;
 
+
+   
+
+});
+}
 
 
 void _showEditEmployeeDialog(Employee employee, BuildContext context) {

@@ -117,6 +117,7 @@ static const double defaultPadding = 5.0;
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Container(
         padding: EdgeInsets.all(defaultPadding * 1.2),
         child: Row(
