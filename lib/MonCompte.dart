@@ -19,6 +19,9 @@ class MonCompte extends StatefulWidget {
 
 class _MonCompteState extends State<MonCompte> {
   Uint8List? _imageBytes;
+  ImageProvider imageProvider = AssetImage('user.png');
+
+  MemoryImage? memoryImage;
   String _cin='';
   String _nom = '';
   String _prenom = '';
@@ -38,29 +41,23 @@ Future<void> _getUserImage() async {
   try {
     var user_id = LocalStorageService.getData('user_id');
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:5000/api/user/get-image'),
-      body: jsonEncode({'user_id': user_id}),
-      headers: {'Content-Type': 'application/json'},
-    );
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final imageUrl = data['_imageUrl'];
-      final imageResponse = await http.get(Uri.parse(imageUrl));
-      
-      if (imageResponse.statusCode == 200) {
+        Uri.parse('http://127.0.0.1:5000/api/user/get-image'),
+        body: {'user_id': user_id},
+      );
+
+      if (response.statusCode == 200) {
+        final imageBytes = response.bodyBytes;
         setState(() {
-          _imageBytes = imageResponse.bodyBytes;
+          // Utiliser MemoryImage pour afficher l'image à partir des données binaires
+          imageProvider = MemoryImage(imageBytes);
         });
       } else {
-        print('Erreur lors du téléchargement de l\'image: ${imageResponse.statusCode}');
+        print('Failed to load image: ${response.statusCode}');
       }
-    } else {
-      print('Erreur lors de la récupération de l\'image: ${response.statusCode}');
+    } catch (error) {
+      print('Error fetching image: $error');
     }
-  } catch (error) {
-    print('Erreur de connexion: $error');
   }
-}
 
 
   Future<void> _getUserData() async {
@@ -251,39 +248,42 @@ Future<void> _importImage() async {
                       ],
                     ),
                     child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () => _importImage(), 
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                            ),
-                            child: CircleAvatar(
-                              radius: 80.0,
-                              backgroundImage: _imageBytes != null ? MemoryImage(_imageBytes!) : null,
-                              child: _imageBytes == null ? Icon(Icons.add_a_photo, size: 40.0) : null, 
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16.0),
-                        ElevatedButton(
-                          onPressed: () => _importImage(), 
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            backgroundColor: Color(0xFF5BADE9),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-                            child: Text(
-                              'Choose File',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+  children: [
+    GestureDetector(
+      onTap: () => _importImage(), 
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+        ),
+        child: CircleAvatar(
+          radius: 80.0,
+          backgroundImage: memoryImage != null ? memoryImage! : null,
+          child: imageProvider != null
+            ? Image(image: imageProvider)
+            : CircularProgressIndicator(),
+        ),
+      ),
+    ),
+    const SizedBox(height: 16.0),
+    ElevatedButton(
+      onPressed: () => _importImage(), 
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        backgroundColor: Color(0xFF5BADE9),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+        child: Text(
+          'Choose File',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    ),
+  ],
+),
+
 
                   ),
                   const SizedBox(width: 20.0),
