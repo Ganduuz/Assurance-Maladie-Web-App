@@ -102,6 +102,7 @@ const familyMemberSchema = new mongoose.Schema({
     plafond: Number,
     reste:Number,
     consome:Number,
+    verif:String,
     
 });
 
@@ -354,7 +355,6 @@ app.post('/api/login', async (req, res) => {
             req.session.user_id = user._id.toString(); // Stocker l'ID de l'utilisateur dans la session
             res.status(200).json({ message: 'Connexion réussie', user_id: user._id.toString(), mail: user.mail, username: user.username ,verif:user.verif});
             console.log('Connexion réussie pour', req.session.user_id);
-            const token = jwt.sign({ user_id: user._id }, 'your_secret_key', { expiresIn: '1h' });
             
         } else {
             res.status(404).json({ message: 'Utilisateur introuvable' });
@@ -597,7 +597,8 @@ app.get('/api/family-members/:user_id', async (req, res) => {
                     naissance: formattedDate,
                     plafond: member.plafond,
                     reste: member.reste, // Inclure le champ reste dans la réponse JSON
-                    consome: member.consome, // Inclure le champ consome dans la réponse JSON
+                    consome: member.consome,
+                    verif:member.verif // Inclure le champ consome dans la réponse JSON
                 };
             });
             console.log('membres récupérées');
@@ -613,6 +614,26 @@ app.get('/api/family-members/:user_id', async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des membres de la famille' });
     }
 });
+
+
+app.put('/api/family-members/validation/:memberId', async (req, res) => {
+    try {
+        const memberId = new mongoose.Types.ObjectId(req.params.memberId); // Utilisez 'new'
+        
+
+        const validateMember = await FamilyMember.findByIdAndUpdate(memberId, { verif:'true' }, { new: true });
+
+        if (!validateMember) {
+            return res.status(404).json({ message: 'Membre introuvable' });
+        }
+
+        res.status(200).json({ message: 'Membre validé avec succès', validateMember });
+    } catch (error) {
+        console.error('Erreur lors de la validation d\'un membre de la famille : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la validation d\'un membre de la famille' });
+    }
+});
+
 
 
 // Endpoint pour ajouter un membre de la famille
@@ -657,8 +678,9 @@ app.post('/api/family-members/add', async (req, res) => {
             relation, 
             naissance: formattedDate, 
             plafond,
-            reste: plafond, // Ajout du champ reste
-            consome: 0 // Ajout du champ consome
+            reste: plafond, 
+            consome: 0,
+            verif:false 
         });
 
         res.status(200).json({ message: 'Nouveau membre ajouté', newMember });

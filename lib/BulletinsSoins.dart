@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:html' as html;
 import 'BSAdmin.dart';
+
 class Bulletins_Soins {
   String Num;
   String ID;
@@ -75,7 +76,8 @@ class _bsState extends State<bs> {
 
   @override
   Widget build(BuildContext context) {
-   
+    html.document.title = 'Capgemini Assurance';
+
     return Container(
       margin: EdgeInsets.all(10),
       padding: EdgeInsets.all(15),

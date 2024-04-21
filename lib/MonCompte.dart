@@ -18,10 +18,8 @@ class MonCompte extends StatefulWidget {
 }
 
 class _MonCompteState extends State<MonCompte> {
-  Uint8List? _imageBytes;
-  ImageProvider imageProvider = AssetImage('user.png');
-
-  MemoryImage? memoryImage;
+  Image ?image;
+  
   String _cin='';
   String _nom = '';
   String _prenom = '';
@@ -37,27 +35,31 @@ void initState() {
     _getUserData();
     _getUserImage();
   }
+
 Future<void> _getUserImage() async {
   try {
     var user_id = LocalStorageService.getData('user_id');
     final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/user/get-image'),
-        body: {'user_id': user_id},
-      );
-
-      if (response.statusCode == 200) {
-        final imageBytes = response.bodyBytes;
-        setState(() {
-          // Utiliser MemoryImage pour afficher l'image à partir des données binaires
-          imageProvider = MemoryImage(imageBytes);
-        });
-      } else {
-        print('Failed to load image: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Error fetching image: $error');
+      Uri.parse('http://127.0.0.1:5000/api/user/get-image'),
+      body: jsonEncode({'user_id': user_id}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      // Les données binaires de l'image sont directement dans la réponse, donc pas besoin de décoder le JSON
+      final imageBytes = response.bodyBytes;
+      
+      setState(() {
+        Uint8List _imageBytes = imageBytes;
+         image = Image.memory(_imageBytes);
+      });
+      
+    } else {
+      print('Erreur lors de la récupération de l\'image: ${response.statusCode}');
     }
+  } catch (error) {
+    print('Erreur de connexion: $error');
   }
+}
 
 
   Future<void> _getUserData() async {
@@ -213,6 +215,8 @@ Future<void> _importImage() async {
 
   @override
   Widget build(BuildContext context) {
+    html.document.title = 'Capgemini Assurance';
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -248,42 +252,40 @@ Future<void> _importImage() async {
                       ],
                     ),
                     child: Column(
-  children: [
-    GestureDetector(
-      onTap: () => _importImage(), 
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-        ),
-        child: CircleAvatar(
-          radius: 80.0,
-          backgroundImage: memoryImage != null ? memoryImage! : null,
-          child: imageProvider != null
-            ? Image(image: imageProvider)
-            : CircularProgressIndicator(),
-        ),
-      ),
-    ),
-    const SizedBox(height: 16.0),
-    ElevatedButton(
-      onPressed: () => _importImage(), 
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-        backgroundColor: Color(0xFF5BADE9),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-        child: Text(
-          'Choose File',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-    ),
-  ],
-),
+                      children: [
+                        GestureDetector(
+                          onTap: () => _importImage(), 
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                            ),
+                            child: CircleAvatar(
+                              radius: 80.0,
+                             
+                              child: image,
+                            ),
 
+                          ),
+                        ),
+                        const SizedBox(height: 16.0),
+                        ElevatedButton(
+                          onPressed: () => _importImage(), 
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            backgroundColor: Color(0xFF5BADE9),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+                            child: Text(
+                              'Choose File',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
 
                   ),
                   const SizedBox(width: 20.0),

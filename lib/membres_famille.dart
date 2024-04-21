@@ -3,6 +3,7 @@ import 'package:intl/intl.dart'; // Pour formater les dates
 import 'dart:convert';
 import 'local_storage_service.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:html' as html;
 
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -22,6 +23,7 @@ class RadiobtnState extends State<Radiobtn> {
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       children: <Widget>[
         Row(
@@ -97,6 +99,7 @@ class _FamilyMemberPageState extends State<FamilyMemberPage> {
   String _naissance='';
   String relation='';
   String memberId='';
+  String verif='';
   TextEditingController nomController = TextEditingController();
   TextEditingController prenomController = TextEditingController();
   TextEditingController dobController = TextEditingController();
@@ -321,7 +324,7 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
 }
 
 
-  void _modifMem(String memberId,BuildContext context) async {
+  void _modifMember(String memberId,BuildContext context) async {
   try {
        String relation = _value == 1 ? "Enfant" : "Conjoint";
 
@@ -389,6 +392,8 @@ void _deleteMember(String memberId,BuildContext context) async {
 
  @override
   Widget build(BuildContext context) {
+    html.document.title = 'Capgemini Assurance';
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -425,6 +430,7 @@ void _deleteMember(String memberId,BuildContext context) async {
                             fontWeight: FontWeight.bold,
                             ),
                             ),
+                            
                           SizedBox(width: 550),
                           SizedBox(height: 20,),
                           Column(
@@ -558,7 +564,7 @@ void _deleteMember(String memberId,BuildContext context) async {
                           ),
                           margin: EdgeInsets.all(15),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: familyMembers[index].verif == 'true' ? Colors.white : Color.fromARGB(255, 253, 212, 212),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: const [
                               BoxShadow(
@@ -568,6 +574,7 @@ void _deleteMember(String memberId,BuildContext context) async {
                               ),
                             ],
                           ),
+                          
                           child: ListTile(
                             contentPadding: EdgeInsets.all(40),
                             title: 
@@ -585,6 +592,8 @@ void _deleteMember(String memberId,BuildContext context) async {
                             subtitle: Column(
                               
                               children: [
+                               
+                                
                                Text(
                               '${familyMembers[index].type} ',
                              textAlign: TextAlign.end, // Alignement à droite
@@ -606,8 +615,12 @@ void _deleteMember(String memberId,BuildContext context) async {
                                   ),
                                 ),
                                 SizedBox(height: 50),
+                                   if (familyMembers[index].verif == 'true') 
+
                                 Row(
+                                  
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Pour espacer les boutons uniformément
+                                  
                                   children: [
                                     SizedBox(
                                       height: 30,
@@ -729,6 +742,18 @@ void _deleteMember(String memberId,BuildContext context) async {
 
                                   ),
                                 ),
+                                SizedBox(height:20),
+                          if (familyMembers[index].verif == 'false') // Correction de la condition
+                                  Text(
+                                    'Ce membre est en cours de validation par le service RH . ',
+                                    textAlign: TextAlign.end,
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 226, 16, 9),
+                                      fontSize: 11.3,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Open Sans Regular',
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
@@ -844,6 +869,8 @@ void _deleteMember(String memberId,BuildContext context) async {
                             plafond: 500.00,
                             reste:500.00,
                             consome:0,
+                            verif:'false',
+                            alert:false
                           ),
                         );
                       } else {
@@ -857,6 +884,9 @@ void _deleteMember(String memberId,BuildContext context) async {
                             plafond: 1000.00,
                             reste:1000.00,
                             consome: 0,
+                            verif:'false',
+                            alert:false,
+
                           ),
                         );
                       }
@@ -1016,7 +1046,7 @@ void _deleteMember(String memberId,BuildContext context) async {
                     ElevatedButton(
                       onPressed: () {
                         
-                        _modifMem(member.id,context);
+                        _modifMember(member.id,context);
  
                         setState(() {
                           familyMembers[index].nom = nomController.text;
@@ -1137,9 +1167,13 @@ class FamilyMember {
   double plafond;
   double reste;
   double consome;
+  String verif ;
+  bool alert;
 
-  FamilyMember({required this.nom, required this.prenom, required this.dob, required this.type , required this.id ,required this.plafond, required this.reste,required this.consome});
+  FamilyMember({required this.nom, required this.prenom, required this.dob, required this.type , required this.id ,required this.plafond, required this.reste,required this.consome,required this.verif,required this.alert});
   factory FamilyMember.fromJson(Map<String, dynamic> json) {
+    double reste = json['reste'] as double;
+    bool alertt = reste < 100;
     return FamilyMember(
       id:json['_id'],
       nom: json['nom'],
@@ -1149,6 +1183,8 @@ class FamilyMember {
       plafond :json ['plafond'],
       reste:json ['reste'],
       consome:json['consome'],
+      verif:json['verif'],
+      alert:alertt,
     );
   }
 }

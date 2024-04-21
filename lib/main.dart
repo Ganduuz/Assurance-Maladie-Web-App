@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      
+      title: 'pfe', // Titre de l'application Flutter
       debugShowCheckedModeBanner: false,
       home: MyHomePage(),
     );

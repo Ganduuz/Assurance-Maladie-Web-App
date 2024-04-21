@@ -8,23 +8,67 @@ import 'connexion.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'local_storage_service.dart';
+import 'dart:html' as html; 
+
+
 class Accueil extends StatefulWidget {
   const Accueil({Key? key}) : super(key: key);
+  
 
   @override
   _AccueilState createState() => _AccueilState();
 }
 
 class _AccueilState extends State<Accueil> {
+late OverlayEntry _overlayEntry;
+double _reste=0;
   int selectedIndex = 0;
    String _userName = '';
   String _userEmail = '';
+  List<FamilyMember> familyMembers = [];
+  List<Widget> alertWidgets = [];
+  
+
+Future<void> _loadFamilyMembers() async {
+  try {
+    List<FamilyMember> members = await fetchFamilyMembers(); 
+    setState(() {
+      familyMembers = members; 
+    });
+  } catch (error) {
+   
+    print('Erreur lors du chargement des membres de la famille: $error');
+  }
+}
+
+Future<List<FamilyMember>> fetchFamilyMembers() async {
+  var user_id = LocalStorageService.getData('user_id');
+
+  final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/family-members/$user_id'));
+  
+  if (response.statusCode == 200) {
+    // Analyser la réponse JSON
+    final jsonData = jsonDecode(response.body);
+    final List<dynamic> membersJson = jsonData['membersDetails'];
+    
+    // Convertir les données JSON en liste d'objets FamilyMember
+    List<FamilyMember> familyMembers = membersJson.map((json) => FamilyMember.fromJson(json)).toList();
+    
+    return familyMembers;
+  } else {
+    // En cas d'erreur, lancer une exception
+    throw Exception('Failed to load family members');
+  }
+}
+
 
  @override
   void initState() {
     super.initState();
     // Appeler la fonction pour récupérer les données de l'utilisateur au démarrage de la page
     _getUserData();
+    _loadFamilyMembers(); 
+
   }
 
 Future<void> _getUserData() async {
@@ -43,7 +87,8 @@ Future<void> _getUserData() async {
         final data = jsonDecode(response.body);
         setState(() {
           _userName = data['username'] ?? '';
-          _userEmail = data['mail']?? '';     
+          _userEmail = data['mail']?? ''; 
+          _reste=data['reste']??'';    
         });
       } else {
         // Gérer les erreurs de réponse du serveur
@@ -57,6 +102,7 @@ Future<void> _getUserData() async {
   }
 
 
+
   static final List<Widget> _widgetOptions = <Widget>[
     Home(),
     FamilyMemberPage(),
@@ -65,10 +111,172 @@ Future<void> _getUserData() async {
     const MonCompte(),
    
   ];
+  void _showAlerts(BuildContext context, double _reste,int numberOfNotifications) {
+    void _removeOverlay() {
+      _overlayEntry.remove();
+    }
+
+    bool employeeAlert = _reste < 100;
+    numberOfNotifications = 0;
+      for (var member in familyMembers) {
+      if (member.alert) {
+        numberOfNotifications++;
+      }
+    }
+      if (employeeAlert)numberOfNotifications++;
+
+    _overlayEntry = OverlayEntry(
+      builder: (BuildContext context) => Positioned(
+        top: MediaQuery.of(context).padding.top + kToolbarHeight + 10,
+        right: 10,
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(width: 2, color: Color.fromARGB(255, 91, 177, 248)),
+          ),
+          color: Colors.white, // Définissez le fond en blanc
+          child: Container(
+            width: 350,
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      "Alertes",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    SizedBox(width: 210,),
+                    IconButton(
+                      icon: Icon(Icons.close), // Icône de fermeture
+                      onPressed: _removeOverlay,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                if (employeeAlert)
+                  ListTile(
+                    leading: Icon(
+                      Icons.error_outline, // Nouvelle icône pour l'alerte
+                      color: Colors.red, // Couleur de l'icône
+                    ),
+                    title: Text(
+                      "Dépassement de seuil",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 35, 190, 237),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "pour vous : ",
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              TextSpan(
+                                text: _userName,
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          "${_reste.toStringAsFixed(2)} DT",
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ...familyMembers
+                    .where((member) => member.alert)
+                    .map((member) {
+                  return ListTile(
+                    leading: Icon(
+                      Icons.error_outline, // Nouvelle icône pour l'alerte
+                      color: Colors.red, // Couleur de l'icône
+                    ),
+                    title: Text(
+                      "Dépassement de seuil",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 35, 190, 237),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "pour votre ${member.type} : ",
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              TextSpan(
+                                text: "${member.nom} ${member.prenom}",
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          "${member.reste.toStringAsFixed(2)} DT",
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                if (familyMembers.every((member) => !member.alert))
+                  Text(
+                    "Aucune alerte",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(_overlayEntry);
+  }
 
   @override
   Widget build(BuildContext context) {
+    html.document.title = 'Capgemini Assurance';
+    int numberOfNotifications = 0;
+    
     return Scaffold(
+      
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -113,8 +321,38 @@ Future<void> _getUserData() async {
                     ),
                   ),
                 ),
-                 SizedBox(width: 40),
-                Icon(Icons.notifications, color: Color.fromARGB(255, 18, 171, 219)),
+                 SizedBox(width: 20),
+                  IconButton(
+                    onPressed: () {
+                      _showAlerts(context, _reste, numberOfNotifications);
+                    },
+                    icon: Stack(
+                      children: [
+                        Icon(Icons.notifications, color: Color(0xFF12ABDB)), // Icône de la cloche
+                        if (numberOfNotifications > 0) // Affiche le nombre de notifications uniquement s'il est supérieur à 0
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.red, // Couleur de l'arrière-plan du badge
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                numberOfNotifications.toString(), // Nombre de notifications converti en chaîne
+                                style: TextStyle(
+                                  color: Colors.white, // Couleur du texte du badge
+                                  fontSize: 12, // Taille du texte du badge
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  )
+       
               ],
             ),
           ),

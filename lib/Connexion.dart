@@ -6,11 +6,14 @@ import 'ForgotPasswordPage.dart';
 import 'Accueil.dart';
 import 'accAdmin.dart';
 import 'MonCompte.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'dart:html' as html; // Importer la bibliothèque HTML pour accéder au titre de la fenêtre du navigateur
 
 
 class MyHomePage extends StatelessWidget {
   final TextEditingController mailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+    final flutterWebViewPlugin = FlutterWebviewPlugin();
 
   Future<void> loginUser(BuildContext context) async {
     final String mail = mailController.text;
@@ -73,6 +76,18 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+        html.document.title = 'Authentification';
+
+    flutterWebViewPlugin.launch(
+      'http://localhost:54228/connexion',
+      hidden: true,
+    );
+
+    flutterWebViewPlugin.onStateChanged.listen((WebViewStateChanged state) {
+      if (state.type == WebViewState.finishLoad) {
+        flutterWebViewPlugin.evalJavascript("document.title = 'Authentification';");
+      }
+    });
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(

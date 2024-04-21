@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'dart:html' as html; 
 class ForgotPasswordPage extends StatelessWidget {
   final TextEditingController mailController = TextEditingController();
 
@@ -73,6 +73,8 @@ class ForgotPasswordPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+        html.document.title = 'Mot de passe oublié ?';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Récupération de mot de passe'),
