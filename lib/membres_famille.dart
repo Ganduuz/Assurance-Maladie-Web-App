@@ -12,7 +12,7 @@ import 'package:table_calendar/table_calendar.dart';
 class Radiobtn extends StatefulWidget {
   final Function(int)? onValueChanged; // Ajout du paramètre de fonction de rappel
 
-  Radiobtn({this.onValueChanged}); // Constructeur avec un paramètre facultatif
+  const Radiobtn({super.key, this.onValueChanged}); // Constructeur avec un paramètre facultatif
 
   @override
   RadiobtnState createState() => RadiobtnState();
@@ -40,7 +40,7 @@ class RadiobtnState extends State<Radiobtn> {
                 }
               },
             ),
-            Text("Enfant"),
+            const Text("Enfant"),
           ],
         ),
         Row(
@@ -57,7 +57,7 @@ class RadiobtnState extends State<Radiobtn> {
                 }
               },
             ),
-            Text("Conjoint"),
+            const Text("Conjoint"),
           ],
         ),
       ],
@@ -82,6 +82,8 @@ class FamilyMemberPage extends StatefulWidget {
   final double plafond=0;
   final double rembourssement=0;
   final double reste=0;
+
+  FamilyMemberPage({super.key});
 
 
   @override
@@ -134,7 +136,7 @@ void buildCalendarWidget(BuildContext context) {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   child: Column(
                     children: [
                       TableCalendar(
@@ -143,7 +145,7 @@ void buildCalendarWidget(BuildContext context) {
                         firstDay: DateTime.utc(1950),
                         lastDay: DateTime.utc(2100),
                         rowHeight: 35,
-                        daysOfWeekStyle: DaysOfWeekStyle(
+                        daysOfWeekStyle: const DaysOfWeekStyle(
                           weekdayStyle: TextStyle(fontWeight: FontWeight.w400),
                           weekendStyle:TextStyle(fontWeight: FontWeight.w400),
                         ),
@@ -158,24 +160,24 @@ void buildCalendarWidget(BuildContext context) {
 
                           });
                         },
-                        headerStyle: HeaderStyle(formatButtonVisible: false, titleCentered: true),
+                        headerStyle: const HeaderStyle(formatButtonVisible: false, titleCentered: true),
                         calendarStyle:CalendarStyle(
                           isTodayHighlighted: true,
                           selectedDecoration: BoxDecoration(
                             color: Colors.blue.shade200,
                             shape: BoxShape.circle,
                           ),
-                          todayDecoration: BoxDecoration(
+                          todayDecoration: const BoxDecoration(
                             color: Colors.blue,
                             shape: BoxShape.circle,
                           ),
-                          selectedTextStyle: TextStyle(color: Colors.white),
+                          selectedTextStyle: const TextStyle(color: Colors.white),
                         ) ,
                         selectedDayPredicate: (DateTime date) {
                           return isSameDay(_selectedDay, date);
                         },
                       ),
-                      SizedBox(height: 10,),
+                      const SizedBox(height: 10,),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -189,7 +191,7 @@ void buildCalendarWidget(BuildContext context) {
                               style: TextStyle(color: Colors.blue.shade300),
                             ),
                           ),),
-                          SizedBox(),
+                          const SizedBox(),
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
@@ -211,6 +213,7 @@ void buildCalendarWidget(BuildContext context) {
   },
 );
 }
+  @override
   void initState() {
   super.initState();
   _loadFamilyMembers(); 
@@ -220,12 +223,12 @@ void buildCalendarWidget(BuildContext context) {
 
 Future<void> _getUserData() async {
     try {
-      var user_id = LocalStorageService.getData('user_id');
+      var userId = LocalStorageService.getData('user_id');
       print("user_id :" + LocalStorageService.getData('user_id'));
 
       final response = await http.post(
         Uri.parse('http://127.0.0.1:5000/api/user'), 
-        body: jsonEncode({'user_id': user_id}), 
+        body: jsonEncode({'user_id': userId}), 
         headers: {
           'Content-Type': 'application/json'
         }, 
@@ -265,9 +268,9 @@ Future<void> _loadFamilyMembers() async {
 }
 
 Future<List<FamilyMember>> fetchFamilyMembers() async {
-  var user_id = LocalStorageService.getData('user_id');
+  var userId = LocalStorageService.getData('user_id');
 
-  final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/family-members/$user_id'));
+  final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/family-members/$userId'));
   
   if (response.statusCode == 200) {
     // Analyser la réponse JSON
@@ -287,12 +290,12 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
   
   void _addMember() async {
   try {
-    var user_id = LocalStorageService.getData('user_id');
+    var userId = LocalStorageService.getData('user_id');
    String relation = _value == 1 ? "Enfant" : "Conjoint";
     final response = await http.post(
       Uri.parse('http://127.0.0.1:5000/api/family-members/add'), 
       body: jsonEncode({
-        'userId': user_id,
+        'userId': userId,
         'nom': _nom,
         'prenom': _prenom,
         'relation': relation,
@@ -306,7 +309,7 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
     if (response.statusCode == 200) { 
       print('Nouveau membre ajouté .');
        ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Membre ajouté avec succès'),
         duration: Duration(seconds: 3),
       ),
@@ -344,7 +347,7 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
     if (response.statusCode == 200) {
       print('Membre mis à jour.');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Membre mis à jour avec succès'),
           duration: Duration(seconds: 4),
         ),
@@ -376,7 +379,7 @@ void _deleteMember(String memberId,BuildContext context) async {
     if (response.statusCode == 200) {
       print('Membre supprimé.');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Membre supprimé .'),
           duration: Duration(seconds: 3),
         ),
@@ -398,16 +401,16 @@ void _deleteMember(String memberId,BuildContext context) async {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          SizedBox(height: 50,),
+          const SizedBox(height: 50,),
           
           Container(
             height: 120,
             width: 1920,
-            margin: EdgeInsets.all(30),
-            padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
+            margin: const EdgeInsets.all(30),
+            padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.blue.shade300),
-                            color: Color.fromARGB(255, 255, 255, 255),
+                            color: const Color.fromARGB(255, 255, 255, 255),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: const [
                               BoxShadow(
@@ -431,110 +434,110 @@ void _deleteMember(String memberId,BuildContext context) async {
                             ),
                             ),
                             
-                          SizedBox(width: 550),
-                          SizedBox(height: 20,),
+                          const SizedBox(width: 550),
+                          const SizedBox(height: 20,),
                           Column(
                                       crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [Text("Reste" ,
+                                      children: [const Text("Reste" ,
                                       style: TextStyle(
                                       fontSize: 12,
                                       color: Color.fromARGB(255, 54, 249, 0),
                                       fontFamily: 'Istok web',
                                       ),),
-                                      SizedBox(height: 5,),
+                                      const SizedBox(height: 5,),
                           
                                     SizedBox(
                                       height: 30,
                                       width: 70,
                                       child: TextButton(
                                         onPressed: () {},
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(5.0),
+                                            side: const BorderSide(
+                                              color: Color.fromARGB(255, 54, 249, 0),
+                                            ),
+                                          ),
+                                        ),
                                         child: Text(
                                           _reste.toStringAsFixed(2),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Color.fromARGB(255, 54, 249, 0),
                                             fontFamily: 'Istok web',
                                             fontSize: 12,
                                           ),
                                         ),
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            side: BorderSide(
-                                              color: Color.fromARGB(255, 54, 249, 0),
-                                            ),
-                                          ),
-                                        ),
                                       ),
                                     ),],),
 
-                                    SizedBox(width: 40,),
+                                    const SizedBox(width: 40,),
                                     Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [Text("Rembourssement", 
+                            children: [const Text("Rembourssement", 
                             style: TextStyle(
                               fontSize: 12,
                               color: Color.fromARGB(255, 241, 52, 0),
                               fontFamily: 'Istok web',
                                  ),),
-                            SizedBox(height: 5,),
+                            const SizedBox(height: 5,),
                           
                                     SizedBox(
                                       height: 30,
                                       width: 70,
                                       child: TextButton(
                                         onPressed: () {},
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(5.0),
+                                            side: const BorderSide(
+                                              color: Color.fromARGB(255, 241, 52, 0),
+                                            ),
+                                          ),
+                                        ),
                                         child: Text(
                                           _rembourssement.toStringAsFixed(2),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Color.fromARGB(255, 241, 52, 0),
                                             fontFamily: 'Istok web',
                                             fontSize: 12,
                                           ),
                                         ),
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            side: BorderSide(
-                                              color: Color.fromARGB(255, 241, 52, 0),
-                                            ),
-                                          ),
-                                        ),
                                       ),
                                     ),],),
-                                     SizedBox(width: 40,),
+                                     const SizedBox(width: 40,),
                                      Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [Text("Plafond", 
+                            children: [const Text("Plafond", 
                             style: TextStyle(
                               fontSize: 12,
                               color: Color.fromARGB(255, 241, 189, 0),
                               fontFamily: 'Istok web',
                             ),
                            ),
-                            SizedBox(height: 5,),
+                            const SizedBox(height: 5,),
                           
                            SizedBox(
                                       height: 30,
                                       width: 70,
                                       child: TextButton(
                                         onPressed: () {},
-                                        child: Text(
-                                          _plafond.toStringAsFixed(2),
-                                          style: TextStyle(
-                                            color: Color.fromARGB(255, 241, 189, 0),
-                                            fontFamily: 'Istok web',
-                                            fontSize: 12,
-                                          ),
-                                        ),
                                         style: TextButton.styleFrom(
                                           backgroundColor: Colors.white,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(5.0),
-                                            side: BorderSide(
+                                            side: const BorderSide(
                                               color: Color.fromARGB(255, 241, 189, 0),
                                             ),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          _plafond.toStringAsFixed(2),
+                                          style: const TextStyle(
+                                            color: Color.fromARGB(255, 241, 189, 0),
+                                            fontFamily: 'Istok web',
+                                            fontSize: 12,
                                           ),
                                         ),
                                       ),
@@ -550,21 +553,21 @@ void _deleteMember(String memberId,BuildContext context) async {
                 children: [
                   Expanded(
                     child: GridView.builder(
-                      padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
                         childAspectRatio: 0.9, // Ajuster le ratio d'aspect selon les besoins
                       ),
                       itemCount: familyMembers.length,
                       itemBuilder: (context, index) {
                         return Container(
-                          constraints: BoxConstraints(
+                          constraints: const BoxConstraints(
                             maxWidth: 200, // Largeur maximale du conteneur
                             maxHeight: 300, // Hauteur maximale du conteneur
                           ),
-                          margin: EdgeInsets.all(15),
+                          margin: const EdgeInsets.all(15),
                           decoration: BoxDecoration(
-                            color: familyMembers[index].verif == 'true' ? Colors.white : Color.fromARGB(255, 253, 212, 212),
+                            color: familyMembers[index].verif == 'true' ? Colors.white : const Color.fromARGB(255, 253, 212, 212),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: const [
                               BoxShadow(
@@ -576,12 +579,12 @@ void _deleteMember(String memberId,BuildContext context) async {
                           ),
                           
                           child: ListTile(
-                            contentPadding: EdgeInsets.all(40),
+                            contentPadding: const EdgeInsets.all(40),
                             title: 
                               Text(
                                 '${familyMembers[index].nom} ${familyMembers[index].prenom}',
                                 textAlign: TextAlign.center, // Centrer le texte
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.blue,
                                   fontSize: 22,
                                   fontWeight: FontWeight.w400,
@@ -597,7 +600,7 @@ void _deleteMember(String memberId,BuildContext context) async {
                                Text(
                               '${familyMembers[index].type} ',
                              textAlign: TextAlign.end, // Alignement à droite
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Color.fromARGB(255, 158, 161, 162),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w400,
@@ -605,16 +608,16 @@ void _deleteMember(String memberId,BuildContext context) async {
                               ),
                             ),
                              
-                                SizedBox(height: 40.0),
+                                const SizedBox(height: 40.0),
                                Text(
                                   textAlign: TextAlign.start,
                                   'Date de naissance: ${familyMembers[index].dob}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 15,
                                     fontFamily: 'Open Sans Regular',
                                   ),
                                 ),
-                                SizedBox(height: 50),
+                                const SizedBox(height: 50),
                                    if (familyMembers[index].verif == 'true') 
 
                                 Row(
@@ -627,23 +630,23 @@ void _deleteMember(String memberId,BuildContext context) async {
                                       width: 70,
                                       child: TextButton(
                                         onPressed: () {},
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(5.0),
+                                            side: const BorderSide(
+                                              color: Color.fromARGB(255, 54, 249, 0),
+                                            ),
+                                          ),
+                                        ),
                                         child: Text(
-                                          '${familyMembers[index].reste.toStringAsFixed(2)}',
-                                          style: TextStyle(
+                                          familyMembers[index].reste.toStringAsFixed(2),
+                                          style: const TextStyle(
                                             color: Color.fromARGB(255, 54, 249, 0),
                                             fontFamily: 'Istok web',
                                             fontSize: 12,
                                           ),
                                         ),
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            side: BorderSide(
-                                              color: Color.fromARGB(255, 54, 249, 0),
-                                            ),
-                                          ),
-                                        ),
                                       ),
                                     ),
                                     SizedBox(
@@ -651,23 +654,23 @@ void _deleteMember(String memberId,BuildContext context) async {
                                       width: 70,
                                       child: TextButton(
                                         onPressed: () {},
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(5.0),
+                                            side: const BorderSide(
+                                              color: Color.fromARGB(255, 241, 52, 0),
+                                            ),
+                                          ),
+                                        ),
                                         child: Text(
-                                          '${familyMembers[index].consome.toStringAsFixed(2)}',
-                                          style: TextStyle(
+                                          familyMembers[index].consome.toStringAsFixed(2),
+                                          style: const TextStyle(
                                             color: Color.fromARGB(255, 241, 52, 0),
                                             fontFamily: 'Istok web',
                                             fontSize: 12,
                                           ),
                                         ),
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            side: BorderSide(
-                                              color: Color.fromARGB(255, 241, 52, 0),
-                                            ),
-                                          ),
-                                        ),
                                       ),
                                     ),
                                     SizedBox(
@@ -675,21 +678,21 @@ void _deleteMember(String memberId,BuildContext context) async {
                                       width: 70,
                                       child: TextButton(
                                         onPressed: () {},
-                                        child: Text(
-                                          '${familyMembers[index].plafond.toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                            color: Color.fromARGB(255, 241, 189, 0),
-                                            fontFamily: 'Istok web',
-                                            fontSize: 12,
-                                          ),
-                                        ),
                                         style: TextButton.styleFrom(
                                           backgroundColor: Colors.white,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(5.0),
-                                            side: BorderSide(
+                                            side: const BorderSide(
                                               color:  Color.fromARGB(255, 241, 189, 0),
                                             ),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          familyMembers[index].plafond.toStringAsFixed(2),
+                                          style: const TextStyle(
+                                            color: Color.fromARGB(255, 241, 189, 0),
+                                            fontFamily: 'Istok web',
+                                            fontSize: 12,
                                           ),
                                         ),
                                       ),
@@ -697,7 +700,7 @@ void _deleteMember(String memberId,BuildContext context) async {
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 40.0),
+                                const SizedBox(height: 40.0),
                                 SizedBox(
                                   height: 40, // Taille fixe des boutons
                                   width: double.infinity, 
@@ -705,20 +708,20 @@ void _deleteMember(String memberId,BuildContext context) async {
                                     onPressed: () {
                                       _modifierMembreFamille(context, index, familyMembers[index]);
                                     },
-                                    child: Text(
-                                      'Modifier membre',
-                                      style: TextStyle(color: Colors.blue, fontFamily: 'Istok web'),
-                                    ),
                                     style: TextButton.styleFrom(
                                       backgroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(5.0),
-                                        side: BorderSide(color: Colors.blue),
+                                        side: const BorderSide(color: Colors.blue),
                                       ),
+                                    ),
+                                    child: const Text(
+                                      'Modifier membre',
+                                      style: TextStyle(color: Colors.blue, fontFamily: 'Istok web'),
                                     ),
                                   ),
                                 ),
-                                SizedBox(height: 10),
+                                const SizedBox(height: 10),
                                 SizedBox(
                                   height: 40, // Taille fixe des boutons
                                   width: double.infinity, // Pour étendre sur toute la largeur
@@ -726,25 +729,25 @@ void _deleteMember(String memberId,BuildContext context) async {
                                     onPressed: () {
                                       _supprimerMembre(context, index,familyMembers[index]);
                                     },
-                                    child: Text(
-                                      'Supprimer membre ',
-                                      style: TextStyle(color: Colors.blue, fontFamily: 'Istok web'),
-                                    ),
                                     style: TextButton.styleFrom(
                                       backgroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(5.0),
-                                        side: BorderSide(color: Colors.blue),
+                                        side: const BorderSide(color: Colors.blue),
                                       ),
+                                    ),
+                                    child: const Text(
+                                      'Supprimer membre ',
+                                      style: TextStyle(color: Colors.blue, fontFamily: 'Istok web'),
                                     ),
 
 
 
                                   ),
                                 ),
-                                SizedBox(height:20),
+                                const SizedBox(height:20),
                           if (familyMembers[index].verif == 'false') // Correction de la condition
-                                  Text(
+                                  const Text(
                                     'Ce membre est en cours de validation par le service RH . ',
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
@@ -774,15 +777,15 @@ void _deleteMember(String memberId,BuildContext context) async {
                 onPressed: () {
                   _showAddMemberDialog(context);
                 },
-                child: Text(
-                  'Nouveau membre',
-                  style: TextStyle(color: Colors.white, fontFamily: 'Istok web'),
-                ),
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.blue,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5.0),
                   ),
+                ),
+                child: const Text(
+                  'Nouveau membre',
+                  style: TextStyle(color: Colors.white, fontFamily: 'Istok web'),
                 ),
               ),
             ),
@@ -809,7 +812,7 @@ void _deleteMember(String memberId,BuildContext context) async {
           child: Container(
             height: 600,
             width: 700,
-            padding: EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(20.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(5.0),
@@ -819,25 +822,25 @@ void _deleteMember(String memberId,BuildContext context) async {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                 Text("Nouveau membre",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-                SizedBox(height: 50.0),
+                 const Text("Nouveau membre",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                const SizedBox(height: 50.0),
                 _buildForm(),
-                SizedBox(height: 30.0),
+                const SizedBox(height: 30.0),
                   Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Row(
                   children: [
                       IconButton(
                       onPressed: (){
                              buildCalendarWidget(context);
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.calendar_month,
                           color: Colors.blue,
                         ),
                       ),
 
-                    Text(
+                    const Text(
                       'Date de naissance',
                       style: TextStyle(
                         color: Colors.black,
@@ -848,9 +851,9 @@ void _deleteMember(String memberId,BuildContext context) async {
                 ),
               ),
                 
-                SizedBox(height: 10.0),
+                const SizedBox(height: 10.0),
                 
-                SizedBox(height: 20.0),
+                const SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
                     if (_formMemb.currentState!.validate()) {
@@ -893,29 +896,29 @@ void _deleteMember(String memberId,BuildContext context) async {
                     });
                     Navigator.pop(context);
                   },
-                  child: Text('Ajouter', style: TextStyle(color: Colors.white, fontFamily: 'Istok web')),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
+                  child: const Text('Ajouter', style: TextStyle(color: Colors.white, fontFamily: 'Istok web')),
                 ),
-                SizedBox(height: 20,),
+                const SizedBox(height: 20,),
                  ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Text(
-                        'Annuler',
-                        style: TextStyle(color: Colors.white, fontFamily: 'Istok web'),
-                      ),
                      
                   style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
+                      ),
+                      child: const Text(
+                        'Annuler',
+                        style: TextStyle(color: Colors.white, fontFamily: 'Istok web'),
                       ),
                     ),
               ],
@@ -935,7 +938,7 @@ void _deleteMember(String memberId,BuildContext context) async {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
-          title: Text("Supprimer ?"),
+          title: const Text("Supprimer ?"),
           content: Container(
             width: 400,
             padding: const EdgeInsets.all(15.0),
@@ -951,10 +954,10 @@ void _deleteMember(String memberId,BuildContext context) async {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text(
+              child: const Text(
                 "Non",
                 style: TextStyle(
-                  color: Color(0xFF5BADEE9),
+                  color: Color(0xff5badee9),
                 ),
               ),
             ),
@@ -966,7 +969,7 @@ void _deleteMember(String memberId,BuildContext context) async {
                 });
                 Navigator.of(context).pop(); 
               },
-              child: Text(
+              child: const Text(
                 "Oui",
                 style: TextStyle(
                   color: Color(0xFF5BADE9),
@@ -1001,7 +1004,7 @@ void _deleteMember(String memberId,BuildContext context) async {
           child: Container(
             height: 550,
             width: 700,
-            padding: EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(20.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10.0),
@@ -1010,26 +1013,26 @@ void _deleteMember(String memberId,BuildContext context) async {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                 Text("Modifier memebre",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-              SizedBox(height: 50.0),
+                 const Text("Modifier memebre",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+              const SizedBox(height: 50.0),
                 _buildForm(),
-                SizedBox(height: 30.0),
+                const SizedBox(height: 30.0),
                       
                 Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.0),
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Row(
                   children: [
                       IconButton(
                      onPressed: (){
                              buildCalendarWidget(context);
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.calendar_month,
                           color: Colors.blue,
                         ),
                       ),
 
-                    Text(
+                    const Text(
                       'Date de naissance',
                       style: TextStyle(
                         color: Colors.black,
@@ -1039,7 +1042,7 @@ void _deleteMember(String memberId,BuildContext context) async {
                   ],
                 ),
               ),
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -1056,29 +1059,29 @@ void _deleteMember(String memberId,BuildContext context) async {
                         });
                        Navigator.of(context).pop();
                       },
-                      child: Text('Enregistrer', style: TextStyle(color: Colors.white, fontFamily: 'Istok web')),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                       ),
+                      child: const Text('Enregistrer', style: TextStyle(color: Colors.white, fontFamily: 'Istok web')),
                     ),
-                    SizedBox(width: 10.0),
+                    const SizedBox(width: 10.0),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Text(
-                        'Annuler',
-                        style: TextStyle(color: Colors.white, fontFamily: 'Istok web'),
-                      ),
                      
                   style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
+                      ),
+                      child: const Text(
+                        'Annuler',
+                        style: TextStyle(color: Colors.white, fontFamily: 'Istok web'),
                       ),
                     ),
                   ],
@@ -1099,7 +1102,7 @@ Widget _buildForm() {
       mainAxisSize: MainAxisSize.min,
       children: [
         TextFormField(
-          style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+          style: const TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
           controller: nomController,
           onChanged: (value) {
             setState(() {
@@ -1115,14 +1118,14 @@ Widget _buildForm() {
             }
             return null;
           },
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Nom',
           ),
           
         ),
-        SizedBox(height: 30.0),
+        const SizedBox(height: 30.0),
         TextFormField(
-          style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+          style: const TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
           controller: prenomController,
           onChanged: (value) {
             setState(() {
@@ -1138,12 +1141,12 @@ Widget _buildForm() {
             }
             return null;
           },
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Prénom',
           ),
           
         ),
-        SizedBox(height: 30.0),
+        const SizedBox(height: 30.0),
         Radiobtn(
           onValueChanged: (value) {
             setState(() {

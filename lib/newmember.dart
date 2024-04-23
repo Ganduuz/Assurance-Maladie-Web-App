@@ -25,6 +25,8 @@ factory FamilyMember.fromJson(Map<String, dynamic> json) {
   }
 }
 class NewMemberPage extends StatefulWidget {
+  const NewMemberPage({super.key});
+
   @override
   _NewMemberPageState createState() => _NewMemberPageState();
 }
@@ -89,7 +91,7 @@ void _deleteMember(String memberId,BuildContext context) async {
     if (response.statusCode == 200) {
       print('Membre supprimé.');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Membre supprimé .'),
           duration: Duration(seconds: 3),
         ),
@@ -120,7 +122,7 @@ void _validMember(String memberId,BuildContext context) async {
     if (response.statusCode == 200) {
       print('Membre validé.');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Membre validé .'),
           duration: Duration(seconds: 3),
         ),
@@ -145,21 +147,21 @@ Widget build(BuildContext context) {
     backgroundColor: Colors.white,
    body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
           
 
 
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 GridView.builder(
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 1,
                     childAspectRatio: 8,
                   ),
@@ -170,7 +172,7 @@ Widget build(BuildContext context) {
               width: double.infinity,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.blue.shade300),
-                color: Color.fromARGB(255, 255, 255, 255),
+                color: const Color.fromARGB(255, 255, 255, 255),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: const [
                   BoxShadow(
@@ -181,32 +183,32 @@ Widget build(BuildContext context) {
                 ],
               ),
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
+                padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "${familyMembers[index].username}",
+                      familyMembers[index].username,
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.blue.shade200,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Row(
                       children: [
                         SizedBox(width: 250, child: Text('${familyMembers[index].nom} ${familyMembers[index].prenom}')),
                         SizedBox(width: 250, child: Text('${familyMembers[index].type} ')),
                         SizedBox(width: 250, child: Text('Date de naissance : ${familyMembers[index].dob}')),
-                         SizedBox(width: 250), 
+                         const SizedBox(width: 250), 
                         IconButton(
                           onPressed: () {
                             _validerMembre(context, index,familyMembers[index]);
                           },
                           icon:Image.asset("assets/approve.png"),
                         ),
-                        SizedBox(width: 5),
+                        const SizedBox(width: 5),
                         IconButton(
                           onPressed: () {
                             _supprimerMembre(context, index,familyMembers[index]);
@@ -235,7 +237,7 @@ void _supprimerMembre(BuildContext context, int index,FamilyMember member) {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
-          title: Text("Supprimer ?"),
+          title: const Text("Supprimer ?"),
           content: Container(
             width: 400,
             padding: const EdgeInsets.all(15.0),
@@ -251,10 +253,10 @@ void _supprimerMembre(BuildContext context, int index,FamilyMember member) {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text(
+              child: const Text(
                 "Non",
                 style: TextStyle(
-                  color: Color(0xFF5BADEE9),
+                  color: Color(0xff5badee9),
                 ),
               ),
             ),
@@ -266,7 +268,7 @@ void _supprimerMembre(BuildContext context, int index,FamilyMember member) {
                 });
                 Navigator.of(context).pop(); 
               },
-              child: Text(
+              child: const Text(
                 "Oui",
                 style: TextStyle(
                   color: Color(0xFF5BADE9),

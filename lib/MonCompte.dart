@@ -3,15 +3,13 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:typed_data';
 import 'local_storage_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 
 class MonCompte extends StatefulWidget {
-  const MonCompte({Key? key}) : super(key: key);
+  const MonCompte({super.key});
 
   @override
   _MonCompteState createState() => _MonCompteState();
@@ -30,7 +28,8 @@ class _MonCompteState extends State<MonCompte> {
   final _formKey = GlobalKey<FormState>();
   final _formInfos = GlobalKey<FormState>();
 
-void initState() {
+@override
+  void initState() {
     super.initState();
     _getUserData();
     _getUserImage();
@@ -38,10 +37,10 @@ void initState() {
 
 Future<void> _getUserImage() async {
   try {
-    var user_id = LocalStorageService.getData('user_id');
+    var userId = LocalStorageService.getData('user_id');
     final response = await http.post(
       Uri.parse('http://127.0.0.1:5000/api/user/get-image'),
-      body: jsonEncode({'user_id': user_id}),
+      body: jsonEncode({'user_id': userId}),
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode == 200) {
@@ -49,8 +48,8 @@ Future<void> _getUserImage() async {
       final imageBytes = response.bodyBytes;
       
       setState(() {
-        Uint8List _imageBytes = imageBytes;
-         image = Image.memory(_imageBytes);
+        Uint8List imageBytes0 = imageBytes;
+         image = Image.memory(imageBytes0);
       });
       
     } else {
@@ -64,12 +63,12 @@ Future<void> _getUserImage() async {
 
   Future<void> _getUserData() async {
     try {
-      var user_id = LocalStorageService.getData('user_id');
+      var userId = LocalStorageService.getData('user_id');
       print("user_id :" + LocalStorageService.getData('user_id'));
 
       final response = await http.post(
         Uri.parse('http://127.0.0.1:5000/api/user/informations'), 
-        body: jsonEncode({'user_id': user_id}), 
+        body: jsonEncode({'user_id': userId}), 
         headers: {
           'Content-Type': 'application/json'
         }, // Set appropriate headers
@@ -98,13 +97,13 @@ Future<void> _getUserImage() async {
 
   void _updateUserData() async {
   try {
-    var user_id = LocalStorageService.getData('user_id');
+    var userId = LocalStorageService.getData('user_id');
 
     final response = await http.post(
       Uri.parse('http://127.0.0.1:5000/api/user/update'), 
       body: jsonEncode({
         'cin':_cin,
-        'user_id': user_id,
+        'user_id': userId,
         'nom': _nom,
         'prenom': _prenom,
         'adresse': _adresse,
@@ -119,7 +118,7 @@ Future<void> _getUserImage() async {
       
       print('Données mis à jour .');
        ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Coordonnées mis à jour avec succès'),
         duration: Duration(seconds: 3),
       ),
@@ -141,11 +140,11 @@ Future<void> _getUserImage() async {
 void _updatePassword() async {
   
     try {
-      var user_id = LocalStorageService.getData('user_id');
+      var userId = LocalStorageService.getData('user_id');
       final response = await http.post(
         Uri.parse('http://127.0.0.1:5000/api/user/update-password'),
         body: jsonEncode({
-          'user_id': user_id,
+          'user_id': userId,
           'nouveauMotDePasse': _confirmationNouveauMotDePasse,
         }),
         headers: {
@@ -156,7 +155,7 @@ void _updatePassword() async {
       if (response.statusCode == 200) {
         print('Mot de passe mis à jour avec succès');
          ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Mot de passe mis à jour avec succès'),
         duration: Duration(seconds: 3),
       ),
@@ -256,7 +255,7 @@ Future<void> _importImage() async {
                         GestureDetector(
                           onTap: () => _importImage(), 
                           child: Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               shape: BoxShape.circle,
                             ),
                             child: CircleAvatar(
@@ -274,10 +273,10 @@ Future<void> _importImage() async {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5.0),
                             ),
-                            backgroundColor: Color(0xFF5BADE9),
+                            backgroundColor: const Color(0xFF5BADE9),
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
                             child: Text(
                               'Choose File',
                               style: TextStyle(color: Colors.white),
@@ -321,79 +320,79 @@ Column(
   children: [
     Row(
       children: [
-        Text(
+        const Text(
           'CIN : ',
           style: TextStyle(
             color: Colors.blue,
           ),
         ),
-        Text('                             '),
+        const Text('                             '),
         Text(
-          '$_cin',
+          _cin,
         ),
       ],
     ),
-    SizedBox(height: 18.0),
+    const SizedBox(height: 18.0),
     Row(
       children: [
-        Text(
+        const Text(
           'Nom : ',
           style: TextStyle(
             color: Colors.blue,
           ),
         ),
-        Text('                           '),
+        const Text('                           '),
         Text(
-          '$_nom',
+          _nom,
         ),
       ],
     ),
-    SizedBox(height: 18.0),
+    const SizedBox(height: 18.0),
     Row(
       children: [
-        Text(
+        const Text(
           'Prénom : ',
           style: TextStyle(
             color: Colors.blue,
           ),
         ),
-         Text('                      '),
+         const Text('                      '),
         Text(
-          '$_prenom',
+          _prenom,
         ),
       ],
     ),
-    SizedBox(height: 18.0),
+    const SizedBox(height: 18.0),
     Row(
       children: [
-        Text(
+        const Text(
           'Adresse : ',
           style: TextStyle(
             color: Colors.blue,
           ),
         ),
-        Text('                     '),
+        const Text('                     '),
         Text(
-          '$_adresse',
+          _adresse,
         ),
       ],
     ),
-    SizedBox(height: 18.0),
+    const SizedBox(height: 18.0),
     Row(
       children: [
-        Text(
+        const Text(
           'Emploi : ',
           style: TextStyle(
             color: Colors.blue,
           ),
         ),
-        Text('                        '),
+        const Text('                        '),
         Text(
-          '$_emploi',
+          _emploi,
         ),
       ],
     ),
-    SizedBox(height: 18.0),
+    const SizedBox(height: 18.0),
   ],
 ),
 
@@ -405,7 +404,7 @@ Column(
                 ],
               ),
               const SizedBox(height: 100), // Ajout d'un espace entre les deux containers
-              Text(
+              const Text(
                 'Sécurité',
                 style: TextStyle(
                   fontSize: 30,
@@ -439,7 +438,7 @@ Column(
         child: Container(
           height: 630,
           width: 600,
-          padding: EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(5.0),
@@ -447,7 +446,7 @@ Column(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Positioned(
+              const Positioned(
                 left: 0,
                 child: Text(
                   'Modifier les informations',
@@ -457,10 +456,10 @@ Column(
                   ),
                 ),
               ),
-              Divider(color: Color(0xFF5BADE9), height: 30,),
-              SizedBox(height: 20.0),
+              const Divider(color: Color(0xFF5BADE9), height: 30,),
+              const SizedBox(height: 20.0),
               _buildForm(),
-              SizedBox(height: 30.0),
+              const SizedBox(height: 30.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -471,29 +470,29 @@ Column(
                         Navigator.of(context).pop();
                       }
                     },
-                    child: Text('Enregistrer', style: TextStyle(color: Colors.white)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF5BADE9),
+                      backgroundColor: const Color(0xFF5BADE9),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                     ),
+                    child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
                   ),
-                  SizedBox(width: 10.0),
+                  const SizedBox(width: 10.0),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: Text(
-                      'Annuler',
-                      style: TextStyle(color: Colors.white),
-                    ),
 
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
+                    ),
+                    child: const Text(
+                      'Annuler',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ],
@@ -544,7 +543,7 @@ Column(
             ),
           ),
         ),
-        SizedBox(height: 30.0),
+        const SizedBox(height: 30.0),
         TextFormField(
           initialValue: _nom,
           onChanged: (value) {
@@ -572,7 +571,7 @@ Column(
             ),
           ),
         ),
-        SizedBox(height: 30.0),
+        const SizedBox(height: 30.0),
         TextFormField(
           initialValue: _prenom,
           onChanged: (value) {
@@ -600,7 +599,7 @@ Column(
             ),
           ),
         ),
-        SizedBox(height: 30.0),
+        const SizedBox(height: 30.0),
         TextFormField(
           initialValue: _adresse,
           onChanged: (value) {
@@ -625,7 +624,7 @@ Column(
             ),
           ),
         ),
-        SizedBox(height: 30.0),
+        const SizedBox(height: 30.0),
         TextFormField(
           initialValue: _emploi,
           onChanged: (value) {
@@ -735,7 +734,7 @@ Widget _buildSecuriteContainer() {
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -745,31 +744,31 @@ Widget _buildSecuriteContainer() {
                         _updatePassword();
                       }
                   },
-                  child: Text(
-                    'Confirmer',
-                    style: TextStyle(color: Colors.white),
-                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF5BADE9),
+                    backgroundColor: const Color(0xFF5BADE9),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
+                  child: const Text(
+                    'Confirmer',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
-                SizedBox(width: 10.0),
+                const SizedBox(width: 10.0),
                 ElevatedButton(
                   onPressed: () {
                     _resetFields(); // Réinitialiser les champs
                   },
-                  child: Text(
-                    'Annuler',
-                    style: TextStyle(color: Colors.white),
-                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
+                  ),
+                  child: const Text(
+                    'Annuler',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],

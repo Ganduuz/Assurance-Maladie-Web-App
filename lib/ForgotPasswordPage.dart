@@ -5,6 +5,8 @@ import 'dart:html' as html;
 class ForgotPasswordPage extends StatelessWidget {
   final TextEditingController mailController = TextEditingController();
 
+  ForgotPasswordPage({super.key});
+
   // Fonction de validation d'e-mail
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
@@ -34,14 +36,14 @@ class ForgotPasswordPage extends StatelessWidget {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Lien Envoyé'),
-              content: Text('Un lien de récupération a été envoyé à votre boite mail.'),
+              title: const Text('Lien Envoyé'),
+              content: const Text('Un lien de récupération a été envoyé à votre boite mail.'),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('OK'),
+                  child: const Text('OK'),
                 ),
               ],
             );
@@ -52,14 +54,14 @@ class ForgotPasswordPage extends StatelessWidget {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Utilisateur introuvable'),
-              content: Text('Veuillez vérifier votre adresse e-mail.'),
+              title: const Text('Utilisateur introuvable'),
+              content: const Text('Veuillez vérifier votre adresse e-mail.'),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('OK'),
+                  child: const Text('OK'),
                 ),
               ],
             );

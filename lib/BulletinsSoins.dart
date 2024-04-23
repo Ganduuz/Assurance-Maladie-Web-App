@@ -26,6 +26,8 @@ class Bulletins_Soins {
 }
 
 class bs extends StatefulWidget {
+  const bs({super.key});
+
   @override
   _bsState createState() => _bsState();
 }
@@ -79,8 +81,8 @@ class _bsState extends State<bs> {
     html.document.title = 'Capgemini Assurance';
 
     return Container(
-      margin: EdgeInsets.all(10),
-      padding: EdgeInsets.all(15),
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(100),
@@ -91,7 +93,7 @@ class _bsState extends State<bs> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
+                const Expanded(
                   child: SingleChildScrollView(
                     child: Text(
                       'Mes bulletins de soins ',
@@ -103,13 +105,13 @@ class _bsState extends State<bs> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(10),
                   width: 200,
                   height: 35,
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: 'Recherche',
-                      contentPadding: EdgeInsets.fromLTRB(5, 0, 7, 0),
+                      contentPadding: const EdgeInsets.fromLTRB(5, 0, 7, 0),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5.0),
                       ),
@@ -119,7 +121,7 @@ class _bsState extends State<bs> {
                         borderRadius: BorderRadius.circular(5.0),
                       ),
                       suffixIcon: IconButton(
-                        icon: Icon(Icons.search),
+                        icon: const Icon(Icons.search),
                         onPressed: () {
                           print("Effectuer la recherche avec le texte: $_searchText");
                         },
@@ -132,7 +134,13 @@ class _bsState extends State<bs> {
                   onPressed: () {
                     _showAddBulletinDialog(context);
                   },
-                  child: Row(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade300,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  child: const Row(
                   children: [
                   Icon(Icons.add,color: Colors.white,),
                   SizedBox(width: 5),
@@ -142,27 +150,21 @@ class _bsState extends State<bs> {
                   ),
                  ],
                 ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade300,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
                 ),
               ],
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Container(
-              margin: EdgeInsets.all(7),
+              margin: const EdgeInsets.all(7),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                 BoxShadow(
-                color: Color.fromARGB(255, 215, 215, 215).withOpacity(0.5),
+                color: const Color.fromARGB(255, 215, 215, 215).withOpacity(0.5),
                 spreadRadius: 5,
                 blurRadius: 7,
-        offset: Offset(0, 2), // Changez l'offset selon votre préférence
+        offset: const Offset(0, 2), // Changez l'offset selon votre préférence
       ),
     ],
               ),
@@ -170,7 +172,7 @@ class _bsState extends State<bs> {
                 defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                 children: [
                   TableRow(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
                           color:Colors.grey,
@@ -191,10 +193,10 @@ class _bsState extends State<bs> {
                   ),
                   ..._currentbuso.map((bs) {
                     return TableRow(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: const Color.fromARGB(255, 193, 191, 191),
+                            color: Color.fromARGB(255, 193, 191, 191),
                             width: 0.3,
                           ),
                         ),
@@ -204,10 +206,10 @@ class _bsState extends State<bs> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          margin: EdgeInsets.symmetric(vertical: 15),
+                          margin: const EdgeInsets.symmetric(vertical: 15),
                           child: Row(
                             children: [
-                              SizedBox(width: 10,),
+                              const SizedBox(width: 10,),
                               Expanded(
                                 child: Text(bs.Num),
                               ),
@@ -215,10 +217,10 @@ class _bsState extends State<bs> {
                           ),
                         ),
                          Container(
-                          margin: EdgeInsets.symmetric(vertical: 15),
+                          margin: const EdgeInsets.symmetric(vertical: 15),
                           child: Row(
                             children: [
-                              SizedBox(width: 10,),
+                              const SizedBox(width: 10,),
                               Expanded(
                                 child: Text(bs.ID),
                               ),
@@ -226,10 +228,10 @@ class _bsState extends State<bs> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.symmetric(vertical: 15),
+                          margin: const EdgeInsets.symmetric(vertical: 15),
                           child: Row(
                             children: [
-                              SizedBox(width: 10,),
+                              const SizedBox(width: 10,),
                               Expanded(
                                 child: Text(bs.Qui_est_malade),
                               ),
@@ -237,10 +239,10 @@ class _bsState extends State<bs> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.symmetric(vertical: 15),
+                          margin: const EdgeInsets.symmetric(vertical: 15),
                           child: Row(
                             children: [
-                              SizedBox(width: 10,),
+                              const SizedBox(width: 10,),
                               Expanded(
                                 child: Text(bs.nom_medecin),
                               ),
@@ -248,10 +250,10 @@ class _bsState extends State<bs> {
                           ),
                         ),
                          Container(
-                          margin: EdgeInsets.symmetric(vertical: 15),
+                          margin: const EdgeInsets.symmetric(vertical: 15),
                           child: Row(
                             children: [
-                              SizedBox(width: 10,),
+                              const SizedBox(width: 10,),
                               Expanded(
                                 child: Text(bs.spec_medecin),
                               ),
@@ -259,10 +261,10 @@ class _bsState extends State<bs> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.symmetric(vertical: 8),
+                          margin: const EdgeInsets.symmetric(vertical: 8),
                           child: Row(
                             children: [
-                              SizedBox(width: 10,),
+                              const SizedBox(width: 10,),
                               Expanded(
                                 child: Text(bs.DateConsultation),
                               ),
@@ -270,10 +272,10 @@ class _bsState extends State<bs> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.symmetric(vertical: 15),
+                          margin: const EdgeInsets.symmetric(vertical: 15),
                           child: Row(
                             children: [
-                              SizedBox(width: 10,),
+                              const SizedBox(width: 10,),
                               Expanded(
                                 child: InkWell(
                                   onTap: () {
@@ -303,19 +305,19 @@ class _bsState extends State<bs> {
                                       }
                                     }
                                   },
-                                  child: bs.piece_jointe.isNotEmpty ? Text('Ouvrir', style: TextStyle(decoration: TextDecoration.underline ,decorationColor: Colors.blue, color: Colors.blue)) : Text('Aucune pièce jointe'),
+                                  child: bs.piece_jointe.isNotEmpty ? const Text('Ouvrir', style: TextStyle(decoration: TextDecoration.underline ,decorationColor: Colors.blue, color: Colors.blue)) : const Text('Aucune pièce jointe'),
                                 ),
                               ),
                             ],
                           ),
                         ),
                         Container(
-                          padding: EdgeInsets.fromLTRB(0, 0, 30, 0),
+                          padding: const EdgeInsets.fromLTRB(0, 0, 30, 0),
                           child: Row(
                             children: [
                               Expanded(
                                 child: IconButton(
-                                  icon: Icon(Icons.delete,color: Colors.red,),
+                                  icon: const Icon(Icons.delete,color: Colors.red,),
                                   onPressed: () {
                                     _archiverBulletinsSoins(bs);
                                   },
@@ -326,22 +328,22 @@ class _bsState extends State<bs> {
                         ),
                       ],
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
             Container(
-             margin: EdgeInsets.all(5),
-             padding: EdgeInsets.all(5),
+             margin: const EdgeInsets.all(5),
+             padding: const EdgeInsets.all(5),
                decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                 BoxShadow(
-                color: Color.fromARGB(255, 215, 215, 215).withOpacity(0.5),
+                color: const Color.fromARGB(255, 215, 215, 215).withOpacity(0.5),
                 spreadRadius: 2,
                 blurRadius: 7,
-        offset: Offset(0, 2), // Changez l'offset selon votre préférence
+        offset: const Offset(0, 2), // Changez l'offset selon votre préférence
       ),
     ],
               ),
@@ -357,10 +359,10 @@ class _bsState extends State<bs> {
                     onPressed: _currentPage < (buso.length / _busoPerPage).ceil() - 1 ? () => setState(() => _currentPage++) : null,
                     icon: Icon(Icons.chevron_right,color: Colors.blue.shade300,size: 18,),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   DropdownButton<int>(
                     value: _busoPerPage,
-                    underline: SizedBox(),
+                    underline: const SizedBox(),
                     onChanged: (value) {
                       setState(() {
                         _busoPerPage = value!;
@@ -386,11 +388,11 @@ class _bsState extends State<bs> {
     return Container(
       
       height: 60,
-      color: Color.fromARGB(200, 236, 235, 235),
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+      color: const Color.fromARGB(200, 236, 235, 235),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
       child: Text(
         text,
-        style: TextStyle(
+        style: const TextStyle(
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -398,11 +400,11 @@ class _bsState extends State<bs> {
   }
 
   void _showAddBulletinDialog(BuildContext context) {
-    String Qui_est_malade='';
+    String quiEstMalade='';
     String ID = '';
-    String nom_medecin='';
-    String spec_medecin='';
-    String piece_jointe = '';
+    String nomMedecin='';
+    String specMedecin='';
+    String pieceJointe = '';
     int nextBulletinNumber = buso.length + 1;
     String nextBulletinNumberString = nextBulletinNumber.toString();
     List listee =['Enfant1','Enfant2','Conjoint'];
@@ -423,18 +425,18 @@ class _bsState extends State<bs> {
               borderRadius:BorderRadius.circular(5),
               color: Colors.white,
             ),
-            padding: EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Nouveau Bulletin",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-                SizedBox(height: 30,),
+                const Text("Nouveau Bulletin",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                const SizedBox(height: 30,),
                 TextField(
                   onChanged: (value) => ID= value,
-                  style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+                  style: const TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   decoration: InputDecoration(
                     labelText: 'ID bulletin',
-                    labelStyle: TextStyle(
+                    labelStyle: const TextStyle(
                       color: Color.fromRGBO(209, 216, 223, 1),
                     ),
                     border: OutlineInputBorder(
@@ -446,35 +448,35 @@ class _bsState extends State<bs> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20,),
+                const SizedBox(height: 20,),
                 Container(
-                  padding: EdgeInsets.only(left: 16,right: 16),
+                  padding: const EdgeInsets.only(left: 16,right: 16),
                   decoration: BoxDecoration(border: Border.all(color: Colors.grey,width: 1),
                   borderRadius: BorderRadius.circular(5),),
                 
                 child : DropdownButton(
-                hint: Text("Qui est malade ?"),
-                icon: Icon(Icons.arrow_drop_down),
-                underline: SizedBox(),
+                hint: const Text("Qui est malade ?"),
+                icon: const Icon(Icons.arrow_drop_down),
+                underline: const SizedBox(),
                 dropdownColor: Colors.white,
                 isExpanded: true,
-                style: TextStyle(color: Color.fromRGBO(209, 216, 223, 1),fontSize: 18),
+                style: const TextStyle(color: Color.fromRGBO(209, 216, 223, 1),fontSize: 18),
                 items: listee.map((name) {
-                return DropdownMenuItem(child: Text(name), value: name);
+                return DropdownMenuItem(value: name, child: Text(name));
               }).toList(),
               onChanged: (selectedValue) {
              setState(() {
-               Qui_est_malade = selectedValue as String;
+               quiEstMalade = selectedValue as String;
              });
               },
              ),),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextField(
-                  onChanged: (value) => nom_medecin= value,
-                  style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+                  onChanged: (value) => nomMedecin= value,
+                  style: const TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   decoration: InputDecoration(
                     labelText: 'Nom du médecin',
-                    labelStyle: TextStyle(
+                    labelStyle: const TextStyle(
                       color: Color.fromRGBO(209, 216, 223, 1),
                     ),
                     border: OutlineInputBorder(
@@ -487,13 +489,13 @@ class _bsState extends State<bs> {
                   ),
                 ),
                 
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextField(
-                  onChanged: (value) => spec_medecin= value,
-                  style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+                  onChanged: (value) => specMedecin= value,
+                  style: const TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
                   decoration: InputDecoration(
                     labelText: 'Spécialité du médecin',
-                    labelStyle: TextStyle(
+                    labelStyle: const TextStyle(
                       color: Color.fromRGBO(209, 216, 223, 1),
                     ),
                     border: OutlineInputBorder(
@@ -505,24 +507,24 @@ class _bsState extends State<bs> {
                     ),
                   ),
                 ),
-                SizedBox(height: 10,),
+                const SizedBox(height: 10,),
                 Row(
                children: [ IconButton(
                   onPressed: (){
                     buildCalendarWidget(context);
                   },
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.calendar_month,
                     color: Colors.blue,
                   ),
                 ),
-                Text('Date de consultation',
+                const Text('Date de consultation',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),),],),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 ElevatedButton(
                   onPressed: () async {
                     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
@@ -536,25 +538,25 @@ class _bsState extends State<bs> {
                         reader.onLoadEnd.listen((event) {
                           setState(() {
                             // Convertir les données de l'image en une chaîne base64
-                            piece_jointe = reader.result as String;
+                            pieceJointe = reader.result as String;
                           });
                         });
                       }
                     });
                   } ,
-                  child: Text(
-                    'Importer votre bulletin de soins',
-                    style: TextStyle(color: const Color.fromARGB(255, 28, 28, 28), fontSize: 16),
-                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 255, 255, 255),
                     shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Color.fromARGB(255, 3, 171, 243)),
+                      side: const BorderSide(color: Color.fromARGB(255, 3, 171, 243)),
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
+                  child: const Text(
+                    'Importer votre bulletin de soins',
+                    style: TextStyle(color: Color.fromARGB(255, 28, 28, 28), fontSize: 16),
+                  ),
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -562,42 +564,42 @@ class _bsState extends State<bs> {
                       onPressed: () {
                         Navigator.of(context).pop(); // Fermer la boîte de dialogue
                       },
-                      child: Text(
-                        'Annuler',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 141, 142, 142),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5.0),
                         ),
                       ),
+                      child: const Text(
+                        'Annuler',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () {
                         setState(() {
                           buso.add(Bulletins_Soins(
                             Num: nextBulletinNumberString,
                             ID: ID,
-                            Qui_est_malade: Qui_est_malade,
-                            nom_medecin: nom_medecin,
-                            spec_medecin: spec_medecin,
+                            Qui_est_malade: quiEstMalade,
+                            nom_medecin: nomMedecin,
+                            spec_medecin: specMedecin,
                             DateConsultation: DateFormat('dd/MM/yyyy').format(_selectedDay), // Utilisation de la date sélectionnée
-                            piece_jointe: piece_jointe,
+                            piece_jointe: pieceJointe,
                           ));
                         });
                         Navigator.of(context).pop(); // Fermer la boîte de dialogue
                       },
-                      child: Text(
-                        'Ajouter',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue.shade300,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5.0),
                         ),
+                      ),
+                      child: const Text(
+                        'Ajouter',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     ),
                   ],
@@ -611,8 +613,8 @@ class _bsState extends State<bs> {
   }
 
    
-  void _archiverBulletinsSoins(Bulletins_Soins bulletins_soins) {
-    int index = buso.indexOf(bulletins_soins); // Trouver l'indice de l'objet dans la liste
+  void _archiverBulletinsSoins(Bulletins_Soins bulletinsSoins) {
+    int index = buso.indexOf(bulletinsSoins); // Trouver l'indice de l'objet dans la liste
   if (index != -1) { // Vérifier si l'objet a été trouvé
   AwesomeDialog(
     width: 500,
@@ -630,11 +632,11 @@ class _bsState extends State<bs> {
       
     },
     btnCancelText: "Non",
-    btnCancelColor: Color(0xFF5BADEE9),
+    btnCancelColor: const Color(0xff5badee9),
     btnOkText: "Oui",
-    btnOkColor: Color(0xFF5BADE9),
+    btnOkColor: const Color(0xFF5BADE9),
     
-  )..show();
+  ).show();
   }}
 
   void buildCalendarWidget(BuildContext context) {
@@ -658,7 +660,7 @@ class _bsState extends State<bs> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   child: Column(
                     children: [
                       TableCalendar(
@@ -666,7 +668,7 @@ class _bsState extends State<bs> {
                         firstDay: DateTime.utc(1950),
                         lastDay: DateTime.utc(2100),
                         rowHeight: 35,
-                        daysOfWeekStyle: DaysOfWeekStyle(
+                        daysOfWeekStyle: const DaysOfWeekStyle(
                           weekdayStyle: TextStyle(fontWeight: FontWeight.w400),
                           weekendStyle:TextStyle(fontWeight: FontWeight.w400),
                         ),
@@ -677,24 +679,24 @@ class _bsState extends State<bs> {
                             
                           });
                         },
-                        headerStyle: HeaderStyle(formatButtonVisible: false, titleCentered: true),
+                        headerStyle: const HeaderStyle(formatButtonVisible: false, titleCentered: true),
                         calendarStyle:CalendarStyle(
                           isTodayHighlighted: true,
                           selectedDecoration: BoxDecoration(
                             color: Colors.blue.shade200,
                             shape: BoxShape.circle,
                           ),
-                          todayDecoration: BoxDecoration(
+                          todayDecoration: const BoxDecoration(
                             color: Colors.blue,
                             shape: BoxShape.circle,
                           ),
-                          selectedTextStyle: TextStyle(color: Colors.white),
+                          selectedTextStyle: const TextStyle(color: Colors.white),
                         ) ,
                         selectedDayPredicate: (DateTime date) {
                           return isSameDay(_selectedDay, date);
                         },
                       ),
-                      SizedBox(height: 10,),
+                      const SizedBox(height: 10,),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -708,7 +710,7 @@ class _bsState extends State<bs> {
                               style: TextStyle(color: Colors.blue.shade300),
                             ),
                           ),),
-                          SizedBox(),
+                          const SizedBox(),
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);

@@ -12,7 +12,7 @@ import 'dart:html' as html;
 
 
 class Accueil extends StatefulWidget {
-  const Accueil({Key? key}) : super(key: key);
+  const Accueil({super.key});
   
 
   @override
@@ -45,9 +45,9 @@ Future<void> _loadFamilyMembers() async {
 }
 
 Future<List<FamilyMember>> fetchFamilyMembers() async {
-  var user_id = LocalStorageService.getData('user_id');
+  var userId = LocalStorageService.getData('user_id');
 
-  final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/family-members/$user_id'));
+  final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/family-members/$userId'));
   
   if (response.statusCode == 200) {
     // Analyser la réponse JSON
@@ -78,12 +78,12 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
 
 Future<void> _getUserData() async {
     try {
-      var user_id = LocalStorageService.getData('user_id');
+      var userId = LocalStorageService.getData('user_id');
       print("user_id :" + LocalStorageService.getData('user_id'));
 
       final response = await http.post(
         Uri.parse('http://127.0.0.1:5000/api/user'), 
-        body: jsonEncode({'user_id': user_id}), 
+        body: jsonEncode({'user_id': userId}), 
         headers: {
           'Content-Type': 'application/json'
         }, 
@@ -109,10 +109,10 @@ Future<void> _getUserData() async {
 
 
   static final List<Widget> _widgetOptions = <Widget>[
-    Home(),
+    const Home(),
     FamilyMemberPage(),
-     bs(),
-     actesMed(),
+     const bs(),
+     const actesMed(),
     const MonCompte(),
    
   ];
@@ -125,13 +125,13 @@ void updateNumber(int newNumber) {
 }
   
 
-  void _showAlerts(BuildContext context, double _reste, Function(int) updateNumber)  {
+  void _showAlerts(BuildContext context, double reste, Function(int) updateNumber)  {
 
-    void _removeOverlay() {
+    void removeOverlay() {
       _overlayEntry.remove();
     }
 
-    bool employeeAlert = _reste < 100;
+    bool employeeAlert = reste < 100;
     int numberOfNotifications = 0;
     
     for (var member in familyMembers) {
@@ -152,39 +152,39 @@ void updateNumber(int newNumber) {
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(width: 2, color: Color.fromARGB(255, 91, 177, 248)),
+          side: const BorderSide(width: 2, color: Color.fromARGB(255, 91, 177, 248)),
         ),
         color: Colors.white,
         child: Container(
           width: 350,
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Text(
+                  const Text(
                     "Alertes",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
                   ),
-                  SizedBox(width: 210),
+                  const SizedBox(width: 210),
                   IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: _removeOverlay,
+                    icon: const Icon(Icons.close),
+                    onPressed: removeOverlay,
                   ),
                 ],
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               if (employeeAlert)
                 ListTile(
-                  leading: Icon(
+                  leading: const Icon(
                     Icons.error_outline,
                     color: Colors.red,
                   ),
-                  title: Text(
+                  title: const Text(
                     "Dépassement de seuil",
                     style: TextStyle(
                       color: Color.fromARGB(255, 35, 190, 237),
@@ -214,8 +214,8 @@ void updateNumber(int newNumber) {
                         ),
                       ),
                       Text(
-                        "${_reste.toStringAsFixed(2)} DT",
-                        style: TextStyle(
+                        "${reste.toStringAsFixed(2)} DT",
+                        style: const TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,
                         ),
@@ -227,11 +227,11 @@ void updateNumber(int newNumber) {
                   .where((member) => member.alert)
                   .map((member) {
                 return ListTile(
-                  leading: Icon(
+                  leading: const Icon(
                     Icons.error_outline,
                     color: Colors.red,
                   ),
-                  title: Text(
+                  title: const Text(
                     "Dépassement de seuil",
                     style: TextStyle(
                       color: Color.fromARGB(255, 35, 190, 237),
@@ -262,7 +262,7 @@ void updateNumber(int newNumber) {
                       ),
                       Text(
                         "${member.reste.toStringAsFixed(2)} DT",
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,
                         ),
@@ -270,9 +270,9 @@ void updateNumber(int newNumber) {
                     ],
                   ),
                 );
-              }).toList(),
+              }),
               if (familyMembers.every((member) => !member.alert))
-                Text(
+                const Text(
                   "Aucune alerte",
                   style: TextStyle(
                     color: Colors.grey,
@@ -337,16 +337,16 @@ notifications++;  });
                       );
                     },
                     style: ButtonStyle(
-                      textStyle: MaterialStateProperty.all<TextStyle>(
+                      textStyle: WidgetStateProperty.all<TextStyle>(
                         const TextStyle(
                           fontSize: 18,
                         ),
                       ),
-                      backgroundColor: MaterialStateProperty.all<Color>(
+                      backgroundColor: WidgetStateProperty.all<Color>(
                         const Color.fromARGB(255, 255, 255, 255),
                       ),
-                      foregroundColor: MaterialStateProperty.all<Color>(
-                         Color.fromARGB(255, 73, 167, 226),
+                      foregroundColor: WidgetStateProperty.all<Color>(
+                         const Color.fromARGB(255, 73, 167, 226),
                       ),
                     ),
                     child: const Text(
@@ -357,7 +357,7 @@ notifications++;  });
                     ),
                   ),
                 ),
-                SizedBox(width: 30,),
+                const SizedBox(width: 30,),
                  IconButton(
   onPressed: () {
     _showAlerts(context, _reste, updateNumber);
@@ -366,21 +366,21 @@ notifications++;  });
     children: [
       Transform.scale(
         scale: 1.5, // Facteur d'échelle pour agrandir l'icône
-        child: Icon(Icons.notifications, color: Color(0xFF12ABDB)), // Icône de la cloche
+        child: const Icon(Icons.notifications, color: Color(0xFF12ABDB)), // Icône de la cloche
       ),
       if (number > 0) // Ajout d'une condition 'if' pour afficher le badge uniquement si le nombre de notifications est supérieur à zéro
         Positioned(
           top: 0,
           right: 0,
           child: Container(
-            padding: EdgeInsets.all(4),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.all(4),
+            decoration: const BoxDecoration(
               color: Colors.red, // Couleur de l'arrière-plan du badge
               shape: BoxShape.circle,
             ),
             child: Text(
               number.toString(), // Nombre de notifications converti en chaîne
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white, // Couleur du texte du badge
                 fontSize: 12, // Taille du texte du badge
                 fontWeight: FontWeight.bold,
@@ -439,7 +439,7 @@ class MenuDrawer extends StatelessWidget {
   final int selectedIndex;
 static const double defaultPadding = 5.0;
 
-  const MenuDrawer({Key? key, required this.userEmail,  required this.userName,required this.onItemTapped, required this.selectedIndex}) : super(key: key);
+  const MenuDrawer({super.key, required this.userEmail,  required this.userName,required this.onItemTapped, required this.selectedIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -448,18 +448,18 @@ static const double defaultPadding = 5.0;
             backgroundColor: Colors.white,
 
       body: Container(
-        padding: EdgeInsets.all(defaultPadding * 1.2),
+        padding: const EdgeInsets.all(defaultPadding * 1.2),
         child: Row(
           children: [
             Expanded(
               flex: 2,
               child: Container(
                 height: height,
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                     horizontal: defaultPadding,
                     vertical: defaultPadding * 3),
                 decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 255, 255, 255),
+                    color: const Color.fromARGB(255, 255, 255, 255),
                     borderRadius: BorderRadius.circular(15)),
                 child: Column(
                   children: [
@@ -467,30 +467,30 @@ static const double defaultPadding = 5.0;
                       height: 100,
                       child: DrawerHeader(
                         padding:
-                            EdgeInsets.only(left: defaultPadding * 1.5),
+                            const EdgeInsets.only(left: defaultPadding * 1.5),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               children: [
-                                CircleAvatar(
+                                const CircleAvatar(
                                   backgroundImage: AssetImage("assets/user (1).png"),
                                   radius: 20,
                                 ),
-                                SizedBox(width: defaultPadding),
+                                const SizedBox(width: defaultPadding),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       userName,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                               color: Color.fromARGB(255, 73, 167, 226),
                                               fontSize: 16)
                                     ),
                                     Text(
                                       userEmail,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: Colors.grey,
                                         fontSize: 11,
                                       ),
@@ -506,10 +506,10 @@ static const double defaultPadding = 5.0;
                         ),
                       ),
                     ),
-          SizedBox(),
+          const SizedBox(),
           AccueLisTile(
             title: "Accueil",
-            icon: Icon(Icons.home),
+            icon: const Icon(Icons.home),
             press: () {
               onItemTapped(0);
             },
@@ -517,7 +517,7 @@ static const double defaultPadding = 5.0;
           ),
           AccueLisTile(
             title: "Membre de famille",
-            icon: Icon(Icons.verified_user_sharp),
+            icon: const Icon(Icons.verified_user_sharp),
             press: () {
               onItemTapped(1);
             },
@@ -525,7 +525,7 @@ static const double defaultPadding = 5.0;
           ),
           AccueLisTile(
             title: "Bulletins de soins",
-            icon: Icon(Icons.newspaper),
+            icon: const Icon(Icons.newspaper),
             press: () {
               onItemTapped(2);
             },
@@ -533,16 +533,16 @@ static const double defaultPadding = 5.0;
           ),
           AccueLisTile(
             title: "Actes médicaux",
-            icon: Icon(Icons.local_hospital),
+            icon: const Icon(Icons.local_hospital),
             press: () {
               onItemTapped(3);
             },
             isSelected: selectedIndex == 3,
           ),
-          Spacer(),
+          const Spacer(),
           AccueLisTile(
             title: "Mon compte",
-            icon: Icon(Icons.account_box),
+            icon: const Icon(Icons.account_box),
             press: () {
               onItemTapped(4);
             },
@@ -550,7 +550,7 @@ static const double defaultPadding = 5.0;
           ),
         AccueLisTile(
   title: "Déconnexion",
-  icon: Icon(Icons.logout),
+  icon: const Icon(Icons.logout),
   press: () {
     showDialog(
       context: context,
@@ -610,12 +610,12 @@ static const double defaultPadding = 5.0;
 
 class AccueLisTile extends StatelessWidget {
   const AccueLisTile({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.press,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   final String title;
   final Icon icon;
@@ -631,22 +631,22 @@ class AccueLisTile extends StatelessWidget {
           Positioned.fill(
             child: Container(
               height: 50,
-              decoration: isSelected ? BoxDecoration(
+              decoration: isSelected ? const BoxDecoration(
                 color: Color.fromARGB(255, 73, 167, 226),
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ) : null,
             ),
           ),
-          Container(
+          SizedBox(
             height: 40,
             child: ListTile(
-              visualDensity: VisualDensity(vertical: -4),
+              visualDensity: const VisualDensity(vertical: -4),
               dense: true,
               onTap: press,
               leading: icon,
               title: Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black,
                 ),
               ),

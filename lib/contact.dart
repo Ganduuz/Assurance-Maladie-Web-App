@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class contact extends StatelessWidget {
-  const contact({Key? key}) : super(key: key);
+  const contact({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Colors.white,
       body: SizedBox(
         width: 1920,
@@ -22,7 +22,7 @@ class contact extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: contact(),
   ));
 }

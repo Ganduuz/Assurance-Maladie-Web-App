@@ -6,7 +6,7 @@ import 'Connexion.dart';
 class ResetPasswordPage extends StatefulWidget {
   final String token;
 
-  const ResetPasswordPage({Key? key, required this.token}) : super(key: key);
+  const ResetPasswordPage({super.key, required this.token});
 
   @override
   _ResetPasswordPageState createState() => _ResetPasswordPageState();
@@ -44,14 +44,14 @@ Future<void> resetPass(BuildContext context) async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Réinitialiser le mot de passe'),
+        title: const Text('Réinitialiser le mot de passe'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Saisissez votre nouveau mot de passe ici'),
-            SizedBox(height: 20),
+            const Text('Saisissez votre nouveau mot de passe ici'),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
@@ -63,7 +63,7 @@ Future<void> resetPass(BuildContext context) async {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
@@ -75,7 +75,7 @@ Future<void> resetPass(BuildContext context) async {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 if (_passwordController.text.isNotEmpty &&
@@ -93,7 +93,7 @@ Future<void> resetPass(BuildContext context) async {
                   });
                 }
               },
-              child: Text('Réinitialiser'),
+              child: const Text('Réinitialiser'),
             ),
           ],
         ),

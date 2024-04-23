@@ -18,9 +18,9 @@ class _AccueilState extends State<AccueilAdmin> {
   static final List<Widget> _widgetOptions = <Widget>[
      const HomeAdmin(),
      const dashboard(),
-      Employeee(),
+      const Employeee(),
      const BSAdmin(),
-     NewMemberPage(),
+     const NewMemberPage(),
 
    
   ];
@@ -47,16 +47,16 @@ class _AccueilState extends State<AccueilAdmin> {
                   child: TextButton(
                     onPressed: () {},
                     style: ButtonStyle(
-                      textStyle: MaterialStateProperty.all<TextStyle>(
+                      textStyle: WidgetStateProperty.all<TextStyle>(
                         const TextStyle(
                           fontSize: 18,
                         ),
                       ),
-                      backgroundColor: MaterialStateProperty.all<Color>(
+                      backgroundColor: WidgetStateProperty.all<Color>(
                         const Color.fromARGB(255, 255, 255, 255),
                       ),
-                      foregroundColor: MaterialStateProperty.all<Color>(
-                         Color.fromARGB(255, 73, 167, 226),
+                      foregroundColor: WidgetStateProperty.all<Color>(
+                         const Color.fromARGB(255, 73, 167, 226),
                       ),
                     ),
                     child: const Text(
@@ -67,8 +67,8 @@ class _AccueilState extends State<AccueilAdmin> {
                     ),
                   ),
                 ),
-                 SizedBox(width: 40),
-                Icon(Icons.notifications, color: Color.fromARGB(255, 18, 171, 219)),
+                 const SizedBox(width: 40),
+                const Icon(Icons.notifications, color: Color.fromARGB(255, 18, 171, 219)),
               ],
             ),
           ),
@@ -111,7 +111,7 @@ class MenuDrawer extends StatelessWidget {
   final int selectedIndex;
 static const double defaultPadding = 5.0;
 
-  const MenuDrawer({Key? key, required this.onItemTapped, required this.selectedIndex}) : super(key: key);
+  const MenuDrawer({super.key, required this.onItemTapped, required this.selectedIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -119,18 +119,18 @@ static const double defaultPadding = 5.0;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
-        padding: EdgeInsets.all(defaultPadding * 1.2),
+        padding: const EdgeInsets.all(defaultPadding * 1.2),
         child: Row(
           children: [
             Expanded(
               flex: 2,
               child: Container(
                 height: height,
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                     horizontal: defaultPadding,
                     vertical: defaultPadding * 3),
                 decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 255, 255, 255),
+                    color: const Color.fromARGB(255, 255, 255, 255),
                     borderRadius: BorderRadius.circular(15)),
                 child: Column(
                   children: [
@@ -138,7 +138,7 @@ static const double defaultPadding = 5.0;
                       height: 100,
                       child: DrawerHeader(
                         padding:
-                            EdgeInsets.only(left: defaultPadding * 1.5),
+                            const EdgeInsets.only(left: defaultPadding * 1.5),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -146,18 +146,18 @@ static const double defaultPadding = 5.0;
                             Row(
                               children: [
                                 
-                                SizedBox(width: defaultPadding),
+                                const SizedBox(width: defaultPadding),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    SizedBox(height: 20),
+                                    const SizedBox(height: 20),
                                     Text(
                                       "Administration RH",
                                       style: Theme.of(context)
                                           .textTheme
-                                          .headline6
+                                          .titleLarge
                                           ?.copyWith(
-                                              color: Color.fromARGB(255, 73, 167, 226),
+                                              color: const Color.fromARGB(255, 73, 167, 226),
                                               fontSize: 16),
                                     ),
                                     
@@ -172,10 +172,10 @@ static const double defaultPadding = 5.0;
                         ),
                       ),
                     ),
-          SizedBox(height: 8,),
+          const SizedBox(height: 8,),
           AccueLisTile(
             title: "Accueil",
-            icon: Icon(Icons.home),
+            icon: const Icon(Icons.home),
             press: () {
               onItemTapped(0);
             },
@@ -183,7 +183,7 @@ static const double defaultPadding = 5.0;
           ),
           AccueLisTile(
             title: "Tableau de bord",
-            icon: Icon(Icons.dashboard),
+            icon: const Icon(Icons.dashboard),
             press: () {
               onItemTapped(1);
             },
@@ -191,7 +191,7 @@ static const double defaultPadding = 5.0;
           ),
           AccueLisTile(
             title: "Employés",
-            icon: Icon(Icons.man),
+            icon: const Icon(Icons.man),
             press: () {
               onItemTapped(2);
             },
@@ -199,16 +199,16 @@ static const double defaultPadding = 5.0;
           ),
           AccueLisTile(
             title: "Bulletins de soins",
-            icon: Icon(Icons.newspaper),
+            icon: const Icon(Icons.newspaper),
             press: () {
               onItemTapped(3);
             },
             isSelected: selectedIndex == 3,
           ),
-          Spacer(),
+          const Spacer(),
           AccueLisTile(
             title: "Nouveau membre ",
-            icon: Icon(Icons.man),
+            icon: const Icon(Icons.man),
             press: () {
               onItemTapped(4);
             },
@@ -216,7 +216,7 @@ static const double defaultPadding = 5.0;
           ),
         AccueLisTile(
   title: "Déconnexion",
-  icon: Icon(Icons.logout),
+  icon: const Icon(Icons.logout),
   press: () {
     showDialog(
       context: context,
@@ -276,12 +276,12 @@ static const double defaultPadding = 5.0;
 
 class AccueLisTile extends StatelessWidget {
   const AccueLisTile({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.press,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   final String title;
   final Icon icon;
@@ -297,22 +297,22 @@ class AccueLisTile extends StatelessWidget {
           Positioned.fill(
             child: Container(
               height: 50,
-              decoration: isSelected ? BoxDecoration(
+              decoration: isSelected ? const BoxDecoration(
                 color: Color.fromARGB(255, 73, 167, 226),
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ) : null,
             ),
           ),
-          Container(
+          SizedBox(
             height: 40,
             child: ListTile(
-              visualDensity: VisualDensity(vertical: -4),
+              visualDensity: const VisualDensity(vertical: -4),
               dense: true,
               onTap: press,
               leading: icon,
               title: Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black,
                 ),
               ),
