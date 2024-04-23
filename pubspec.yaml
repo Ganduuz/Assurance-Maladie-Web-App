@@ -120,6 +120,9 @@ flutter:
   - assets/update.png
   - assets/remove-user.png
   - assets/disarchiver.png
+  - assets/decline.png
+  - assets/approve.png
+
   fonts:  
     - family: Julius Sans One
       fonts:

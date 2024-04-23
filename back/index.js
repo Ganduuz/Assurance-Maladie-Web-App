@@ -616,6 +616,45 @@ app.get('/api/family-members/:user_id', async (req, res) => {
 });
 
 
+
+
+app.get('/api/family-members_non', async (req, res) => {
+    try {
+        // Recherche des membres de la famille non vérifiés
+        const familyMembers = await FamilyMember.find({ verif: false });
+        
+        if (familyMembers.length > 0) {
+            // Créer un tableau pour stocker les détails de chaque membre
+            const membersDetails = await Promise.all(familyMembers.map(async (member) => {
+                const user = await usersModel.findById(member.userId);
+                const formattedDate = moment(member.naissance).format('DD/MM/YYYY');
+                const username = `${user.nom} ${user.prenom}`;
+                return {
+                    username: username,
+                    userId: member.userId,
+                    _id: member._id,
+                    nom: member.nom,
+                    prenom: member.prenom,
+                    relation: member.relation,
+                    naissance: formattedDate,
+                    plafond: member.plafond,
+                    reste: member.reste, 
+                    consome: member.consome,
+                    verif: member.verif 
+                };
+            }));
+            console.log('Membres récupérés');
+            res.status(200).json({ message: 'Détails des membres de la famille récupérés', membersDetails });
+        } else {
+            res.status(404).json({ message: 'Aucun membre de la famille non vérifié trouvé' });
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des détails des membres de la famille : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des membres de la famille' });
+    }
+});
+
+
 app.put('/api/family-members/validation/:memberId', async (req, res) => {
     try {
         const memberId = new mongoose.Types.ObjectId(req.params.memberId); // Utilisez 'new'

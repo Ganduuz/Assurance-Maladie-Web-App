@@ -20,7 +20,7 @@ class _AccueilState extends State<AccueilAdmin> {
      const dashboard(),
       Employeee(),
      const BSAdmin(),
-     const newmember(),
+     NewMemberPage(),
 
    
   ];

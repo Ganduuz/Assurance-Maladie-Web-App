@@ -22,18 +22,21 @@ class Accueil extends StatefulWidget {
 class _AccueilState extends State<Accueil> {
 late OverlayEntry _overlayEntry;
 double _reste=0;
+int initialNumberOfNotifications = 0; // Définir le nombre initial de notifications
+
   int selectedIndex = 0;
    String _userName = '';
   String _userEmail = '';
   List<FamilyMember> familyMembers = [];
   List<Widget> alertWidgets = [];
-  
+  int number=0;
 
 Future<void> _loadFamilyMembers() async {
   try {
     List<FamilyMember> members = await fetchFamilyMembers(); 
     setState(() {
       familyMembers = members; 
+      _calculateNotifications();
     });
   } catch (error) {
    
@@ -68,6 +71,8 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
     // Appeler la fonction pour récupérer les données de l'utilisateur au démarrage de la page
     _getUserData();
     _loadFamilyMembers(); 
+    number=0;
+    _calculateNotifications();
 
   }
 
@@ -111,170 +116,201 @@ Future<void> _getUserData() async {
     const MonCompte(),
    
   ];
-  void _showAlerts(BuildContext context, double _reste,int numberOfNotifications) {
+
+
+void updateNumber(int newNumber) {
+  setState(() {
+    number = newNumber;
+  });
+}
+  
+
+  void _showAlerts(BuildContext context, double _reste, Function(int) updateNumber)  {
+
     void _removeOverlay() {
       _overlayEntry.remove();
     }
 
     bool employeeAlert = _reste < 100;
-    numberOfNotifications = 0;
-      for (var member in familyMembers) {
+    int numberOfNotifications = 0;
+    
+    for (var member in familyMembers) {
       if (member.alert) {
         numberOfNotifications++;
       }
     }
-      if (employeeAlert)numberOfNotifications++;
-
-    _overlayEntry = OverlayEntry(
-      builder: (BuildContext context) => Positioned(
-        top: MediaQuery.of(context).padding.top + kToolbarHeight + 10,
-        right: 10,
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(width: 2, color: Color.fromARGB(255, 91, 177, 248)),
-          ),
-          color: Colors.white, // Définissez le fond en blanc
-          child: Container(
-            width: 350,
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      "Alertes",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    SizedBox(width: 210,),
-                    IconButton(
-                      icon: Icon(Icons.close), // Icône de fermeture
-                      onPressed: _removeOverlay,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                if (employeeAlert)
-                  ListTile(
-                    leading: Icon(
-                      Icons.error_outline, // Nouvelle icône pour l'alerte
-                      color: Colors.red, // Couleur de l'icône
-                    ),
-                    title: Text(
-                      "Dépassement de seuil",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 35, 190, 237),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "pour vous : ",
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              TextSpan(
-                                text: _userName,
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          "${_reste.toStringAsFixed(2)} DT",
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ...familyMembers
-                    .where((member) => member.alert)
-                    .map((member) {
-                  return ListTile(
-                    leading: Icon(
-                      Icons.error_outline, // Nouvelle icône pour l'alerte
-                      color: Colors.red, // Couleur de l'icône
-                    ),
-                    title: Text(
-                      "Dépassement de seuil",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 35, 190, 237),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "pour votre ${member.type} : ",
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              TextSpan(
-                                text: "${member.nom} ${member.prenom}",
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          "${member.reste.toStringAsFixed(2)} DT",
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                if (familyMembers.every((member) => !member.alert))
+    
+    if (employeeAlert) {
+      numberOfNotifications++;
+    }
+    
+  _overlayEntry = OverlayEntry(
+    builder: (BuildContext context) => Positioned(
+      top: MediaQuery.of(context).padding.top + kToolbarHeight + 10,
+      right: 10,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(width: 2, color: Color.fromARGB(255, 91, 177, 248)),
+        ),
+        color: Colors.white,
+        child: Container(
+          width: 350,
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
                   Text(
-                    "Aucune alerte",
+                    "Alertes",
                     style: TextStyle(
-                      color: Colors.grey,
-                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),
-              ],
-            ),
+                  SizedBox(width: 210),
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: _removeOverlay,
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              if (employeeAlert)
+                ListTile(
+                  leading: Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                  ),
+                  title: Text(
+                    "Dépassement de seuil",
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 35, 190, 237),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "pour vous : ",
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            TextSpan(
+                              text: _userName,
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        "${_reste.toStringAsFixed(2)} DT",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ...familyMembers
+                  .where((member) => member.alert)
+                  .map((member) {
+                return ListTile(
+                  leading: Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                  ),
+                  title: Text(
+                    "Dépassement de seuil",
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 35, 190, 237),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "pour votre ${member.type} : ",
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            TextSpan(
+                              text: "${member.nom} ${member.prenom}",
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        "${member.reste.toStringAsFixed(2)} DT",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              if (familyMembers.every((member) => !member.alert))
+                Text(
+                  "Aucune alerte",
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+            ],
           ),
         ),
       ),
-    );
+    ),
+  );
+ updateNumber(numberOfNotifications);
 
-    Overlay.of(context).insert(_overlayEntry);
+  Overlay.of(context).insert(_overlayEntry);
+}
+void _calculateNotifications() {
+  int notifications = 0;
+  for (var member in familyMembers) {
+    if (member.alert) {
+      notifications++;
+    }
   }
+if (_reste<100){
+  setState(() {
+notifications++;  });
+}
+  setState(() {
+    number = notifications;
+  });
+
+  print(number);
+}
 
   @override
   Widget build(BuildContext context) {
     html.document.title = 'Capgemini Assurance';
-    int numberOfNotifications = 0;
-    
+
     return Scaffold(
       
       backgroundColor: Colors.white,
@@ -321,38 +357,41 @@ Future<void> _getUserData() async {
                     ),
                   ),
                 ),
-                 SizedBox(width: 20),
-                  IconButton(
-                    onPressed: () {
-                      _showAlerts(context, _reste, numberOfNotifications);
-                    },
-                    icon: Stack(
-                      children: [
-                        Icon(Icons.notifications, color: Color(0xFF12ABDB)), // Icône de la cloche
-                        if (numberOfNotifications > 0) // Affiche le nombre de notifications uniquement s'il est supérieur à 0
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Container(
-                              padding: EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.red, // Couleur de l'arrière-plan du badge
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text(
-                                numberOfNotifications.toString(), // Nombre de notifications converti en chaîne
-                                style: TextStyle(
-                                  color: Colors.white, // Couleur du texte du badge
-                                  fontSize: 12, // Taille du texte du badge
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  )
-       
+                SizedBox(width: 30,),
+                 IconButton(
+  onPressed: () {
+    _showAlerts(context, _reste, updateNumber);
+  },
+  icon: Stack(
+    children: [
+      Transform.scale(
+        scale: 1.5, // Facteur d'échelle pour agrandir l'icône
+        child: Icon(Icons.notifications, color: Color(0xFF12ABDB)), // Icône de la cloche
+      ),
+      if (number > 0) // Ajout d'une condition 'if' pour afficher le badge uniquement si le nombre de notifications est supérieur à zéro
+        Positioned(
+          top: 0,
+          right: 0,
+          child: Container(
+            padding: EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.red, // Couleur de l'arrière-plan du badge
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              number.toString(), // Nombre de notifications converti en chaîne
+              style: TextStyle(
+                color: Colors.white, // Couleur du texte du badge
+                fontSize: 12, // Taille du texte du badge
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+    ],
+  ),
+)
+
               ],
             ),
           ),
