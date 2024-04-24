@@ -5,15 +5,14 @@ import 'local_storage_service.dart';
 import 'ForgotPasswordPage.dart';
 import 'Accueil.dart';
 import 'accAdmin.dart';
-import 'MonCompte.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-import 'dart:html' as html; // Importer la bibliothèque HTML pour accéder au titre de la fenêtre du navigateur
-
+import 'dart:html' as html;
+import 'package:flutter/services.dart';
 
 class MyHomePage extends StatelessWidget {
   final TextEditingController mailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-    final flutterWebViewPlugin = FlutterWebviewPlugin();
+  final flutterWebViewPlugin = FlutterWebviewPlugin();
 
   Future<void> loginUser(BuildContext context) async {
     final String mail = mailController.text;
@@ -28,27 +27,19 @@ class MyHomePage extends StatelessWidget {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if(data['mail']=="RH@capgemini.com"){
-            Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => AccueilAdmin()),
+        if (data['mail'] == "RH@capgemini.com") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AccueilAdmin()),
           );
-        }else{
-          if(data['verif']=true){
-            Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Accueil()),
-        );
-        LocalStorageService.saveData('user_id', data["user_id"]);
-            
-          }else{
-            LocalStorageService.saveData('user_id', data["user_id"]);
+        } else {
+          
             Navigator.push(
               context,
-               MaterialPageRoute(builder: (context) => MonCompte()),
-               );
-
-          }
+              MaterialPageRoute(builder: (context) => Accueil()),
+            );
+            LocalStorageService.saveData('user_id', data["user_id"]);
+          
         }
       } else {
         showDialog(
@@ -56,7 +47,8 @@ class MyHomePage extends StatelessWidget {
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Échec de la connexion'),
-              content: Text('Nom d\'utilisateur ou mot de passe incorrect.'),
+              content:
+                  Text('Nom d\'utilisateur ou mot de passe incorrect.'),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -76,7 +68,7 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-        html.document.title = 'Authentification';
+    html.document.title = 'Authentification';
 
     flutterWebViewPlugin.launch(
       'http://localhost:54228/connexion',
@@ -85,9 +77,11 @@ class MyHomePage extends StatelessWidget {
 
     flutterWebViewPlugin.onStateChanged.listen((WebViewStateChanged state) {
       if (state.type == WebViewState.finishLoad) {
-        flutterWebViewPlugin.evalJavascript("document.title = 'Authentification';");
+        flutterWebViewPlugin.evalJavascript(
+            "document.title = 'Authentification';");
       }
     });
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
@@ -200,6 +194,10 @@ class MyHomePage extends StatelessWidget {
                               ),
                             ),
                           ),
+                          // Déclencher la connexion lorsque "Entrée" est pressée
+                          onSubmitted: (_) {
+                            loginUser(context);
+                          },
                         ),
                         Padding(
                           padding: EdgeInsets.fromLTRB(250.0, 4.0, 5.0, 2),
@@ -227,6 +225,7 @@ class MyHomePage extends StatelessWidget {
                         ),
                         SizedBox(height: 55.0),
                         ElevatedButton(
+                          key: Key('seConnecterButton'),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.all(0),
                             shape: const RoundedRectangleBorder(

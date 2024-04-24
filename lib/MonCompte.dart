@@ -220,7 +220,7 @@ Future<void> _importImage() async {
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(80.0, 50.0, 250.0, 70),
+          padding: const EdgeInsets.all(50),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -315,86 +315,86 @@ Future<void> _importImage() async {
                             ),
                             
                           ),
-Column(
-  crossAxisAlignment: CrossAxisAlignment.start, // Aligne les éléments à gauche
-  children: [
-    Row(
-      children: [
-        const Text(
-          'CIN : ',
-          style: TextStyle(
-            color: Colors.blue,
-          ),
-        ),
-        const Text('                             '),
-        Text(
-          _cin,
-        ),
-      ],
-    ),
-    const SizedBox(height: 18.0),
-    Row(
-      children: [
-        const Text(
-          'Nom : ',
-          style: TextStyle(
-            color: Colors.blue,
-          ),
-        ),
-        const Text('                           '),
-        Text(
-          _nom,
-        ),
-      ],
-    ),
-    const SizedBox(height: 18.0),
-    Row(
-      children: [
-        const Text(
-          'Prénom : ',
-          style: TextStyle(
-            color: Colors.blue,
-          ),
-        ),
-         const Text('                      '),
-        Text(
-          _prenom,
-        ),
-      ],
-    ),
-    const SizedBox(height: 18.0),
-    Row(
-      children: [
-        const Text(
-          'Adresse : ',
-          style: TextStyle(
-            color: Colors.blue,
-          ),
-        ),
-        const Text('                     '),
-        Text(
-          _adresse,
-        ),
-      ],
-    ),
-    const SizedBox(height: 18.0),
-    Row(
-      children: [
-        const Text(
-          'Emploi : ',
-          style: TextStyle(
-            color: Colors.blue,
-          ),
-        ),
-        const Text('                        '),
-        Text(
-          _emploi,
-        ),
-      ],
-    ),
-    const SizedBox(height: 18.0),
-  ],
-),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start, // Aligne les éléments à gauche
+                          children: [
+                            Row(
+                              children: [
+                                const Text(
+                                  'CIN : ',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                const Text('                             '),
+                                Text(
+                                  _cin,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18.0),
+                            Row(
+                              children: [
+                                const Text(
+                                  'Nom : ',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                const Text('                           '),
+                                Text(
+                                  _nom,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18.0),
+                            Row(
+                              children: [
+                                const Text(
+                                  'Prénom : ',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                const Text('                      '),
+                                Text(
+                                  _prenom,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18.0),
+                            Row(
+                              children: [
+                                const Text(
+                                  'Adresse : ',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                const Text('                     '),
+                                Text(
+                                  _adresse,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18.0),
+                            Row(
+                              children: [
+                                const Text(
+                                  'Emploi : ',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                const Text('                        '),
+                                Text(
+                                  _emploi,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18.0),
+                          ],
+                        ),
 
 
                         ],
@@ -436,9 +436,9 @@ Column(
         elevation: 0.0,
         backgroundColor: Colors.transparent,
         child: Container(
-          height: 630,
+          height: 480,
           width: 600,
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(10.0),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(5.0),

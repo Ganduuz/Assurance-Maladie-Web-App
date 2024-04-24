@@ -107,8 +107,25 @@ const familyMemberSchema = new mongoose.Schema({
 });
 
 const FamilyMember = mongoose.model('membres', familyMemberSchema);
-
 module.exports = FamilyMember;
+
+const BSSchema = new mongoose.Schema({
+    num :Number,
+    matricule: String,
+    malade: String,
+    userId: String,
+    medecin: String,
+    specMedecin: String,
+    date: String,
+    etat:Number,
+    
+
+});
+
+const BS = mongoose.model('BS', BSSchema);
+
+
+
 app.get('/api/employesArch', async (req, res) => {
     try {
         // Recherche des employés avec un plafond de 1500
@@ -789,5 +806,56 @@ app.delete('/api/family-members/delete/:memberId', async (req, res) => {
     } catch (error) {
         console.error('Erreur lors de la suppression d\'un membre de la famille : ', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la suppression d\'un membre de la famille' });
+    }
+});
+
+
+
+
+
+
+app.post('/api/:userId/ajouterBS', async (req, res) => {
+    try {
+        const { userId } = req.params; // Correction pour correspondre au paramètre de route
+        const { num, matricule, malade, medecin, specMedecin, date } = req.body; 
+
+        // Vérification si la date est définie et a le format attendu
+        if (!date || typeof date !== 'string') {
+            return res.status(400).json({ message: 'La date est requise et doit être une chaîne de caractères' });
+        }
+
+        // Séparation des composants de la date
+        const dateComponents = date.split('/');
+        if (dateComponents.length !== 3) {
+            return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
+        }
+
+        const [day, month, year] = dateComponents.map(Number);
+
+        // Vérification si les composants sont valides
+        if (isNaN(day) || isNaN(month) || isNaN(year)) {
+            return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
+        }
+
+        // Création d'un nouvel objet Date
+        const formattedDate = new Date(year, month - 1, day);
+
+        
+        // Ajout du nouveau bulletin avec la date formatée et l'état défini
+        const newBS = await BS.create({ 
+            userId, // Correction pour correspondre au nom du champ dans le schéma
+            num, 
+            matricule, 
+            malade,
+            medecin, 
+            specMedecin, 
+            date: formattedDate,
+            etat: 1 // Attribution de l'état directement ici
+        });
+
+        res.status(200).json({ message: 'Bulletin de soins ajouté', newBS });
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout d\'un bulletin de soins : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un bulletin de soins' });
     }
 });

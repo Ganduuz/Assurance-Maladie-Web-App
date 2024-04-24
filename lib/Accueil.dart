@@ -1,3 +1,4 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'moncompte.dart';
 import 'actesMed.dart';
@@ -9,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'local_storage_service.dart';
 import 'dart:html' as html; 
+import 'remboursement.dart';
 
 
 class Accueil extends StatefulWidget {
@@ -111,7 +113,8 @@ Future<void> _getUserData() async {
   static final List<Widget> _widgetOptions = <Widget>[
     const Home(),
     FamilyMemberPage(),
-     const bs(),
+      bs(),
+     remb(),
      const actesMed(),
     const MonCompte(),
    
@@ -400,7 +403,7 @@ notifications++;  });
       body: Column(
         
         children: [
-         
+         Divider(color: Color(0xFF5BADE9),),
           Expanded(
             child: Row(
               children: [
@@ -416,6 +419,10 @@ notifications++;  });
                     },
                     selectedIndex: selectedIndex,
                   ),
+                ),
+                VerticalDivider(
+                  color: Colors.grey.shade100,
+                  width: 0.5,
                 ),
                 Expanded(
                   child: IndexedStack(
@@ -452,22 +459,22 @@ static const double defaultPadding = 5.0;
         child: Row(
           children: [
             Expanded(
-              flex: 2,
+              flex: 3,
               child: Container(
                 height: height,
                 padding: const EdgeInsets.symmetric(
-                    horizontal: defaultPadding,
-                    vertical: defaultPadding * 3),
+                 
+                    vertical: 30),
                 decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 255, 255, 255),
-                    borderRadius: BorderRadius.circular(15)),
+                ),
                 child: Column(
                   children: [
                     SizedBox(
                       height: 100,
                       child: DrawerHeader(
                         padding:
-                            const EdgeInsets.only(left: defaultPadding * 1.5),
+                            const EdgeInsets.only(left: 10 * 1.5),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -499,9 +506,7 @@ static const double defaultPadding = 5.0;
                                 ),
                               ],
                           
-                            ), Expanded(
-              flex: 4,
-              child: Container(),),
+                            ),
                           ],
                         ),
                       ),
@@ -531,73 +536,40 @@ static const double defaultPadding = 5.0;
             },
             isSelected: selectedIndex == 2,
           ),
-          AccueLisTile(
-            title: "Actes médicaux",
-            icon: const Icon(Icons.local_hospital),
+           AccueLisTile(
+            title: "Mes remboursements",
+            icon: const Icon(Icons.newspaper),
             press: () {
               onItemTapped(3);
             },
             isSelected: selectedIndex == 3,
+          ),
+          AccueLisTile(
+            title: "Actes médicaux",
+            icon: const Icon(Icons.local_hospital),
+            press: () {
+              onItemTapped(4);
+            },
+            isSelected: selectedIndex == 4,
           ),
           const Spacer(),
           AccueLisTile(
             title: "Mon compte",
             icon: const Icon(Icons.account_box),
             press: () {
-              onItemTapped(4);
+              onItemTapped(5);
             },
-            isSelected: selectedIndex == 4,
+            isSelected: selectedIndex == 5,
           ),
-        AccueLisTile(
-  title: "Déconnexion",
-  icon: const Icon(Icons.logout),
-  press: () {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+           AccueLisTile(
+            title: "Déconnexion",
+            icon: const Icon(Icons.logout),
+            press: () {
+            _deconnexion(context);
+            },
+            isSelected: selectedIndex == 6,
           ),
-          title: const Text('Déconnexion'),
-          content: Container(
-            width: 400,
-            padding: const EdgeInsets.all(15.0),
-            child: const Text('Voulez-vous vous déconnecter?'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Annuler',
-                style: TextStyle(color: Color(0xFF5BADE9)),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyHomePage(), // Supprimez 'const' ici
-                  ),
-                );
-              },
-              child: const Text(
-                'Déconnexion',
-                style: TextStyle(color: Color(0xFF5BADE9)),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  },
-  isSelected: selectedIndex == 5,
-),
+
         ],
       ),
       ),
@@ -606,7 +578,31 @@ static const double defaultPadding = 5.0;
       ),
     );
   }
+  void _deconnexion(BuildContext context) {
+    AwesomeDialog(
+      width: 500,
+      context: context,
+      dialogType: DialogType.question,
+      animType: AnimType.topSlide,
+      title: 'Déconnexion',
+      desc: 'Voulez-vous vraiment se déconnecter ?',
+      btnCancelOnPress: () {},
+      btnOkOnPress: () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MyHomePage(),
+        ),
+      );
+      },
+      btnCancelText: "Annuler",
+      btnCancelColor: Color.fromARGB(245, 170, 216, 231),
+      btnOkText: "Oui",
+      btnOkColor: Color(0xFF5BADE9),
+    )..show();
+    }
 }
+
 
 class AccueLisTile extends StatelessWidget {
   const AccueLisTile({
@@ -630,7 +626,7 @@ class AccueLisTile extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Container(
-              height: 50,
+              height: 45,
               decoration: isSelected ? const BoxDecoration(
                 color: Color.fromARGB(255, 73, 167, 226),
                 borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -662,8 +658,11 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Accueil'),
-);
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Padding(padding: const EdgeInsets.fromLTRB(80.0, 50.0, 250.0, 0),),
+      ),
+    );
 }
 }
