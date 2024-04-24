@@ -41,10 +41,10 @@ class _bsState extends State<bs> {
   int _currentPage = 0;
   int _busoPerPage = 6;
   String _searchText = ''; 
-    String _username= ''; // État local pour stocker le texte de recherche
+    String _username= ''; 
 
   DateTime _focusedDay = DateTime.now();
-  DateTime _selectedDay = DateTime.now(); // Ajout de _selectedDay pour stocker la date sélectionnée
+  DateTime _selectedDay = DateTime.now(); 
   String? selectedMalade;
     List<FamilyMemb> familyMembers = [];
 
@@ -448,19 +448,19 @@ Future<void> _getUserData() async {
     );
   }
 
-  void _showAddBulletinDialog(BuildContext context) {
-  String Qui_est_malade = 'Qui est malade ?';
-
+ void _showAddBulletinDialog(BuildContext context) {
+  String Qui_est_malade = ''; // Mettre à jour le nom du malade sélectionné
   String ID = '';
   String nom_medecin = '';
   String spec_medecin = '';
   String piece_jointe = '';
   int nextBulletinNumber = buso.length + 1;
   String nextBulletinNumberString = nextBulletinNumber.toString();
-  List<String> listee =
-      familyMembers.map((member) => '${member.nom} ${member.prenom}').toList();
-      listee.insert(0, _username);
+  List<String> listee = familyMembers.map((member) => '${member.nom} ${member.prenom}').toList();
+  listee.insert(0, _username);
+
   _selectedDay = DateTime.now();
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -498,51 +498,49 @@ Future<void> _getUserData() async {
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Colors.blue.shade300, width: 2.0),
+                    borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                 ),
               ),
               SizedBox(height: 20,),
               Container(
-              padding: EdgeInsets.symmetric(horizontal: 16), // Utiliser un padding symétrique
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey, width: 1),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: DropdownButton<String>(
-                value: selectedMalade,
-                onChanged: (newValue) {
-                  setState(() {
-                    selectedMalade = newValue!;
-                    Qui_est_malade = newValue; // Mettre à jour Qui_est_malade
-                  });
-                },
-                hint: Text("Qui est malade ?"),
-                icon: Icon(Icons.arrow_drop_down),
-                underline: SizedBox(),
-                dropdownColor: Colors.white,
-                isExpanded: true,
-                style: TextStyle(
-                  color: Color.fromRGBO(43, 144, 238, 1),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                padding: EdgeInsets.symmetric(horizontal: 16), // Utiliser un padding symétrique
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey, width: 1),
+                  borderRadius: BorderRadius.circular(5),
                 ),
-               items: listee.asMap().entries.map<DropdownMenuItem<String>>((entry) {
-      int index = entry.key;
-      String valueItem = entry.value;
-      return DropdownMenuItem<String>(
-        child: Text(
-          valueItem,
-          style: index == 0 ? TextStyle(color: Theme.of(context).primaryColor,) : null, // Changer la couleur du premier élément
-        ),
-        value: valueItem,
-      );
-    }).toList(),
-  ),
-),
+                child:DropdownButton<String>(
+                  value: Qui_est_malade.isNotEmpty ? Qui_est_malade : null,
+                  onChanged: (newValue) {
+                    setState(() {
+                      Qui_est_malade = newValue!;
+                    });
+                  },
+                  hint: Text("Qui est malade ?", style: TextStyle(fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.arrow_drop_down),
+                  underline: SizedBox(),
+                  dropdownColor: Colors.white,
+                  isExpanded: true,
+                  style: TextStyle(
+                    color: Color.fromRGBO(43, 144, 238, 1),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  items: listee.asMap().entries.map<DropdownMenuItem<String>>((entry) {
+                    int index = entry.key;
+                    String valueItem = entry.value;
+                    return DropdownMenuItem<String>(
+                      value: valueItem,
+                      child: Text(
+                        valueItem,
+                        style: index == 0 ? TextStyle(color:Theme.of(context).primaryColor,) : null, // Mettre en couleur le premier élément de la liste
+                      ),
+                    );
+                  }).toList(),
+                ),
 
+              ),
               SizedBox(height: 20),
               TextField(
                 onChanged: (value) => nom_medecin = value,
@@ -556,8 +554,7 @@ Future<void> _getUserData() async {
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Colors.blue.shade300, width: 2.0),
+                    borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                 ),
@@ -575,29 +572,33 @@ Future<void> _getUserData() async {
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Colors.blue.shade300, width: 2.0),
+                    borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                 ),
               ),
               SizedBox(height: 10,),
               Row(
-                children: [IconButton(
-                  onPressed: (){
-                    buildCalendarWidget(context);
-                  },
-                  icon: Icon(
-                    Icons.calendar_month,
-                    color: Colors.blue,
+                children: [
+                  IconButton(
+                    onPressed: (){
+                      buildCalendarWidget(context);
+                    },
+                    icon: Icon(
+                      Icons.calendar_month,
+                      color: Colors.blue,
+                    ),
                   ),
-                ),
-                  Text('Date de consultation',
+                  Text(
+                    'Date de consultation',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                    ),),],),
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () async {
@@ -656,22 +657,15 @@ Future<void> _getUserData() async {
                         buso.add(Bulletins_Soins(
                           Num: nextBulletinNumberString,
                           ID: ID,
-                          Qui_est_malade: Qui_est_malade, // Utiliser Qui_est_malade mis à jour
+                          Qui_est_malade: Qui_est_malade,
                           nom_medecin: nom_medecin,
                           spec_medecin: spec_medecin,
-                          DateConsultation:
-                          DateFormat('dd/MM/yyyy').format(_selectedDay), // Utilisation de la date sélectionnée
+                          DateConsultation: DateFormat('dd/MM/yyyy').format(_selectedDay),
                           piece_jointe: piece_jointe,
                         ));
-                        
-                      });
-                      setState(() {
-                         selectedMalade="";
-
-                        
+                        selectedMalade = ''; // Réinitialiser la valeur sélectionnée
                       });
                       Navigator.of(context).pop();
-                      
                     },
                     child: Text(
                       'Ajouter',
@@ -696,8 +690,8 @@ Future<void> _getUserData() async {
 
    
   void _archiverBulletinsSoins(Bulletins_Soins bulletins_soins) {
-    int index = buso.indexOf(bulletins_soins); // Trouver l'indice de l'objet dans la liste
-  if (index != -1) { // Vérifier si l'objet a été trouvé
+    int index = buso.indexOf(bulletins_soins); 
+  if (index != -1) { 
   AwesomeDialog(
     width: 500,
     
@@ -705,7 +699,7 @@ Future<void> _getUserData() async {
     dialogType: DialogType.question,
     animType: AnimType.topSlide,
     title: 'Supprimer ?',
-    desc: 'Êtes-vous sûr de vouloir supprimer cette bulletin de soins ?',
+    desc: 'Êtes-vous sûr de vouloir supprimer ce bulletin de soins ?',
     btnCancelOnPress: () {},
     btnOkOnPress: () {
       setState(() {
