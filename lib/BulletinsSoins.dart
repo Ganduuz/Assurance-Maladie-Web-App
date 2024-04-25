@@ -44,9 +44,11 @@ class _bsState extends State<bs> {
     String _username= ''; 
 
   DateTime _focusedDay = DateTime.now();
-  DateTime _selectedDay = DateTime.now(); 
+  DateTime _selectedDay = DateTime.now();
   String? selectedMalade;
     List<FamilyMemb> familyMembers = [];
+    TextEditingController dateController = TextEditingController();
+
 
   List<Bulletins_Soins> get _filteredbuso {
     return buso.where((bs) => bs.Num.toLowerCase().contains(_searchText.toLowerCase()) ||
@@ -454,11 +456,13 @@ Future<void> _getUserData() async {
   String nom_medecin = '';
   String spec_medecin = '';
   String piece_jointe = '';
+  
+
   int nextBulletinNumber = buso.length + 1;
   String nextBulletinNumberString = nextBulletinNumber.toString();
   List<String> listee = familyMembers.map((member) => '${member.nom} ${member.prenom}').toList();
   listee.insert(0, _username);
-
+dateController.text = '';
   _selectedDay = DateTime.now();
 
   showDialog(
@@ -510,37 +514,50 @@ Future<void> _getUserData() async {
                   border: Border.all(color: Colors.grey, width: 1),
                   borderRadius: BorderRadius.circular(5),
                 ),
-                child:DropdownButton<String>(
-                  value: Qui_est_malade.isNotEmpty ? Qui_est_malade : null,
-                  onChanged: (newValue) {
-                    setState(() {
-                      Qui_est_malade = newValue!;
-                    });
-                  },
-                  hint: Text("Qui est malade ?", style: TextStyle(fontWeight: FontWeight.bold)),
-                  icon: Icon(Icons.arrow_drop_down),
-                  underline: SizedBox(),
-                  dropdownColor: Colors.white,
-                  isExpanded: true,
-                  style: TextStyle(
-                    color: Color.fromRGBO(43, 144, 238, 1),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  items: listee.asMap().entries.map<DropdownMenuItem<String>>((entry) {
-                    int index = entry.key;
-                    String valueItem = entry.value;
-                    return DropdownMenuItem<String>(
-                      value: valueItem,
-                      child: Text(
-                        valueItem,
-                        style: index == 0 ? TextStyle(color:Theme.of(context).primaryColor,) : null, // Mettre en couleur le premier élément de la liste
+                child: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return DropdownButton<String>(
+                      value: Qui_est_malade.isNotEmpty ? Qui_est_malade : null,
+                      onChanged: (newValue) {
+                        setState(() {
+                          Qui_est_malade = newValue!;
+                        });
+                      },
+                      hint: Qui_est_malade.isNotEmpty
+                          ? Text(
+                              Qui_est_malade,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          : Text(
+                              "Qui est malade ?",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                      icon: Icon(Icons.arrow_drop_down),
+                      underline: SizedBox(),
+                      dropdownColor: Colors.white,
+                      isExpanded: true,
+                      style: TextStyle(
+                        color: Color.fromRGBO(43, 144, 238, 1),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
+                      items: listee.asMap().entries.map<DropdownMenuItem<String>>((entry) {
+                        int index = entry.key;
+                        String valueItem = entry.value;
+                        return DropdownMenuItem<String>(
+                          value: valueItem,
+                          child: Text(
+                            valueItem,
+                            style: index == 0 ? TextStyle(color: Theme.of(context).primaryColor) : null, // Mettre en couleur le premier élément de la liste
+                          ),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
+                  },
                 ),
-
               ),
+
+
               SizedBox(height: 20),
               TextField(
                 onChanged: (value) => nom_medecin = value,
@@ -577,28 +594,61 @@ Future<void> _getUserData() async {
                   ),
                 ),
               ),
-              SizedBox(height: 10,),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: (){
-                      buildCalendarWidget(context);
-                    },
-                    icon: Icon(
-                      Icons.calendar_month,
-                      color: Colors.blue,
-                    ),
+              SizedBox(height: 20,),
+              // Déclarez un TextEditingController
+
+              
+  
+    SizedBox(width: 10), // Ajouter un espacement entre l'icône et le champ de texte
+    // Utiliser Flexible pour que le champ de texte puisse se redimensionner selon l'espace disponible
+Row(
+  children: [
+    Flexible(
+      child: Container(
+        constraints: BoxConstraints(maxWidth: 250), // Spécifiez la largeur maximale souhaitée ici
+        child: TextField(
+          
+          controller: dateController,
+          readOnly: true,
+          onTap: () {
+            buildCalendarWidget(context);
+          },
+          decoration: InputDecoration(labelText: 'Date de consultation ',
+                  labelStyle: TextStyle(
+                    color: Color.fromRGBO(209, 216, 223, 1),
                   ),
-                  Text(
-                    'Date de consultation',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+
+            border: OutlineInputBorder(),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey, width: 1),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue, width: 1),
+            ),
+            prefixIcon: IconButton(
+              onPressed: () {
+                buildCalendarWidget(context);
+              },
+              icon: Icon(
+                Icons.calendar_today,
+                color: Colors.blue,
               ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  ],
+),
+
+
+    
+  
+
+
+
+// Fonction pour construire le widget de calendrier
+
               SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () async {
@@ -663,7 +713,7 @@ Future<void> _getUserData() async {
                           DateConsultation: DateFormat('dd/MM/yyyy').format(_selectedDay),
                           piece_jointe: piece_jointe,
                         ));
-                        selectedMalade = ''; // Réinitialiser la valeur sélectionnée
+                        selectedMalade = ''; 
                       });
                       Navigator.of(context).pop();
                     },
@@ -716,7 +766,6 @@ Future<void> _getUserData() async {
   }}
 
   void buildCalendarWidget(BuildContext context) {
-    
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -740,6 +789,7 @@ Future<void> _getUserData() async {
                   child: Column(
                     children: [
                       TableCalendar(
+                        
                         focusedDay: _focusedDay,
                         firstDay: DateTime.utc(1950),
                         lastDay: DateTime.utc(2100),
@@ -749,9 +799,11 @@ Future<void> _getUserData() async {
                           weekendStyle:TextStyle(fontWeight: FontWeight.w400),
                         ),
                         onDaySelected: (DateTime selectDay,DateTime focusDay) {
+
                           setState(() {
                             _selectedDay=selectDay;
                             _focusedDay=focusDay;
+                             dateController.text = "${selectDay.day.toString().padLeft(2, '0')}/${selectDay.month.toString().padLeft(2, '0')}/${selectDay.year}";
                           });
                         },
                         headerStyle: HeaderStyle(formatButtonVisible: false, titleCentered: true),
@@ -778,7 +830,11 @@ Future<void> _getUserData() async {
                         children: [
                           Expanded(child: TextButton(
                             onPressed: () {
-                              Navigator.pop(context, _selectedDay);
+                              Navigator.pop(context, _selectedDay);                         
+                            setState(() {
+                               _selectedDay = DateTime.now(); // "DateTime().now" corrigé en "DateTime.now()"
+                            
+                          });
                             },
                             child: Text(
                               "OK",
@@ -789,6 +845,10 @@ Future<void> _getUserData() async {
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
+                              setState(() {
+                               _selectedDay = DateTime.now(); // "DateTime().now" corrigé en "DateTime.now()"
+                            
+                          });
                             },
                             child: Text(
                               "Annuler",
