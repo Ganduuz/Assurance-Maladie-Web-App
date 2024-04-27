@@ -16,14 +16,13 @@ class _AccueilState extends State<AccueilAdmin> {
   int selectedIndex = 0;
 
   static final List<Widget> _widgetOptions = <Widget>[
-     const HomeAdmin(),
      const dashboard(),
-      const Employeee(),
-     const BSAdmin(),
-     const NewMemberPage(),
+     Employeee (),
+     BSAdmin(bulletinsSoins: [],),
+      NewMemberPage(),
 
-   
-  ];
+
+];
 
   @override
   Widget build(BuildContext context) {
@@ -173,46 +172,39 @@ static const double defaultPadding = 5.0;
                       ),
                     ),
           const SizedBox(height: 8,),
+         
           AccueLisTile(
-            title: "Accueil",
-            icon: const Icon(Icons.home),
+            title: "Tableau de bord",
+            icon: const Icon(Icons.dashboard),
             press: () {
               onItemTapped(0);
             },
             isSelected: selectedIndex == 0,
           ),
           AccueLisTile(
-            title: "Tableau de bord",
-            icon: const Icon(Icons.dashboard),
+            title: "Employés",
+            icon: const Icon(Icons.man),
             press: () {
               onItemTapped(1);
             },
             isSelected: selectedIndex == 1,
           ),
           AccueLisTile(
-            title: "Employés",
-            icon: const Icon(Icons.man),
+            title: "Bulletins de soins",
+            icon: const Icon(Icons.newspaper),
             press: () {
               onItemTapped(2);
             },
             isSelected: selectedIndex == 2,
-          ),
-          AccueLisTile(
-            title: "Bulletins de soins",
-            icon: const Icon(Icons.newspaper),
-            press: () {
-              onItemTapped(3);
-            },
-            isSelected: selectedIndex == 3,
           ),
           const Spacer(),
           AccueLisTile(
             title: "Nouveau membre ",
             icon: const Icon(Icons.man),
             press: () {
-              onItemTapped(4);
+              onItemTapped(3);
             },
-            isSelected: selectedIndex == 4,
+            isSelected: selectedIndex == 3,
           ),
         AccueLisTile(
   title: "Déconnexion",

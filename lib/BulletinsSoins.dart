@@ -467,153 +467,153 @@ Widget build(BuildContext context) {
                           bs.piece_jointe.contains(_searchText);
                     }).map((bs) {
                       return Container(
-  padding: EdgeInsets.all(10),
-  decoration: BoxDecoration(
-    color: Color.fromARGB(255, 255, 255, 255),
-    boxShadow: const [
-      BoxShadow(
-        color: Color.fromRGBO(208, 230, 244, 0.804),
-        blurRadius: 20.0,
-        offset: Offset(0, 5),
-      ),
-    ],
-  ),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(
-            width: 150,
-            child: Text(
-              bs.ID,
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 150,
-            child: Text(
-              bs.Qui_est_malade,
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 150,
-            child: Text(
-              bs.nom_medecin,
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 150,
-            child: Text(
-              bs.spec_medecin,
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 190,
-            child: Text(
-              bs.DateConsultation,
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 150,
-            child: Container(
-              margin: EdgeInsets.symmetric(vertical: 15),
-              child: Row(
-                children: [
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        if (bs.piece_jointe.isNotEmpty) {
-                          if (bs.piece_jointe.startsWith('http')) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Scaffold(
-                                  body: Center(
-                                    child: Image.network(bs.piece_jointe),
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color.fromRGBO(208, 230, 244, 0.804),
+                              blurRadius: 20.0,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width: 150,
+                                  child: Text(
+                                    bs.ID,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Scaffold(
-                                  body: Center(
-                                    child: Image.network((bs.piece_jointe)),
+                                SizedBox(
+                                  width: 150,
+                                  child: Text(
+                                    bs.Qui_est_malade,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      child: bs.piece_jointe.isNotEmpty
-                          ? Text(
-                              'Ouvrir',
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                                decorationColor: Colors.blue,
-                                color: Colors.blue,
+                                SizedBox(
+                                  width: 150,
+                                  child: Text(
+                                    bs.nom_medecin,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 150,
+                                  child: Text(
+                                    bs.spec_medecin,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 150,
+                                  child: Text(
+                                    bs.DateConsultation,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 150,
+                                  child: Container(
+                                    margin: EdgeInsets.symmetric(vertical: 15),
+                                    child: Row(
+                                      children: [
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: InkWell(
+                                            onTap: () {
+                                              if (bs.piece_jointe.isNotEmpty) {
+                                                if (bs.piece_jointe.startsWith('http')) {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) => Scaffold(
+                                                        body: Center(
+                                                          child: Image.network(bs.piece_jointe),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) => Scaffold(
+                                                        body: Center(
+                                                          child: Image.network((bs.piece_jointe)),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                            },
+                                            child: bs.piece_jointe.isNotEmpty
+                                                ? Text(
+                                                    'Ouvrir',
+                                                    style: TextStyle(
+                                                      decoration: TextDecoration.underline,
+                                                      decorationColor: Colors.blue,
+                                                      color: Colors.blue,
+                                                    ),
+                                                  )
+                                                : Text('Aucune pièce jointe'),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 150,
+                                  child: Tooltip(
+                                    message: 'Supprimer',
+                                    child: IconButton(
+                                      onPressed: () {
+                                        _supprimerBS(context, bs);
+                                      },
+                                      icon: Image.asset("assets/decline.png"),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              height: 50,
+                              color: Colors.white,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  buildStep(1, 'Ajouté', bs.etat >= 1),
+                                  Expanded(child: Divider(color: bs.etat  >= 2 ? const Color.fromARGB(255, 33, 243, 131) : Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
+                                  buildStep(2, 'Récupéré société', bs.etat >= 2),
+                                  Expanded(child: Divider(color: bs.etat  >= 3 ?const Color.fromARGB(255, 33, 243, 131) :  Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
+                                  buildStep(3, 'Envoyé assurance', bs.etat >= 3),
+                                  Expanded(child: Divider(color: bs.etat  >= 4 ? const Color.fromARGB(255, 33, 243, 131) : Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
+                                  buildStep(4, 'Remboursé', _currentStep >= 4),
+                                ],
                               ),
                             )
-                          : Text('Aucune pièce jointe'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 150,
-            child: Tooltip(
-              message: 'Supprimer',
-              child: IconButton(
-                onPressed: () {
-                  _supprimerBS(context, bs);
-                },
-                icon: Image.asset("assets/decline.png"),
-              ),
-            ),
-          ),
-        ],
-      ),
-      Container(
-        height: 50,
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            buildStep(1, 'En cours', bs.etat >= 1),
-            Expanded(child: Divider(color: bs.etat  >= 2 ? const Color.fromARGB(255, 33, 243, 131) :const Color.fromARGB(255, 180, 180, 180), height: 10, thickness: 2)),
-            buildStep(2, 'Récupéré société', bs.etat >= 2),
-            Expanded(child: Divider(color: bs.etat  >= 3 ?const Color.fromARGB(255, 33, 243, 131) : const Color.fromARGB(255, 180, 180, 180), height: 10, thickness: 2)),
-            buildStep(3, 'Envoyé assurance', bs.etat >= 3),
-            Expanded(child: Divider(color: bs.etat  >= 4 ? const Color.fromARGB(255, 33, 243, 131) :const Color.fromARGB(255, 180, 180, 180), height: 10, thickness: 2)),
-            buildStep(4, 'Remboursé', _currentStep >= 4),
-          ],
-        ),
-      )
-    ],
-  ),
-);
+                          ],
+                        ),
+                      );
 
                     }).toList(),
                   ),
@@ -675,14 +675,30 @@ Widget build(BuildContext context) {
 Widget buildStep(int stepNumber, String title, bool isActive) {
   return Row(
     children: [
-      CircleAvatar(
-        radius: 15,
-        backgroundColor: isActive ?  const Color.fromARGB(255, 33, 243, 131) : const Color.fromARGB(255, 180, 180, 180),
-        child: Text(stepNumber.toString(),
-        style:TextStyle(color:Colors.white),),
-      ),
+      if (isActive)
+        Tooltip(
+          message: '17/02/2025',
+          child: CircleAvatar(
+            radius: 15,
+            backgroundColor: const Color.fromARGB(255, 33, 243, 131),
+            child: Text(
+              stepNumber.toString(),
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        )
+      else
+        CircleAvatar(
+          radius: 15,
+          backgroundColor: Color.fromARGB(255, 193, 193, 193),
+          child: Text(
+            stepNumber.toString(),
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+
       SizedBox(width: 10),
-      Text(title,),
+      Text(title),
     ],
   );
 }

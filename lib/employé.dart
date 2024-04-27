@@ -726,21 +726,29 @@ IconButton(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.archive, color: Colors.red),
-                                onPressed: () {
-                                   _archiverEmployee(employee, context);
+                              Tooltip(
+                                message: 'Archiver',
+                                child: IconButton(
+                                  icon: const Icon(Icons.archive, color: Colors.red),
+                                  onPressed: () {
+                                    _archiverEmployee(employee, context);
                                     setState(() {
-                                      nombre --;
-                                      });
-                                },
+                                      nombre--;
+                                    });
+                                  },
+                                ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () {
-                                  _showEditEmployeeDialog(employee,context);
-                                },
-                              ),
+
+                              Tooltip(
+                                message: 'Modifier',
+                                child: IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () {
+                                    _showEditEmployeeDialog(employee,context);
+                                  },
+                                ),
+                              )
+
                             ],
                           ),
                         ),

@@ -838,7 +838,7 @@ app.get('/api/BS/:user_id', async (req, res) => {
                     nomActes: bulletin.nomActes,
                     actes: bulletin.actes,
                     date: formattedDate,
-                    userId: bulletin.plafond,
+                    userId: bulletin.userID,
                     etat:bulletin.etat,
                 };
             });
@@ -924,5 +924,142 @@ app.delete('/api/BS/delete/:bsId', async (req, res) => {
     } catch (error) {
         console.error('Erreur lors de la suppression d\'une bulletin de soins : ', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la suppression d\'un bulletin de soins' });
+    }
+});
+
+
+// Endpoint pour récupérer les bulletins de soins avec l'état 1
+app.get('/api/BSadmin/etat1', async (req, res) => {
+    try {
+        // Recherche des bulletins de soins avec l'état 1 dans la base de données
+        const bulletins = await BS.find({ etat: 1 });
+
+        if (bulletins.length > 0) {
+            const nombre =bulletins.length;
+
+            // Créer un tableau pour stocker les détails de chaque bulletin
+            const bulletinsDetails = await Promise.all(bulletins.map(async (bulletin) => {
+                // Formatage de la date avec moment.js
+                const formattedDate = moment(BS.date).format('DD/MM/YYYY');
+                // Recherche de l'utilisateur associé à ce bulletin
+                const user = await usersModel.findOne({ _id: bulletin.userID });
+                const username = `${user.nom} ${user.prenom}`;
+
+                // Retourner les détails du bulletin avec le nom d'utilisateur associé
+                return {
+                    _id: bulletin._id,
+                    matricule: bulletin.matricule,
+                    memberId: bulletin.memberId,
+                    prenomMalade: bulletin.prenomMalade,
+                    nomMalade: bulletin.nomMalade,
+                    nomActes: bulletin.nomActes,
+                    actes: bulletin.actes,
+                    date: formattedDate,
+                    userId: bulletin.userID,
+                    etat: bulletin.etat,
+                    username: username,
+                };
+            }));
+
+            // Envoyer les détails des bulletins récupérés avec un code de statut 200
+            res.status(200).json({ message: 'Détails des bulletins de soins récupérés',nombre, bulletinsDetails });
+        } else {
+            // Envoyer un message d'erreur si aucun bulletin n'a été trouvé avec l'état 1
+            res.status(404).json({ message: 'Aucun bulletin trouvé pour cet utilisateur' });
+        }
+    } catch (error) {
+        // Gérer les erreurs de manière appropriée et envoyer un message d'erreur avec un code de statut 500
+        console.error('Erreur lors de la récupération des détails des bulletins de soins : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des bulletins de soins' });
+    }
+});
+
+app.get('/api/BSadmin/etat2', async (req, res) => {
+    try {
+        // Recherche des bulletins de soins avec l'état 1 dans la base de données
+        const bulletins = await BS.find({ etat: 2 });
+
+        if (bulletins.length > 0) {
+            const nombre =bulletins.length;
+
+            // Créer un tableau pour stocker les détails de chaque bulletin
+            const bulletinsDetails = await Promise.all(bulletins.map(async (bulletin) => {
+                // Formatage de la date avec moment.js
+                const formattedDate = moment(BS.date).format('DD/MM/YYYY');
+                // Recherche de l'utilisateur associé à ce bulletin
+                const user = await usersModel.findOne({ _id: bulletin.userID });
+                const username = `${user.nom} ${user.prenom}`;
+
+                // Retourner les détails du bulletin avec le nom d'utilisateur associé
+                return {
+                    _id: bulletin._id,
+                    matricule: bulletin.matricule,
+                    memberId: bulletin.memberId,
+                    prenomMalade: bulletin.prenomMalade,
+                    nomMalade: bulletin.nomMalade,
+                    nomActes: bulletin.nomActes,
+                    actes: bulletin.actes,
+                    date: formattedDate,
+                    userId: bulletin.userID,
+                    etat: bulletin.etat,
+                    username: username,
+                };
+            }));
+
+            // Envoyer les détails des bulletins récupérés avec un code de statut 200
+            res.status(200).json({ message: 'Détails des bulletins de soins récupérés',nombre, bulletinsDetails });
+        } else {
+            // Envoyer un message d'erreur si aucun bulletin n'a été trouvé avec l'état 1
+            res.status(404).json({ message: 'Aucun bulletin trouvé pour cet utilisateur' });
+        }
+    } catch (error) {
+        // Gérer les erreurs de manière appropriée et envoyer un message d'erreur avec un code de statut 500
+        console.error('Erreur lors de la récupération des détails des bulletins de soins : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des bulletins de soins' });
+    }
+});
+
+app.get('/api/BSadmin/etat3', async (req, res) => {
+    try {
+        // Recherche des bulletins de soins avec l'état 1 dans la base de données
+        const bulletins = await BS.find({ etat: 3 });
+
+        if (bulletins.length > 0) {
+            const nombre =bulletins.length;
+
+            // Créer un tableau pour stocker les détails de chaque bulletin
+            const bulletinsDetails = await Promise.all(bulletins.map(async (bulletin) => {
+                // Formatage de la date avec moment.js
+                const formattedDate = moment(BS.date).format('DD/MM/YYYY');
+                // Recherche de l'utilisateur associé à ce bulletin
+                const user = await usersModel.findOne({ _id: bulletin.userID });
+                const username = `${user.nom} ${user.prenom}`;
+
+                // Retourner les détails du bulletin avec le nom d'utilisateur associé
+                return {
+                    _id: bulletin._id,
+                    matricule: bulletin.matricule,
+                    memberId: bulletin.memberId,
+                    prenomMalade: bulletin.prenomMalade,
+                    nomMalade: bulletin.nomMalade,
+                    nomActes: bulletin.nomActes,
+                    actes: bulletin.actes,
+                    date: formattedDate,
+                    userId: bulletin.userID,
+                    etat: bulletin.etat,
+                    username: username,
+                };
+            }));
+
+            // Envoyer les détails des bulletins récupérés avec un code de statut 200
+            res.status(200).json({ message: 'Détails des bulletins de soins récupérés',nombre, bulletinsDetails });
+        } else {
+            // Envoyer un message d'erreur si aucun bulletin n'a été trouvé avec l'état 1
+            res.status(404).json({ message: 'Aucun bulletin trouvé pour cet utilisateur' });
+        }
+    } catch (error) {
+        // Gérer les erreurs de manière appropriée et envoyer un message d'erreur avec un code de statut 500
+        console.error('Erreur lors de la récupération des détails des bulletins de soins : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des bulletins de soins' });
     }
 });

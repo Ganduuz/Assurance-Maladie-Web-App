@@ -625,79 +625,90 @@ void _deleteMember(String memberId,BuildContext context) async {
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Pour espacer les boutons uniformément
                                   
                                   children: [
-                                    SizedBox(
-                                      height: 30,
-                                      width: 70,
-                                      child: TextButton(
-                                        onPressed: () {},
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            side: const BorderSide(
+                                    Tooltip(
+                                      message: 'Reste',
+                                      child: SizedBox(
+                                        height: 30,
+                                        width: 70,
+                                        child: TextButton(
+                                          onPressed: () {},
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(5.0),
+                                              side: const BorderSide(
+                                                color: Color.fromARGB(255, 54, 249, 0),
+                                              ),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            familyMembers[index].reste.toStringAsFixed(2),
+                                            style: const TextStyle(
                                               color: Color.fromARGB(255, 54, 249, 0),
+                                              fontFamily: 'Istok web',
+                                              fontSize: 12,
                                             ),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          familyMembers[index].reste.toStringAsFixed(2),
-                                          style: const TextStyle(
-                                            color: Color.fromARGB(255, 54, 249, 0),
-                                            fontFamily: 'Istok web',
-                                            fontSize: 12,
                                           ),
                                         ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      height: 30,
-                                      width: 70,
-                                      child: TextButton(
-                                        onPressed: () {},
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            side: const BorderSide(
+
+                                    Tooltip(
+                                      message: 'Remboursé',
+                                      child: SizedBox(
+                                        height: 30,
+                                        width: 70,
+                                        child: TextButton(
+                                          onPressed: () {},
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(5.0),
+                                              side: const BorderSide(
+                                                color: Color.fromARGB(255, 241, 52, 0),
+                                              ),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            familyMembers[index].consome.toStringAsFixed(2),
+                                            style: const TextStyle(
                                               color: Color.fromARGB(255, 241, 52, 0),
+                                              fontFamily: 'Istok web',
+                                              fontSize: 12,
                                             ),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          familyMembers[index].consome.toStringAsFixed(2),
-                                          style: const TextStyle(
-                                            color: Color.fromARGB(255, 241, 52, 0),
-                                            fontFamily: 'Istok web',
-                                            fontSize: 12,
                                           ),
                                         ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      height: 30,
-                                      width: 70,
-                                      child: TextButton(
-                                        onPressed: () {},
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            side: const BorderSide(
-                                              color:  Color.fromARGB(255, 241, 189, 0),
+
+                                    Tooltip(
+                                      message: 'Plafond',
+                                      child: SizedBox(
+                                        height: 30,
+                                        width: 70,
+                                        child: TextButton(
+                                          onPressed: () {},
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(5.0),
+                                              side: const BorderSide(
+                                                color: Color.fromARGB(255, 241, 189, 0),
+                                              ),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            familyMembers[index].plafond.toStringAsFixed(2),
+                                            style: const TextStyle(
+                                              color: Color.fromARGB(255, 241, 189, 0),
+                                              fontFamily: 'Istok web',
+                                              fontSize: 12,
                                             ),
                                           ),
                                         ),
-                                        child: Text(
-                                          familyMembers[index].plafond.toStringAsFixed(2),
-                                          style: const TextStyle(
-                                            color: Color.fromARGB(255, 241, 189, 0),
-                                            fontFamily: 'Istok web',
-                                            fontSize: 12,
-                                          ),
-                                        ),
                                       ),
-                                      
-                                    ),
+                                    )
+
                                   ],
                                 ),
                                 const SizedBox(height: 40.0),
