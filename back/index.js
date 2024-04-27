@@ -11,6 +11,7 @@ const multer = require('multer');
 const upload = multer();
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
+const { ObjectId } = require('mongoose').Types;
 
 
 
@@ -110,12 +111,16 @@ const FamilyMember = mongoose.model('membres', familyMemberSchema);
 module.exports = FamilyMember;
 
 const BSSchema = new mongoose.Schema({
-    num :Number,
+    memberId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'FamilyMember'
+    },
     matricule: String,
-    malade: String,
-    userId: String,
-    medecin: String,
-    specMedecin: String,
+    nomMalade:String,
+    prenomMalade:String,
+    userID: String,
+    nomActes: String,
+    actes: String,
     date: String,
     etat:Number,
     
@@ -812,12 +817,52 @@ app.delete('/api/family-members/delete/:memberId', async (req, res) => {
 
 
 
+app.get('/api/BS/:user_id', async (req, res) => {
+    try {
+        const { user_id } = req.params;
+        
+        // Recherche des membres de la famille appartenant à l'utilisateur avec l'ID spécifié
+        const bulletins = await BS.find({ userID: user_id });
+        
+        if (bulletins.length > 0) {
+            // Créer un tableau pour stocker les détails de chaque membre
+            const bulletinsDetails = bulletins.map(bulletin => {
+                const formattedDate = moment(BS.date).format('DD/MM/YYYY');
+        
+                return {
+                    _id: bulletin._id,
+                    matricule: bulletin.matricule,
+                    memberId: bulletin.memberId,
+                    prenomMalade: bulletin.prenomMalade,
+                    nomMalade: bulletin.nomMalade,
+                    nomActes: bulletin.nomActes,
+                    actes: bulletin.actes,
+                    date: formattedDate,
+                    userId: bulletin.plafond,
+                    etat:bulletin.etat,
+                };
+            });
+            console.log('bulletins de soins récupérées');
+            res.status(200).json({ message: 'Détails des bulletins de soins récupérés', bulletinsDetails });
+        
+        }
+        
+         else {
+            res.status(404).json({ message: 'Aucun bulletin trouvé pour cet utilisateur' });
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des détails des bulletins de soins : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des bulletins de soins' });
+    }
+});
 
 
 app.post('/api/:userId/ajouterBS', async (req, res) => {
     try {
-        const { userId } = req.params; // Correction pour correspondre au paramètre de route
-        const { num, matricule, malade, medecin, specMedecin, date } = req.body; 
+        const { userId } = req.params;
+        const userrId = new mongoose.Types.ObjectId(req.params.userId); // Utilisez 'new'
+
+        const { matricule, malade, nomActes, actes, date } = req.body; 
 
         // Vérification si la date est définie et a le format attendu
         if (!date || typeof date !== 'string') {
@@ -840,15 +885,26 @@ app.post('/api/:userId/ajouterBS', async (req, res) => {
         // Création d'un nouvel objet Date
         const formattedDate = new Date(year, month - 1, day);
 
-        
-        // Ajout du nouveau bulletin avec la date formatée et l'état défini
+        // Séparation du nom et prénom du malade
+        let nomMalade = '';
+        let prenomMalade = '';
+        if (typeof malade === 'string') {
+            const maladeComponents = malade.split(' ');
+            nomMalade = maladeComponents[0];
+            prenomMalade = maladeComponents.slice(1).join(' ');
+        }
+
+        // Recherche du membre de la famille en fonction du prénom ou de l'ID de l'utilisateur
+        const member = await FamilyMember.findOne({ prenom: prenomMalade, userId: userrId });
+        const memberID = member ? new ObjectId(member.id) : null;        // Ajout du nouveau bulletin avec la date formatée et l'état défini
         const newBS = await BS.create({ 
-            userId, // Correction pour correspondre au nom du champ dans le schéma
-            num, 
+            userID:userId, 
+            memberId: memberID, // Si member est null, aucun membre n'est trouvé
             matricule, 
-            malade,
-            medecin, 
-            specMedecin, 
+            nomMalade,
+            prenomMalade,
+            nomActes, 
+            actes, 
             date: formattedDate,
             etat: 1 // Attribution de l'état directement ici
         });
@@ -857,5 +913,16 @@ app.post('/api/:userId/ajouterBS', async (req, res) => {
     } catch (error) {
         console.error('Erreur lors de l\'ajout d\'un bulletin de soins : ', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un bulletin de soins' });
+    }
+});
+
+
+app.delete('/api/BS/delete/:bsId', async (req, res) => {
+    try {
+        await BS.findByIdAndDelete(req.params.bsId);
+        res.json({ message: 'Bulletin de soins supprimé avec succès' });
+    } catch (error) {
+        console.error('Erreur lors de la suppression d\'une bulletin de soins : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la suppression d\'un bulletin de soins' });
     }
 });
