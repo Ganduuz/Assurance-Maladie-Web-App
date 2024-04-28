@@ -153,7 +153,7 @@ Future<List<Bulletins_Soins>> fetchBS() async {
               color: Colors.white,
             child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
- children: [
+        children: [
                   TextButton(
                     onPressed: () {
                       _onItemTapped(0);
@@ -163,12 +163,12 @@ Future<List<Bulletins_Soins>> fetchBS() async {
                       style: TextStyle(
                         color: Color.fromARGB(255, 57, 57, 57),
                         fontFamily: 'Istok web',
-                        fontSize: 12,
+                        fontSize: 16,
                       ),
                     ),
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
                           return _selectedIndex == 0 ? Colors.blue : Colors.white;
                         },
                       ),
@@ -183,12 +183,12 @@ Future<List<Bulletins_Soins>> fetchBS() async {
                       style: TextStyle(
                         color: Color.fromARGB(255, 57, 57, 57),
                         fontFamily: 'Istok web',
-                        fontSize: 12,
+                        fontSize: 16,
                       ),
                     ),
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
                           return _selectedIndex == 1 ? Colors.blue : Colors.white;
                         },
                       ),
@@ -203,12 +203,12 @@ Future<List<Bulletins_Soins>> fetchBS() async {
                       style: TextStyle(
                         color: Color.fromARGB(255, 57, 57, 57),
                         fontFamily: 'Istok web',
-                        fontSize: 12,
+                        fontSize: 16,
                       ),
                     ),
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
                           return _selectedIndex == 2 ? Colors.blue : Colors.white;
                         },
                       ),
@@ -216,25 +216,26 @@ Future<List<Bulletins_Soins>> fetchBS() async {
                   ),
                    TextButton(
                     onPressed: () {
-                      _onItemTapped(2);
+                      _onItemTapped(3);
                     },
                     child: Text(
                       'Décision',
                       style: TextStyle(
                         color: Color.fromARGB(255, 57, 57, 57),
                         fontFamily: 'Istok web',
-                        fontSize: 12,
+                        fontSize: 16,
                       ),
                     ),
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                          return _selectedIndex == 2 ? Colors.blue : Colors.white;
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                          return _selectedIndex == 3 ? Colors.blue : Colors.white;
                         },
                       ),
                     ),
-                  ),
-                
+                    ),
+      SizedBox(width: 110,),
+
       SizedBox(height: 50,),
       Container(
       width: 200,

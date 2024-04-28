@@ -2,12 +2,49 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+
+
+class Member {
+  String nom;
+  String prenom;
+  String relation;
+  double reste;
+  double consome;
+
+  Member({
+    required this.nom,
+    required this.prenom,
+    required this.relation,
+    required this.reste,
+    required this.consome,
+
+
+  });
+
+  factory Member.fromJson(Map<String, dynamic> json) {
+    return Member(
+      nom: json['nomMem'],
+      prenom: json['prenomMem'],
+      relation: json['relation'],
+      reste:json['resteMem'],
+      consome:json['consomeMem'],
+
+      // Initialisez d'autres propriétés nécessaires à partir du JSON ici
+    );
+  }
+}
+
 class Employee {
   String fullname;
   String cin;
   String email;
   String poste;
   String verification;
+  double reste;
+  double consome;
+  List <Member> familyMembersDetails; 
+    double nmbrMem;
+
 
   Employee({
     required this.fullname,
@@ -15,18 +52,38 @@ class Employee {
     required this.email,
     required this.poste,
     required this.verification,
+     required this.reste,
+      required this.consome,
+     required this.familyMembersDetails,
+         required this.nmbrMem,
+
   });
 
   factory Employee.fromJson(Map<String, dynamic> json) {
-    return Employee(
-      fullname:'${json['nom']} ${json['prenom']}',
-
-      cin: json['cin'],
-      email: json['mail'],
-      poste: json['emploi'],
-      verification: json['verif'],
-    );
+  // Récupérer les détails des membres de la famille du JSON
+  List<Member> familyMembersDetails = [];
+  if (json.containsKey('familyMembers')) {
+    List<dynamic> familyMembersJson = json['familyMembers'];
+    familyMembersDetails = familyMembersJson.map((memberJson) {
+      return Member.fromJson(memberJson);
+    }).toList();
   }
+
+  // Créer l'objet Employee en incluant les détails des membres de la famille
+  return Employee(
+    fullname: '${json['nom']} ${json['prenom']}',
+    cin: json['cin'],
+    email: json['mail'],
+    poste: json['emploi'],
+    verification: json['verif'],
+    reste:json['reste'],
+    consome:json['consome'],
+
+    familyMembersDetails: familyMembersDetails,
+    nmbrMem:json['nombreMembres']
+ // Ajouter les détails des membres de la famille
+  );
+}
 }
 
 class Employeee extends StatefulWidget {
@@ -58,6 +115,12 @@ List<Employee> _currentEmployeesArchh = [];
    final _formKey = GlobalKey<FormState>();
       final _editKey = GlobalKey<FormState>();
 
+ final GlobalKey _tooltipKey = GlobalKey();
+
+  void _hideTooltip() {
+    final dynamic tooltip = _tooltipKey.currentState;
+    tooltip?.ensureTooltipVisible();
+  }
 
   @override
   void initState() {
@@ -663,28 +726,65 @@ IconButton(
                           ),
                         ),
                       ),
+                      
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(1000),
-                                child: Image.asset(
-                                  'assets/user (1).png',
-                                  width: 30,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  employee.fullname,
-                                  style: const TextStyle(fontSize: 13),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                         Transform.translate(
+  offset: Offset(20, 0), // Décalage de 20 pixels vers la droite
+       child:    Tooltip(
+               key: UniqueKey(), // Utilisez UniqueKey() ici
+            message: '- ${employee.fullname} , Reste:${employee.reste} -- Consomé :${employee.consome}\n'
+                     '- Membres de famille: ${employee.nmbrMem} \n'
+'${employee.familyMembersDetails.map((member) => ' ${member.relation}:${member.nom} ${member.prenom}    Reste:${member.reste} -- Consomé:${member.consome}').join('\n')}',
+                    
+            padding: EdgeInsets.all(20),
+            margin: EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 208, 229, 239),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                color: Color.fromARGB(255, 204, 234, 244).withOpacity(0.5),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: Offset(0, 5), // Changez l'offset selon votre préférence
+                ),],
+            
+            ),
+            textStyle: TextStyle(
+              color: Colors.black,
+              fontSize: 14,
+            ),
+             verticalOffset: 0, // Pas de décalage vertical
+             preferBelow: true, // Affiche le Tooltip au-dessus de l'élément cible
+           
+            child: GestureDetector(
+              onTap: () {
+                _hideTooltip();
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                margin: EdgeInsets.symmetric(vertical: 15),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(1000),
+                      child: Image.asset(
+                        'assets/user (1).png',
+                        width: 30,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(employee.fullname),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),),
+                        
                         TableCell(
                           verticalAlignment: TableCellVerticalAlignment.middle,
                           child: Text(
@@ -740,14 +840,14 @@ IconButton(
                               ),
 
                               Tooltip(
-                                message: 'Modifier',
-                                child: IconButton(
-                                  icon: const Icon(Icons.edit, color: Colors.blue),
-                                  onPressed: () {
-                                    _showEditEmployeeDialog(employee,context);
-                                  },
-                                ),
-                              )
+                              message: 'Modifier',
+                              child: IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () {
+                                  _showEditEmployeeDialog(employee,context);
+                                },
+                              ),
+                            )
 
                             ],
                           ),
@@ -1053,6 +1153,10 @@ IconButton(
                                 email: email,
                                 poste: poste,
                                 verification: verification,
+                                consome:0,
+                                reste:1500,
+                                familyMembersDetails: [],
+                                nmbrMem:0
                               ));
                             });
                             Navigator.of(context).pop(); // Close the dialog
@@ -1333,9 +1437,9 @@ void _showEditEmployeeDialog(Employee employee, BuildContext context) {
             ),
           ),
         ),
-      );
-    },
-  );
+   );
+},
+);
 }
 
 }

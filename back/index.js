@@ -44,7 +44,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/Employés')
 
 // Définition du modèle de la collection users avec Mongoose (utilisation du singulier pour le modèle)
 const usersSchema = new mongoose.Schema({
-    cin : String,
+    cin: String,
     mail: String,
     nom: String,
     prenom: String,
@@ -55,10 +55,10 @@ const usersSchema = new mongoose.Schema({
     passwordResetToken: String,
     passwordResetTokenExpired: Date,
     plafond: Number,
-    reste:Number,
-    consome:Number,
-    verif:String
-
+    reste: Number,
+    consome: Number,
+    verif: String,
+    familyMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'membres' }] // Référence vers les membres de la famille
 });
 
 const usersArchiveSchema = new mongoose.Schema({
@@ -76,9 +76,9 @@ const usersArchiveSchema = new mongoose.Schema({
     plafond: Number,
     reste: Number,
     consome: Number,
-    verif: String
+    verif: String,
+    familyMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'membres' }] // Référence vers les membres de la famille
 });
-
 
 
 usersSchema.methods.createResetPasswordToken = function () {
@@ -97,18 +97,18 @@ const usersArchiveModel = mongoose.model('usersArchive', usersArchiveSchema);
 const familyMemberSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },                                                                                                                                                                                                                                                                                                                                      
     nom: String,
-    prenom:String,
-    relation: String,
+    prenom: String,
+    relation: String, // Ajouter le champ relation
     naissance: Date,
     plafond: Number,
-    reste:Number,
-    consome:Number,
-    verif:String,
-    
+    reste: Number,
+    consome: Number,
+    verif: String,
 });
 
 const FamilyMember = mongoose.model('membres', familyMemberSchema);
 module.exports = FamilyMember;
+
 
 const BSSchema = new mongoose.Schema({
     memberId: {
@@ -130,31 +130,40 @@ const BSSchema = new mongoose.Schema({
 const BS = mongoose.model('BS', BSSchema);
 
 
-
 app.get('/api/employesArch', async (req, res) => {
     try {
         // Recherche des employés avec un plafond de 1500
         const employes = await usersArchiveModel.find({ plafond: 1500 });
 
         if (employes.length > 0) {
-            const nombre= employes.length ;
+            const nombre = employes.length;
             // Créer un tableau pour stocker les détails de chaque employé
-            const archivedEmployees = employes.map(employe => {
+            const employesDetails = await Promise.all(employes.map(async (employe) => {
+                // Recherche des membres de la famille de cet employé
+                const familyMembers = await FamilyMember.find({ userId: employe._id });
                 return {
                     _id: employe._id,
                     cin: employe.cin,
                     nom: employe.nom,
                     prenom: employe.prenom,
                     mail: employe.mail,
-                    emploi:employe.emploi,
+                    emploi: employe.emploi,
                     verif: employe.verif,
                     plafond: employe.plafond,
-                    reste: employe.reste, // Inclure le champ reste dans la réponse JSON
-                    consome: employe.consome, // Inclure le champ consome dans la réponse JSON
+                    reste: employe.reste,
+                    consome: employe.consome,
+                    familyMembers: familyMembers.map(member => ({
+                        nom: member.nom,
+                        prenom: member.prenom,
+                        relation: member.relation,
+                        resteMem: member.reste,
+                        consomeMem: member.consome
+                    })),
+                    nombreMembres: familyMembers.length
                 };
-            });
+            }));
             console.log('Employés Archivés récupérés');
-            res.status(200).json({ message: 'Détails des employés archivés récupérés',nombre, archivedEmployees });
+            res.status(200).json({ message: 'Détails des employés archivés récupérés', nombre, employesDetails });
         } else {
             res.status(404).json({ message: 'Aucun employé trouvé ' });
         }
@@ -163,31 +172,40 @@ app.get('/api/employesArch', async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des employés' });
     }
 });
-
 app.get('/api/employes', async (req, res) => {
     try {
         // Recherche des employés avec un plafond de 1500
         const employes = await usersModel.find({ plafond: 1500 });
 
         if (employes.length > 0) {
-            const nombre= employes.length ;
+            const nombre = employes.length;
             // Créer un tableau pour stocker les détails de chaque employé
-            const employesDetails = employes.map(employe => {
+            const employesDetails = await Promise.all(employes.map(async (employe) => {
+                // Recherche des membres de la famille de cet employé
+                const familyMembers = await FamilyMember.find({ userId: employe._id ,verif:"true"});
                 return {
                     _id: employe._id,
                     cin: employe.cin,
                     nom: employe.nom,
                     prenom: employe.prenom,
                     mail: employe.mail,
-                    emploi:employe.emploi,
+                    emploi: employe.emploi,
                     verif: employe.verif,
                     plafond: employe.plafond,
-                    reste: employe.reste, // Inclure le champ reste dans la réponse JSON
-                    consome: employe.consome, // Inclure le champ consome dans la réponse JSON
+                    reste: employe.reste,
+                    consome: employe.consome,
+                    familyMembers: familyMembers.map(member => ({
+                        nomMem: member.nom,
+                        prenomMem: member.prenom,
+                        relation: member.relation,
+                        resteMem: member.reste,
+                        consomeMem: member.consome
+                    })),
+                    nombreMembres: familyMembers.length // Ajouter le nombre de membres de famille
                 };
-            });
+            }));
             console.log('Employés récupérés');
-            res.status(200).json({ message: 'Détails des employés récupérés',nombre, employesDetails });
+            res.status(200).json({ message: 'Détails des employés récupérés', nombre, employesDetails });
         } else {
             res.status(404).json({ message: 'Aucun employé trouvé ' });
         }
@@ -196,6 +214,7 @@ app.get('/api/employes', async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des employés' });
     }
 });
+
 
 app.post('/api/employe/add', async (req, res) => {
     try {
