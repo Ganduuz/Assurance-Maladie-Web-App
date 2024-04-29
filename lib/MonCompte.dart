@@ -436,7 +436,7 @@ Future<void> _importImage() async {
         elevation: 0.0,
         backgroundColor: Colors.transparent,
         child: Container(
-          height: 480,
+          height: 550,
           width: 600,
           padding: const EdgeInsets.all(10.0),
           decoration: BoxDecoration(

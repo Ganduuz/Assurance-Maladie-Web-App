@@ -1187,7 +1187,6 @@ void _supprimerBS(BuildContext context, Bulletins_Soins bulletin_soin) {
                             _selectedDay=selectDay;
                             _focusedDay=focusDay;
                              dateController.text = "${selectDay.day.toString().padLeft(2, '0')}/${selectDay.month.toString().padLeft(2, '0')}/${selectDay.year}";
-                            selectDay = DateTime.now();
                              _date= "${selectDay.day.toString().padLeft(2, '0')}/${selectDay.month.toString().padLeft(2, '0')}/${selectDay.year}";
 
                           });

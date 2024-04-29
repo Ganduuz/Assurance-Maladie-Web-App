@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Pour formater les dates
 import 'dart:convert';
 import 'local_storage_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'dart:html' as html;
-
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
@@ -108,15 +106,20 @@ class _FamilyMemberPageState extends State<FamilyMemberPage> {
    int _value =0; 
     DateTime _selectedDay = DateTime.now();
     DateTime _focusedDay = DateTime.now();
+     int _selectedYear = DateTime.now().year;
+      double calendarHeight = 150; // Hauteur du calendrier
+  int numberOfItems = 28; // Nombre d'éléments dans la liste déroulante
+  double itemHeight = 60.0; // Hauteur de chaque élément
+  double dropdownHeight = 150.0; // Hauteur totale de la liste déroulante
   List<FamilyMember> familyMembers = [];
+
   DateTime selectedDate = DateTime.now();
   double plafond =0;
     final _formMemb = GlobalKey<FormState>();
 
    
 
-void buildCalendarWidget(BuildContext context) {
-    
+ void buildCalendarWidget(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -129,69 +132,97 @@ void buildCalendarWidget(BuildContext context) {
               elevation: 0.0,
               backgroundColor: Colors.transparent,
               child: SizedBox(
-                height: 380,
+                height: 430, // Increased height to accommodate year picker
                 width: 380,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
                   child: Column(
                     children: [
+                      SizedBox(height: 10,),
+              
+                      DropdownButton<int>(
+                        value: _selectedYear,
+                        underline: SizedBox(),
+                        dropdownColor: Colors.white,
+                        onChanged: (int? newValue) {
+                          setState(() {
+                            _selectedYear = newValue!;
+                            _selectedDay = DateTime(_selectedYear, _selectedDay.month, _selectedDay.day);
+                          });
+                        },
+                         items: List.generate(100, (index) => DateTime.now().year - 50 + index)
+                            .map((int value) {
+                          return DropdownMenuItem<int>(
+                            
+                            value: value,
+                            child: SizedBox(
+                              height: itemHeight,
+                              child: Center(child: Text(value.toString())),
+                            ),
+                          );
+                        }).toList(),
+                        itemHeight: itemHeight, // Hauteur de chaque élément du dropdown
+                        menuMaxHeight: dropdownHeight, // Hauteur totale de la liste déroulante
+                      ),
                       TableCalendar(
-                        
-                        focusedDay: _focusedDay,
+                        focusedDay: _selectedDay,
                         firstDay: DateTime.utc(1950),
                         lastDay: DateTime.utc(2100),
                         rowHeight: 35,
-                        daysOfWeekStyle: const DaysOfWeekStyle(
+                        daysOfWeekStyle: DaysOfWeekStyle(
                           weekdayStyle: TextStyle(fontWeight: FontWeight.w400),
-                          weekendStyle:TextStyle(fontWeight: FontWeight.w400),
+                          weekendStyle: TextStyle(fontWeight: FontWeight.w400),
                         ),
-                        onDaySelected: (DateTime selectDay,DateTime focusDay) {
-                          _selectedDay = DateTime.now();
+                        onDaySelected: (DateTime selectDay, DateTime focusDay) {
                           setState(() {
-                            _selectedDay=selectDay;
-                            _focusedDay=focusDay;
+                            _selectedDay = selectDay;
+                            _selectedYear = selectDay.year;
                             dobController.text = DateFormat('dd/MM/yyyy').format(_selectedDay);
-                         _naissance = DateFormat('dd/MM/yyyy').format(_selectedDay);
-                                                      
+                            _naissance = DateFormat('dd/MM/yyyy').format(_selectedDay);
 
                           });
                         },
-                        headerStyle: const HeaderStyle(formatButtonVisible: false, titleCentered: true),
-                        calendarStyle:CalendarStyle(
+                        headerStyle: HeaderStyle(
+                          formatButtonVisible: false,
+                          titleCentered: true,
+                        ),
+                        calendarStyle: CalendarStyle(
                           isTodayHighlighted: true,
                           selectedDecoration: BoxDecoration(
                             color: Colors.blue.shade200,
                             shape: BoxShape.circle,
                           ),
-                          todayDecoration: const BoxDecoration(
+                          todayDecoration: BoxDecoration(
                             color: Colors.blue,
                             shape: BoxShape.circle,
                           ),
-                          selectedTextStyle: const TextStyle(color: Colors.white),
-                        ) ,
+                          selectedTextStyle: TextStyle(color: Colors.white),
+                        ),
                         selectedDayPredicate: (DateTime date) {
                           return isSameDay(_selectedDay, date);
                         },
                       ),
-                      const SizedBox(height: 10,),
+                      SizedBox(height: 10,),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(child: TextButton(
-                            onPressed: () {
-                              Navigator.pop(context, _selectedDay);
-                            },
-                            child: Text(
-                              "OK",
-                              style: TextStyle(color: Colors.blue.shade300),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {   
+                                Navigator.pop(context, _selectedDay);
+                              },
+                              child: Text(
+                                "OK",
+                                style: TextStyle(color: Colors.blue.shade300),
+                              ),
                             ),
-                          ),),
-                          const SizedBox(),
+                          ),
+                          SizedBox(),
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
@@ -203,6 +234,7 @@ void buildCalendarWidget(BuildContext context) {
                           ),
                         ],
                       ),
+                      
                     ],
                   ),
                 ),
@@ -210,9 +242,10 @@ void buildCalendarWidget(BuildContext context) {
             );
           },
         );
-  },
-);
-}
+      },
+    );
+  }
+
   @override
   void initState() {
   super.initState();
@@ -811,6 +844,7 @@ void _deleteMember(String memberId,BuildContext context) async {
     dobController.text = ''; // Réinitialiser le champ date de naissance
     _value = 1;
     _selectedDay = DateTime.now();
+     _selectedYear = DateTime.now().year;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1129,8 +1163,18 @@ Widget _buildForm() {
             }
             return null;
           },
-          decoration: const InputDecoration(
+          decoration:  InputDecoration(
             labelText: 'Nom',
+             labelStyle: const TextStyle(
+              color: Color.fromRGBO(209, 216, 223, 1),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue, width: 2.0),
+              borderRadius: BorderRadius.circular(5.0),
+            ),
           ),
           
         ),
@@ -1152,8 +1196,18 @@ Widget _buildForm() {
             }
             return null;
           },
-          decoration: const InputDecoration(
+          decoration:  InputDecoration(
             labelText: 'Prénom',
+             labelStyle: const TextStyle(
+              color: Color.fromRGBO(209, 216, 223, 1),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue, width: 2.0),
+              borderRadius: BorderRadius.circular(5.0),
+            ),
           ),
           
         ),
@@ -1172,6 +1226,7 @@ Widget _buildForm() {
 }
 
 }
+
 class FamilyMember {
   String id;
   String nom;
@@ -1199,6 +1254,6 @@ class FamilyMember {
       consome:json['consome'],
       verif:json['verif'],
       alert:alertt,
-    );
-  }
+);
+}
 }

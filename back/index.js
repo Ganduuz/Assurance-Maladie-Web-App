@@ -833,8 +833,6 @@ app.delete('/api/family-members/delete/:memberId', async (req, res) => {
 });
 
 
-
-
 app.get('/api/BS/:user_id', async (req, res) => {
     try {
         const { user_id } = req.params;
@@ -845,8 +843,8 @@ app.get('/api/BS/:user_id', async (req, res) => {
         if (bulletins.length > 0) {
             // Créer un tableau pour stocker les détails de chaque membre
             const bulletinsDetails = bulletins.map(bulletin => {
-                const formattedDate = moment(BS.date).format('DD/MM/YYYY');
-        
+                const formattedDate = moment(bulletin.date).format('DD/MM/YYYY'); // Utilisez bulletin.date
+
                 return {
                     _id: bulletin._id,
                     matricule: bulletin.matricule,
@@ -857,15 +855,13 @@ app.get('/api/BS/:user_id', async (req, res) => {
                     actes: bulletin.actes,
                     date: formattedDate,
                     userId: bulletin.userID,
-                    etat:bulletin.etat,
+                    etat: bulletin.etat,
                 };
             });
             console.log('bulletins de soins récupérées');
             res.status(200).json({ message: 'Détails des bulletins de soins récupérés', bulletinsDetails });
         
-        }
-        
-         else {
+        } else {
             res.status(404).json({ message: 'Aucun bulletin trouvé pour cet utilisateur' });
         }
     } catch (error) {
@@ -873,7 +869,6 @@ app.get('/api/BS/:user_id', async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des bulletins de soins' });
     }
 });
-
 
 app.post('/api/:userId/ajouterBS', async (req, res) => {
     try {
