@@ -77,7 +77,6 @@ const usersArchiveSchema = new mongoose.Schema({
     reste: Number,
     consome: Number,
     verif: String,
-    familyMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'membres' }] // Référence vers les membres de la famille
 });
 
 
@@ -138,7 +137,7 @@ app.get('/api/employesArch', async (req, res) => {
         if (employes.length > 0) {
             const nombre = employes.length;
             // Créer un tableau pour stocker les détails de chaque employé
-            const employesDetails = await Promise.all(employes.map(async (employe) => {
+            const archivedEmployees  = await Promise.all(employes.map(async (employe) => {
                 // Recherche des membres de la famille de cet employé
                 const familyMembers = await FamilyMember.find({ userId: employe._id });
                 return {
@@ -153,17 +152,17 @@ app.get('/api/employesArch', async (req, res) => {
                     reste: employe.reste,
                     consome: employe.consome,
                     familyMembers: familyMembers.map(member => ({
-                        nom: member.nom,
-                        prenom: member.prenom,
+                        nomMem: member.nom,
+                        prenomMem: member.prenom,
                         relation: member.relation,
                         resteMem: member.reste,
                         consomeMem: member.consome
                     })),
-                    nombreMembres: familyMembers.length
+                    nombreMembres: familyMembers.length // Ajouter le nombre de membres de famille
                 };
             }));
             console.log('Employés Archivés récupérés');
-            res.status(200).json({ message: 'Détails des employés archivés récupérés', nombre, employesDetails });
+            res.status(200).json({ message: 'Détails des employés archivés récupérés',nombre, archivedEmployees  });
         } else {
             res.status(404).json({ message: 'Aucun employé trouvé ' });
         }
@@ -947,6 +946,7 @@ app.delete('/api/BS/delete/:bsId', async (req, res) => {
 });
 
 
+
 // Endpoint pour récupérer les bulletins de soins avec l'état 1
 app.get('/api/BSadmin/etat1', async (req, res) => {
     try {
@@ -954,15 +954,17 @@ app.get('/api/BSadmin/etat1', async (req, res) => {
         const bulletins = await BS.find({ etat: 1 });
 
         if (bulletins.length > 0) {
-            const nombre =bulletins.length;
+            const nombre = bulletins.length;
 
             // Créer un tableau pour stocker les détails de chaque bulletin
             const bulletinsDetails = await Promise.all(bulletins.map(async (bulletin) => {
                 // Formatage de la date avec moment.js
-                const formattedDate = moment(BS.date).format('DD/MM/YYYY');
+                const formattedDate = moment(bulletin.date).format('DD/MM/YYYY');
                 // Recherche de l'utilisateur associé à ce bulletin
                 const user = await usersModel.findOne({ _id: bulletin.userID });
-                const username = `${user.nom} ${user.prenom}`;
+                
+                // Vérifier si l'utilisateur existe avant d'accéder à ses propriétés
+                const username = user ? `${user.nom} ${user.prenom}` : 'Utilisateur inconnu';
 
                 // Retourner les détails du bulletin avec le nom d'utilisateur associé
                 return {
@@ -981,7 +983,7 @@ app.get('/api/BSadmin/etat1', async (req, res) => {
             }));
 
             // Envoyer les détails des bulletins récupérés avec un code de statut 200
-            res.status(200).json({ message: 'Détails des bulletins de soins récupérés',nombre, bulletinsDetails });
+            res.status(200).json({ message: 'Détails des bulletins de soins récupérés', nombre, bulletinsDetails });
         } else {
             // Envoyer un message d'erreur si aucun bulletin n'a été trouvé avec l'état 1
             res.status(404).json({ message: 'Aucun bulletin trouvé pour cet utilisateur' });
@@ -993,21 +995,24 @@ app.get('/api/BSadmin/etat1', async (req, res) => {
     }
 });
 
+// Endpoint pour récupérer les bulletins de soins avec l'état 1
 app.get('/api/BSadmin/etat2', async (req, res) => {
     try {
         // Recherche des bulletins de soins avec l'état 1 dans la base de données
         const bulletins = await BS.find({ etat: 2 });
 
         if (bulletins.length > 0) {
-            const nombre =bulletins.length;
+            const nombre = bulletins.length;
 
             // Créer un tableau pour stocker les détails de chaque bulletin
             const bulletinsDetails = await Promise.all(bulletins.map(async (bulletin) => {
                 // Formatage de la date avec moment.js
-                const formattedDate = moment(BS.date).format('DD/MM/YYYY');
+                const formattedDate = moment(bulletin.date).format('DD/MM/YYYY');
                 // Recherche de l'utilisateur associé à ce bulletin
                 const user = await usersModel.findOne({ _id: bulletin.userID });
-                const username = `${user.nom} ${user.prenom}`;
+                
+                // Vérifier si l'utilisateur existe avant d'accéder à ses propriétés
+                const username = user ? `${user.nom} ${user.prenom}` : 'Utilisateur inconnu';
 
                 // Retourner les détails du bulletin avec le nom d'utilisateur associé
                 return {
@@ -1026,7 +1031,7 @@ app.get('/api/BSadmin/etat2', async (req, res) => {
             }));
 
             // Envoyer les détails des bulletins récupérés avec un code de statut 200
-            res.status(200).json({ message: 'Détails des bulletins de soins récupérés',nombre, bulletinsDetails });
+            res.status(200).json({ message: 'Détails des bulletins de soins récupérés', nombre, bulletinsDetails });
         } else {
             // Envoyer un message d'erreur si aucun bulletin n'a été trouvé avec l'état 1
             res.status(404).json({ message: 'Aucun bulletin trouvé pour cet utilisateur' });
@@ -1038,21 +1043,24 @@ app.get('/api/BSadmin/etat2', async (req, res) => {
     }
 });
 
+// Endpoint pour récupérer les bulletins de soins avec l'état 1
 app.get('/api/BSadmin/etat3', async (req, res) => {
     try {
         // Recherche des bulletins de soins avec l'état 1 dans la base de données
         const bulletins = await BS.find({ etat: 3 });
 
         if (bulletins.length > 0) {
-            const nombre =bulletins.length;
+            const nombre = bulletins.length;
 
             // Créer un tableau pour stocker les détails de chaque bulletin
             const bulletinsDetails = await Promise.all(bulletins.map(async (bulletin) => {
                 // Formatage de la date avec moment.js
-                const formattedDate = moment(BS.date).format('DD/MM/YYYY');
+                const formattedDate = moment(bulletin.date).format('DD/MM/YYYY');
                 // Recherche de l'utilisateur associé à ce bulletin
                 const user = await usersModel.findOne({ _id: bulletin.userID });
-                const username = `${user.nom} ${user.prenom}`;
+                
+                // Vérifier si l'utilisateur existe avant d'accéder à ses propriétés
+                const username = user ? `${user.nom} ${user.prenom}` : 'Utilisateur inconnu';
 
                 // Retourner les détails du bulletin avec le nom d'utilisateur associé
                 return {
@@ -1071,7 +1079,7 @@ app.get('/api/BSadmin/etat3', async (req, res) => {
             }));
 
             // Envoyer les détails des bulletins récupérés avec un code de statut 200
-            res.status(200).json({ message: 'Détails des bulletins de soins récupérés',nombre, bulletinsDetails });
+            res.status(200).json({ message: 'Détails des bulletins de soins récupérés', nombre, bulletinsDetails });
         } else {
             // Envoyer un message d'erreur si aucun bulletin n'a été trouvé avec l'état 1
             res.status(404).json({ message: 'Aucun bulletin trouvé pour cet utilisateur' });

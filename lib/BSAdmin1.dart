@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'BSAdmin1.dart';
+import 'dart:html' as html;
+import 'BSAdmin.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -45,23 +46,23 @@ factory Bulletins_Soins.fromJson(Map<String, dynamic> json) {
 
 }
 
-class BSAdmin extends StatefulWidget {
+class BSAdmin1 extends StatefulWidget {
    final List<Bulletins_Soins> bulletinsSoins;
    Size get preferredSize => const Size.fromHeight(50);
-  BSAdmin({required this.bulletinsSoins});
+  BSAdmin1({required this.bulletinsSoins});
   @override
-  _BSAdminState createState() => _BSAdminState();
+  _BSAdminState1 createState() => _BSAdminState1();
   
 }
 
-class _BSAdminState extends State<BSAdmin> {
+class _BSAdminState1 extends State<BSAdmin1> {
   List<Bulletins_Soins> buso = [];
   
   int _currentPage = 0;
   int _busoPerPage = 6;
   String _searchText = ''; // État local pour stocker le texte de recherche
   String? selectedMalade;
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   List<bool> _selected = [];
    bool _isHeaderChecked = false;
  @override
@@ -119,7 +120,7 @@ Future<void> _loadBS() async {
 
 Future<List<Bulletins_Soins>> fetchBS() async {
 
-  final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/BSadmin/etat1'));
+  final response = await http.get(Uri.parse(''));
   
   if (response.statusCode == 200) {
     // Analyser la réponse JSON
@@ -157,6 +158,12 @@ Future<List<Bulletins_Soins>> fetchBS() async {
                   TextButton(
                     onPressed: () {
                       _onItemTapped(0);
+                      Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          BSAdmin(bulletinsSoins: [],)),
+                                );
                     },
                     child: Text(
                       'Nouveau bulletin',
@@ -177,12 +184,6 @@ Future<List<Bulletins_Soins>> fetchBS() async {
                   TextButton(
                     onPressed: () {
                       _onItemTapped(1);
-                       Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          BSAdmin1(bulletinsSoins: [],)),
-                                );
                     },
                     child: Text(
                       'Récupérer société',

@@ -216,7 +216,6 @@ List<Employee> get _currentEmployeesArch {
 }
 
 
-
 Future<void> _loadEmployesArch() async {
   try {
     List<Employee> employees = await fetchEmployeesArch();
@@ -229,24 +228,28 @@ Future<void> _loadEmployesArch() async {
     print('Erreur lors du chargement des employés: $error');
   }
 }
-
-  Future<List<Employee>> fetchEmployeesArch() async {
-    final response =
-        await http.get(Uri.parse('http://127.0.0.1:5000/api/employesArch'));
+Future<List<Employee>> fetchEmployeesArch() async {
+  try {
+    final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/employesArch'));
 
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);
-     
-        final List<dynamic> membersJson = jsonData['archivedEmployees'];
-        List<Employee> archivedEmployees =
-            membersJson.map((json) => Employee.fromJson(json)).toList();
+      final List<dynamic>? employeesJson = jsonData['archivedEmployees'];
 
+      if (employeesJson != null) {
+        List<Employee> archivedEmployees = employeesJson.map((json) => Employee.fromJson(json)).toList();
         return archivedEmployees;
-        
+      } else {
+        throw Exception('Les données des employés archivés sont nulles');
+      }
     } else {
-      throw Exception('Failed to load employees archived');
+      throw Exception('Échec du chargement des employés archivés. Code d\'état: ${response.statusCode}');
     }
+  } catch (error) {
+    print('Erreur lors du chargement des employés archivés: $error');
+    throw error; 
   }
+}
 
 
 
@@ -732,9 +735,9 @@ IconButton(
   offset: Offset(20, 0), // Décalage de 20 pixels vers la droite
        child:    Tooltip(
                key: UniqueKey(), // Utilisez UniqueKey() ici
-            message: '- ${employee.fullname} , Reste:${employee.reste} -- Consomé :${employee.consome}\n'
-                     '- Membres de famille: ${employee.nmbrMem} \n'
-'${employee.familyMembersDetails.map((member) => ' ${member.relation}:${member.nom} ${member.prenom}    Reste:${member.reste} -- Consomé:${member.consome}').join('\n')}',
+            message: ' ${employee.fullname}      Reste:${employee.reste} -- Consomé :${employee.consome}\n'
+                     ' Membres de famille: ${employee.nmbrMem} \n'
+'${employee.familyMembersDetails.map((member) => '  - ${member.relation}:${member.nom} ${member.prenom}     Reste:${member.reste} -- Consomé:${member.consome}').join('\n')}',
                     
             padding: EdgeInsets.all(20),
             margin: EdgeInsets.all(15),
