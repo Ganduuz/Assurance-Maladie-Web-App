@@ -126,8 +126,20 @@ const BSSchema = new mongoose.Schema({
 
 });
 
-const BS = mongoose.model('BS', BSSchema);
 
+
+const actesSchema = new mongoose.Schema({
+    
+    type: String,
+    nomActe:String,
+    region:String,
+    
+
+});
+const actes = mongoose.model('actes', actesSchema);
+
+
+const BS = mongoose.model('BS', BSSchema);
 
 app.get('/api/employesArch', async (req, res) => {
     try {
@@ -1083,5 +1095,91 @@ app.get('/api/BSadmin/etat3', async (req, res) => {
         // Gérer les erreurs de manière appropriée et envoyer un message d'erreur avec un code de statut 500
         console.error('Erreur lors de la récupération des détails des bulletins de soins : ', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des bulletins de soins' });
+    }
+});
+
+
+
+app.put('/api/BS/suivante/:BSId', async (req, res) => {
+    try {
+        const BSId = new mongoose.Types.ObjectId(req.params.BSId); // Utilisez 'new'
+
+        // Mettre à jour l'état du bulletin de soins
+        const bulletin = await BS.findByIdAndUpdate(BSId, { $inc: { etat: 1 } }, { new: true });
+
+        if (!bulletin) {
+            // Si aucun bulletin n'est trouvé avec l'ID spécifié
+            return res.status(404).json({ message: 'Bulletin de soins non trouvé' });
+        }
+
+        res.status(200).json({ message: 'Bulletin passé à l\'étape suivante', bulletin });
+    } catch (error) {
+        console.error('Erreur lors de passer à l\'étape suivante : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de passer à l\'étape suivante' });
+    }
+});
+
+
+app.put('/api/BS/precedente/:BSId', async (req, res) => {
+    try {
+        const BSId = new mongoose.Types.ObjectId(req.params.BSId); // Utilisez 'new'
+
+        // Recherche du bulletin de soins par son ID
+        const bulletin = await BS.findById(BSId);
+
+        if (!bulletin) {
+            // Si aucun bulletin n'est trouvé avec l'ID spécifié
+            return res.status(404).json({ message: 'Bulletin de soins non trouvé' });
+        }
+
+        // Vérifier si l'état du bulletin est supérieur à 0
+        if (bulletin.etat > 0) {
+            // Mettre à jour l'état du bulletin de soins en décrémentant de 1
+            bulletin.etat -= 1;
+            await bulletin.save();
+            
+            res.status(200).json({ message: 'Bulletin passé à l\'étape précédente', bulletin });
+        } else {
+            res.status(400).json({ message: 'Le bulletin est déjà à l\'étape la plus ancienne' });
+        }
+    } catch (error) {
+        console.error('Erreur lors de passer à l\'étape précédente : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de passer à l\'étape précédente' });
+    }
+});
+
+app.post('/api/ajouteractes', async (req, res) => {
+    try {
+        const { acte, nomacte, region } = req.body; 
+        const existingActe = await actes.findOne({ nomActe: nomacte });
+
+        if(existingActe) {
+            // Si un acte existe déjà avec le même nom, retourner une erreur
+            return res.status(400).json({ message: 'Cet acte existe déjà' });
+        }
+
+        // Création d'un nouvel objet Date
+        let type;
+        if (acte === "Pharmacie") {
+            type = "pharmacie";
+        } else if (acte === "Laboratoire d'analyse") {
+            type = "labo";
+        } else if (acte === "Opticien") {
+            type = "opticien";
+        } else {
+            type = "medecin";
+        }
+
+        // Création d'un nouvel acte
+        const newActe = await actes.create({ 
+            type: type, 
+            nomActe: nomacte,
+            region: region
+        });
+
+        res.status(200).json({ message: 'Acte ajouté avec succès', newActe });
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout d\'un acte : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un acte' });
     }
 });
