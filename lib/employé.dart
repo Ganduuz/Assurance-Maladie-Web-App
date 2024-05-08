@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -524,11 +525,11 @@ ElevatedButton(
         children: [
           TableRow(
             decoration: BoxDecoration(
-              color: Colors.blueAccent,
+              color: Color.fromARGB(255, 207, 206, 206),
               borderRadius: BorderRadius.circular(10), // Coins arrondis
             ),
             children: [
-               tableHeader("       Nom complet"),
+               tableHeader("       Nom complet",),
                 tableHeader("                     CIN"),
                 tableHeader("                  E-mail"),
                 tableHeader("                   Poste"),
@@ -554,7 +555,7 @@ ElevatedButton(
                       ClipRRect(
                         borderRadius: BorderRadius.circular(1000),
                         child: Image.asset(
-                          'assets/user (1).png',
+                          'assets/téléchargement.jpeg',
                           width: 30,
                         ),
                       ),
@@ -595,7 +596,7 @@ ElevatedButton(
                 TableCell(
                   verticalAlignment: TableCellVerticalAlignment.middle,
                   child: Text(
-                    (employee.verification == "true") ? "verifié" : "non verifié",
+                    (employee.verification == "true") ? "Activé" : "non Activé",
                     style: TextStyle(
                       fontSize: 13,
                       color: (employee.verification == "true") ? Colors.green : Colors.red,
@@ -603,7 +604,9 @@ ElevatedButton(
                     textAlign: TextAlign.center,
                   ),
                 ),
-                IconButton(
+                Tooltip(
+                                message: 'Archiver',
+                child :IconButton(
                   icon: Image.asset("assets/disarchiver.png"),
                   onPressed: () {
                     _disarchiverEmployee(employee,context);
@@ -611,6 +614,7 @@ ElevatedButton(
                        nombre ++;
                       });
                   },
+                ),
                 ),
               ],
             );
@@ -704,7 +708,7 @@ IconButton(
                     decoration: const BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
-                          color: Colors.grey,
+                          color: Color.fromARGB(255, 207, 206, 206),
                           width: 0.5,
                         ),
                       ),
@@ -716,7 +720,7 @@ IconButton(
                       tableHeader("                   Poste"),
                       tableHeader("                Vérification"),
                       tableHeader("                      "),
-                    ],
+                    ]
                   ),
 
                   ..._currentEmployees.map((employee) {
@@ -774,7 +778,7 @@ IconButton(
                     ClipRRect(
                       borderRadius: BorderRadius.circular(1000),
                       child: Image.asset(
-                        'assets/user (1).png',
+                        'assets/téléchargement.jpeg',
                         width: 30,
                       ),
                     ),
@@ -815,7 +819,7 @@ IconButton(
                         TableCell(
                           verticalAlignment: TableCellVerticalAlignment.middle,
                           child: Text(
-                            (employee.verification == "true") ? "verifié" : "non verifié",
+                            (employee.verification == "true") ? "Activé" : "non Activé",
                             style: TextStyle(
                               fontSize: 13,
                               color: (employee.verification == "true") ? Colors.green : Colors.red,
@@ -919,6 +923,7 @@ IconButton(
       child: Text(
         text,
         style: const TextStyle(
+          color: Color.fromARGB(255, 79, 169, 243), 
           fontWeight: FontWeight.bold,
         ),
       ),

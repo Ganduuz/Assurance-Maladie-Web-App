@@ -122,6 +122,25 @@ flutter:
   - assets/disarchiver.png
   - assets/decline.png
   - assets/approve.png
+  - assets/pharmacie.png
+  - assets/radiologue.png
+  - assets/hospital.png
+  - assets/destist.png
+  - assets/lab.png
+  - assets/location.png
+  - assets/phone.png
+  - assets/medecin.png
+  - assets/téléchargement.jpeg
+  - assets/group.png
+  - assets/assurance_home.jpg
+  - assets/health-insurance.png
+  - assets/home.png
+  - assets/remb.png
+  - assets/newspaper.png
+  - assets/exit.png
+  - assets/monCompte.png
+
+
 
   fonts:  
     - family: Julius Sans One

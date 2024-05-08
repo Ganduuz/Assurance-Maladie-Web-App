@@ -201,22 +201,29 @@ Widget build(BuildContext context) {
                         SizedBox(width: 250, child: Text('${familyMembers[index].nom} ${familyMembers[index].prenom}')),
                         SizedBox(width: 250, child: Text('${familyMembers[index].type} ')),
                         SizedBox(width: 250, child: Text('Date de naissance : ${familyMembers[index].dob}')),
-                         const SizedBox(width: 250), 
-                        IconButton(
-                          onPressed: () {
-                            _validerMembre(context, index,familyMembers[index]);
-                          },
-                          icon:Image.asset("assets/approve.png"),
+                        SizedBox(width: 250), // Un SizedBox vide pour ajouter de l'espace entre les éléments
+                        Tooltip(
+                          message: 'Valider', // Ajoutez un message au Tooltip
+                          child: IconButton(
+                            onPressed: () {
+                              _validerMembre(context, index, familyMembers[index]);
+                            },
+                            icon: Image.asset("assets/approve.png"),
+                          ),
                         ),
                         const SizedBox(width: 5),
-                        IconButton(
-                          onPressed: () {
-                            _supprimerMembre(context, index,familyMembers[index]);
-                          },
-                          icon: Image.asset("assets/decline.png"),
+                        Tooltip(
+                          message: 'Supprimer', // Ajoutez un message au Tooltip
+                          child: IconButton(
+                            onPressed: () {
+                              _supprimerMembre(context, index, familyMembers[index]);
+                            },
+                            icon: Image.asset("assets/decline.png"),
+                          ),
                         ),
                       ],
                     ),
+
                   ],
                 ),
               ),);

@@ -122,6 +122,10 @@ const BSSchema = new mongoose.Schema({
     actes: String,
     date: String,
     etat:Number,
+    dateEtape1:Date,
+    dateEtape2:Date,
+    dateEtape3:Date,
+    dateEtape4:Date
     
 
 });
@@ -431,6 +435,7 @@ app.post('/api/user', async (req, res) => {
                 const username = `${user.nom} ${user.prenom}`; 
                 res.status(200).json({
                     message: 'Données récupérées',
+                    userprenom:user.prenom,
                     username: username,
                     mail: user.mail,                   
                     plafond:user.plafond,
@@ -868,6 +873,13 @@ app.get('/api/BS/:user_id', async (req, res) => {
                     date: formattedDate,
                     userId: bulletin.userID,
                     etat: bulletin.etat,
+                    dateEtape1:bulletin.dateEtape1,
+                    dateEtape2:bulletin.dateEtape2,
+                    dateEtape3:bulletin.dateEtape3,
+                    dateEtape4:bulletin.dateEtape4,
+
+                    
+
                 };
             });
             console.log('bulletins de soins récupérées');
@@ -931,7 +943,11 @@ app.post('/api/:userId/ajouterBS', async (req, res) => {
             nomActes, 
             actes, 
             date: formattedDate,
-            etat: 1 // Attribution de l'état directement ici
+            etat: 1 ,
+            dateEtape1: Date.now(), 
+            dateEtape2: null,
+            dateEtape3: null,
+            dateEtape4: null,
         });
 
         res.status(200).json({ message: 'Bulletin de soins ajouté', newBS });
@@ -940,6 +956,8 @@ app.post('/api/:userId/ajouterBS', async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un bulletin de soins' });
     }
 });
+
+
 
 
 app.delete('/api/BS/delete/:bsId', async (req, res) => {
@@ -1050,6 +1068,8 @@ app.get('/api/BSadmin/etat2', async (req, res) => {
     }
 });
 
+
+
 // Endpoint pour récupérer les bulletins de soins avec l'état 1
 app.get('/api/BSadmin/etat3', async (req, res) => {
     try {
@@ -1100,51 +1120,70 @@ app.get('/api/BSadmin/etat3', async (req, res) => {
 
 
 
-app.put('/api/BS/suivante/:BSId', async (req, res) => {
+app.put('/api/BS/suivante', async (req, res) => {
     try {
-        const BSId = new mongoose.Types.ObjectId(req.params.BSId); // Utilisez 'new'
-
-        // Mettre à jour l'état du bulletin de soins
-        const bulletin = await BS.findByIdAndUpdate(BSId, { $inc: { etat: 1 } }, { new: true });
-
-        if (!bulletin) {
-            // Si aucun bulletin n'est trouvé avec l'ID spécifié
-            return res.status(404).json({ message: 'Bulletin de soins non trouvé' });
+        const { BSIds } = req.body; // Récupérer la liste des identifiants des bulletins de soins depuis le corps de la requête
+        
+        // Vérifier si la liste d'identifiants est fournie
+        if (!BSIds || !Array.isArray(BSIds) || BSIds.length === 0) {
+            return res.status(400).json({ message: 'Veuillez fournir une liste valide d\'identifiants de bulletins de soins' });
         }
 
-        res.status(200).json({ message: 'Bulletin passé à l\'étape suivante', bulletin });
+        // Mettre à jour l'état et la date d'étape pour chaque bulletin de soins dans la liste
+        const updatedBulletins = await Promise.all(BSIds.map(async (BSId) => {
+            let updateQuery = { $inc: { etat: 1 } };
+
+            const bulletin = await BS.findById(BSId);
+            if (bulletin.etat === 1) {
+                updateQuery.dateEtape2 = Date.now();
+            } else if (bulletin.etat === 2) {
+                updateQuery.dateEtape3 = Date.now();
+            
+            } else if (bulletin.etat === 3) {
+                updateQuery.dateEtape4 = Date.now();
+            }
+
+            const updatedBulletin = await BS.findByIdAndUpdate(BSId, updateQuery, { new: true });
+            return updatedBulletin;
+        }));
+
+        // Vérifier si tous les bulletins ont été mis à jour avec succès
+        if (updatedBulletins.some(bulletin => !bulletin)) {
+            return res.status(404).json({ message: 'Certains bulletins de soins n\'ont pas été trouvés' });
+        }
+
+        res.status(200).json({ message: 'Bulletins passés à l\'étape suivante', updatedBulletins });
     } catch (error) {
-        console.error('Erreur lors de passer à l\'étape suivante : ', error);
-        res.status(500).json({ message: 'Une erreur s\'est produite lors de passer à l\'étape suivante' });
+        console.error('Erreur lors du passage à l\'étape suivante : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors du passage à l\'étape suivante' });
     }
 });
 
 
-app.put('/api/BS/precedente/:BSId', async (req, res) => {
+app.put('/api/BS/precedente', async (req, res) => {
     try {
-        const BSId = new mongoose.Types.ObjectId(req.params.BSId); // Utilisez 'new'
-
-        // Recherche du bulletin de soins par son ID
-        const bulletin = await BS.findById(BSId);
-
-        if (!bulletin) {
-            // Si aucun bulletin n'est trouvé avec l'ID spécifié
-            return res.status(404).json({ message: 'Bulletin de soins non trouvé' });
+        const { BSIds } = req.body; // Récupérer la liste des identifiants des bulletins de soins depuis le corps de la requête
+        
+        // Vérifier si la liste d'identifiants est fournie
+        if (!BSIds || !Array.isArray(BSIds) || BSIds.length === 0) {
+            return res.status(400).json({ message: 'Veuillez fournir une liste valide d\'identifiants de bulletins de soins' });
         }
 
-        // Vérifier si l'état du bulletin est supérieur à 0
-        if (bulletin.etat > 0) {
-            // Mettre à jour l'état du bulletin de soins en décrémentant de 1
-            bulletin.etat -= 1;
-            await bulletin.save();
-            
-            res.status(200).json({ message: 'Bulletin passé à l\'étape précédente', bulletin });
-        } else {
-            res.status(400).json({ message: 'Le bulletin est déjà à l\'étape la plus ancienne' });
+        // Mettre à jour l'état de chaque bulletin de soins dans la liste
+        const updatedBulletins = await Promise.all(BSIds.map(async (BSId) => {
+            const bulletin = await BS.findByIdAndUpdate(BSId, { $inc: { etat: -1 } }, { new: true });
+            return bulletin;
+        }));
+
+        // Vérifier si tous les bulletins ont été mis à jour avec succès
+        if (updatedBulletins.some(bulletin => !bulletin)) {
+            return res.status(404).json({ message: 'Certains bulletins de soins n\'ont pas été trouvés' });
         }
+
+        res.status(200).json({ message: 'Bulletins passés à l\'étape précédente', updatedBulletins });
     } catch (error) {
-        console.error('Erreur lors de passer à l\'étape précédente : ', error);
-        res.status(500).json({ message: 'Une erreur s\'est produite lors de passer à l\'étape précédente' });
+        console.error('Erreur lors du passage à l\'étape précédente : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors du passage à l\'étape précédente' });
     }
 });
 

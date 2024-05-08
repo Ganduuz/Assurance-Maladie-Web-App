@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'moncompte.dart';
 import 'actesMed.dart';
 import 'BulletinsSoins.dart';
-import 'contact.dart';
 import 'membres_famille.dart';
 import 'connexion.dart';
 import 'package:http/http.dart' as http;
@@ -27,7 +26,8 @@ double _reste=0;
 int initialNumberOfNotifications = 0; // Définir le nombre initial de notifications
 
   int selectedIndex = 0;
-   String _userName = '';
+  String _userName = '';
+
   String _userEmail = '';
   List<FamilyMember> familyMembers = [];
   List<Widget> alertWidgets = [];
@@ -70,7 +70,6 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
  @override
   void initState() {
     super.initState();
-    // Appeler la fonction pour récupérer les données de l'utilisateur au démarrage de la page
     _getUserData();
     _loadFamilyMembers(); 
     number=0;
@@ -110,15 +109,7 @@ Future<void> _getUserData() async {
 
 
 
-  static final List<Widget> _widgetOptions = <Widget>[
-    const Home(),
-    FamilyMemberPage(),
-      bs(),
-     remb(),
-     const actesMed(),
-    const MonCompte(),
-   
-  ];
+ 
 
 
 void updateNumber(int newNumber) {
@@ -150,7 +141,7 @@ void updateNumber(int newNumber) {
   _overlayEntry = OverlayEntry(
     builder: (BuildContext context) => Positioned(
       top: MediaQuery.of(context).padding.top + kToolbarHeight + 10,
-      right: 10,
+      right: 20,
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(
@@ -312,6 +303,14 @@ notifications++;  });
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> _widgetOptions = [
+    Home(),     
+    FamilyMemberPage(),
+    bs(),
+    remb(),
+    ActesMed(),
+    const MonCompte(),
+  ];
     html.document.title = 'Capgemini Assurance';
 
     return Scaffold(
@@ -330,70 +329,42 @@ notifications++;  });
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
-                  width: 200,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const contact()), // Navigation vers Acceuil
-                      );
-                    },
-                    style: ButtonStyle(
-                      textStyle: WidgetStateProperty.all<TextStyle>(
-                        const TextStyle(
-                          fontSize: 18,
+               
+                
+                 IconButton(
+                  onPressed: () {
+                    _showAlerts(context, _reste, updateNumber);
+                  },
+                  icon: Stack(
+                    children: [
+                      Transform.scale(
+                        scale: 1.5, // Facteur d'échelle pour agrandir l'icône
+                        child: const Icon(Icons.notifications, color: Color(0xFF12ABDB)), // Icône de la cloche
+                      ),
+                      if (number > 0) // Ajout d'une condition 'if' pour afficher le badge uniquement si le nombre de notifications est supérieur à zéro
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red, // Couleur de l'arrière-plan du badge
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              number.toString(), // Nombre de notifications converti en chaîne
+                              style: const TextStyle(
+                                color: Colors.white, // Couleur du texte du badge
+                                fontSize: 12, // Taille du texte du badge
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                      backgroundColor: WidgetStateProperty.all<Color>(
-                        const Color.fromARGB(255, 255, 255, 255),
-                      ),
-                      foregroundColor: WidgetStateProperty.all<Color>(
-                         const Color.fromARGB(255, 73, 167, 226),
-                      ),
-                    ),
-                    child: const Text(
-                      'Contactez-nous',
-                      style: TextStyle(
-                        fontFamily: 'inter-bold',
-                      ),
-                    ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 30,),
-                 IconButton(
-  onPressed: () {
-    _showAlerts(context, _reste, updateNumber);
-  },
-  icon: Stack(
-    children: [
-      Transform.scale(
-        scale: 1.5, // Facteur d'échelle pour agrandir l'icône
-        child: const Icon(Icons.notifications, color: Color(0xFF12ABDB)), // Icône de la cloche
-      ),
-      if (number > 0) // Ajout d'une condition 'if' pour afficher le badge uniquement si le nombre de notifications est supérieur à zéro
-        Positioned(
-          top: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: const BoxDecoration(
-              color: Colors.red, // Couleur de l'arrière-plan du badge
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              number.toString(), // Nombre de notifications converti en chaîne
-              style: const TextStyle(
-                color: Colors.white, // Couleur du texte du badge
-                fontSize: 12, // Taille du texte du badge
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-    ],
-  ),
-)
+                Container(width: 10),
 
               ],
             ),
@@ -436,6 +407,7 @@ notifications++;  });
         ],
       ),
     );
+    
   }
 }
 
@@ -482,7 +454,7 @@ static const double defaultPadding = 5.0;
                             Row(
                               children: [
                                 const CircleAvatar(
-                                  backgroundImage: AssetImage("assets/user (1).png"),
+                                  backgroundImage: AssetImage("assets/téléchargement.jpeg"),
                                   radius: 20,
                                 ),
                                 const SizedBox(width: defaultPadding),
@@ -513,62 +485,64 @@ static const double defaultPadding = 5.0;
                     ),
           const SizedBox(),
           AccueLisTile(
-            title: "Accueil",
-            icon: const Icon(Icons.home),
-            press: () {
-              onItemTapped(0);
-            },
-            isSelected: selectedIndex == 0,
-          ),
-          AccueLisTile(
-            title: "Membre de famille",
-            icon: const Icon(Icons.verified_user_sharp),
-            press: () {
-              onItemTapped(1);
-            },
-            isSelected: selectedIndex == 1,
-          ),
-          AccueLisTile(
-            title: "Bulletins de soins",
-            icon: const Icon(Icons.newspaper),
-            press: () {
-              onItemTapped(2);
-            },
-            isSelected: selectedIndex == 2,
-          ),
-           AccueLisTile(
-            title: "Mes remboursements",
-            icon: const Icon(Icons.newspaper),
-            press: () {
-              onItemTapped(3);
-            },
-            isSelected: selectedIndex == 3,
-          ),
-          AccueLisTile(
-            title: "Actes médicaux",
-            icon: const Icon(Icons.local_hospital),
-            press: () {
-              onItemTapped(4);
-            },
-            isSelected: selectedIndex == 4,
-          ),
-          const Spacer(),
-          AccueLisTile(
-            title: "Mon compte",
-            icon: const Icon(Icons.account_box),
-            press: () {
-              onItemTapped(5);
-            },
-            isSelected: selectedIndex == 5,
-          ),
-           AccueLisTile(
-            title: "Déconnexion",
-            icon: const Icon(Icons.logout),
-            press: () {
-            _deconnexion(context);
-            },
-            isSelected: selectedIndex == 6,
-          ),
+                      title: "Accueil",
+                      imagePath: "assets/home.png",
+                      press: () {
+                        onItemTapped(0);
+                      },
+                      isSelected: selectedIndex == 0,
+                    ),
+                    AccueLisTile(
+                      title: "Membre de famille",
+                      imagePath: "assets/group.png",
+                      press: () {
+                        onItemTapped(1);
+                      },
+                      isSelected: selectedIndex == 1,
+                    ),
+                    AccueLisTile(
+                      title: "Bulletins de soins",
+                      imagePath: "assets/newspaper.png",
+                      press: () {
+                        onItemTapped(2);
+                      },
+                      isSelected: selectedIndex == 2,
+                    ),
+                    AccueLisTile(
+                      title: "Mes remboursements ",
+                      imagePath: "assets/remb.png",
+                      press: () {
+                        onItemTapped(3);
+                      },
+                      isSelected: selectedIndex == 3,
+                    ),
+                   
+                    AccueLisTile(
+                      title: "Annuaires santé",
+                      imagePath: "assets/health-insurance.png",
+                      press: () {
+                        onItemTapped(4);
+                      },
+                      isSelected: selectedIndex == 4,
+                    ),
+                    Spacer(),
+                    AccueLisTile(
+                      title: "Mon compte",
+                      imagePath: "assets/monCompte.png",
+                      press: () {
+                        onItemTapped(5);
+                      },
+                      isSelected: selectedIndex == 5,
+                    ),
+                    AccueLisTile(
+                      title: "Déconnexion",
+                     imagePath: "assets/exit.png",
+                      press: () {
+                        _deconnexion(context); // Afficher la boîte de dialogue
+                      },
+                      isSelected: selectedIndex == 6,
+                    ),
+
 
         ],
       ),
@@ -606,17 +580,21 @@ static const double defaultPadding = 5.0;
 
 class AccueLisTile extends StatelessWidget {
   const AccueLisTile({
-    super.key,
+    Key? key,
     required this.title,
-    required this.icon,
+    required this.imagePath,
     required this.press,
     required this.isSelected,
-  });
+     this.imageWidth = 18, // Définir une valeur par défaut pour la largeur de l'image
+    this.imageHeight = 18,
+  }) : super(key: key);
 
   final String title;
-  final Icon icon;
+  final String imagePath;
   final VoidCallback press;
   final bool isSelected;
+   final double imageWidth; // Ajouter un paramètre pour la largeur de l'image
+  final double imageHeight; // Ajouter un paramètre pour la hauteur de l'image
 
   @override
   Widget build(BuildContext context) {
@@ -627,42 +605,190 @@ class AccueLisTile extends StatelessWidget {
           Positioned.fill(
             child: Container(
               height: 45,
-              decoration: isSelected ? const BoxDecoration(
-                color: Color.fromARGB(255, 73, 167, 226),
+              decoration: isSelected ? BoxDecoration(
+                color: Colors.blue.shade200,
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ) : null,
             ),
           ),
-          SizedBox(
+          Container(
             height: 40,
             child: ListTile(
-              visualDensity: const VisualDensity(vertical: -4),
+              visualDensity: VisualDensity(vertical: -4),
               dense: true,
               onTap: press,
-              leading: icon,
+              leading: Image.asset(imagePath,width: imageWidth, // Utiliser la largeur spécifiée
+                height: imageHeight, ),
               title: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.black,
                 ),
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
+     ),
+);
 }
-class Home extends StatelessWidget {
-  const Home({super.key});
+}
+
+
+
+class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
+
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  String _userprenom='';
+
+  @override
+  void initState() {
+    super.initState();
+    _getUsername();
+  }
+
+  Future<void> _getUsername() async {
+    try {
+      var userId = LocalStorageService.getData('user_id');
+      print("user_id :" + LocalStorageService.getData('user_id'));
+
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:5000/api/user'), 
+        body: jsonEncode({'user_id': userId}), 
+        headers: {
+          'Content-Type': 'application/json'
+        }, 
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _userprenom=data['userprenom']?? '';
+         
+        });
+      } else {
+        // Gérer les erreurs de réponse du serveur
+        print(
+            'Erreur de chargement des données utilisateur: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Gérer les erreurs de connexion
+      print('Erreur de connexion: $error');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        child: Padding(padding: const EdgeInsets.fromLTRB(80.0, 50.0, 250.0, 0),),
+        child: Row(
+          
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                height: screenHeight * 0.8,
+                width: screenWidth * 0.5,
+                padding: const EdgeInsets.all(50.0),
+                child: Column(
+                  
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                                        SizedBox(height: 50),
+
+                    Text(
+                      'Bonjour $_userprenom !',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+                    Text(
+                      'Notre assurance maladie va au-delà de la simple couverture : elle incarne la tranquillité d\'esprit, la sécurité financière et la garantie d\'un avenir en bonne santé pour vous et vos proches.',
+                      style: TextStyle(
+                        color: Colors.grey[700], // Couleur moderne
+                      ),
+                    ),
+                    SizedBox(height: 100),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 40,
+                            width: 150,
+                            decoration: BoxDecoration(
+                              border:
+                                  Border.all(color: Colors.blue.shade300),
+                              color: Color.fromARGB(255, 255, 255, 255),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color.fromRGBO(208, 230, 244, 0.804),
+                                  blurRadius: 20.0,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                "Accessibilité accrue",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: Container(
+                            height: 40,
+                            width: 150,
+                            decoration: BoxDecoration(
+                              border:
+                                  Border.all(color: Colors.blue.shade300),
+                              color: Color.fromARGB(255, 255, 255, 255),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color.fromRGBO(208, 230, 244, 0.804),
+                                  blurRadius: 20.0,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                "Suivi en temps réel",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              child: Image.asset(
+                "assets/assurance_home.jpg",
+                height: screenHeight * 0.8,
+                width: screenWidth * 0.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
-}
+  }
 }

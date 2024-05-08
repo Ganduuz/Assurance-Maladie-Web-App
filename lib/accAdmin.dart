@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dashboard.dart';
 import 'employé.dart';
 import 'BSAdmin.dart';
+import 'BSAdmin1.dart';
+
 import 'connexion.dart';
 import 'newmember.dart';
 
@@ -20,6 +22,7 @@ class _AccueilState extends State<AccueilAdmin> {
      Employeee (),
      BSAdmin(bulletinsSoins: [],),
       NewMemberPage(),
+     BSAdmin1(bulletinsSoins: [],),
 
 
 ];
@@ -43,31 +46,9 @@ class _AccueilState extends State<AccueilAdmin> {
               children: [
                 SizedBox(
                   width: 200,
-                  child: TextButton(
-                    onPressed: () {},
-                    style: ButtonStyle(
-                      textStyle: WidgetStateProperty.all<TextStyle>(
-                        const TextStyle(
-                          fontSize: 18,
-                        ),
-                      ),
-                      backgroundColor: WidgetStateProperty.all<Color>(
-                        const Color.fromARGB(255, 255, 255, 255),
-                      ),
-                      foregroundColor: WidgetStateProperty.all<Color>(
-                         const Color.fromARGB(255, 73, 167, 226),
-                      ),
-                    ),
-                    child: const Text(
-                      'Contactez-nous',
-                      style: TextStyle(
-                        fontFamily: 'inter-bold',
-                      ),
-                    ),
-                  ),
+                  
                 ),
-                 const SizedBox(width: 40),
-                const Icon(Icons.notifications, color: Color.fromARGB(255, 18, 171, 219)),
+                
               ],
             ),
           ),
@@ -199,7 +180,7 @@ static const double defaultPadding = 5.0;
           ),
           const Spacer(),
           AccueLisTile(
-            title: "Nouveau membre ",
+            title: "Valider membres ",
             icon: const Icon(Icons.man),
             press: () {
               onItemTapped(3);

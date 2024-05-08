@@ -254,16 +254,19 @@ Future<void> _importImage() async {
                       children: [
                         GestureDetector(
                           onTap: () => _importImage(), 
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
+                          child: ClipOval(
+                            child: Container(
+                              width: 160.0,
+                              height: 160.0,
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                shape: BoxShape.circle,
+                              ),
+                              child: CircleAvatar(
+                                radius: 80.0,
+                                backgroundImage: AssetImage('assets/téléchargement.jpeg'),
+                              ),
                             ),
-                            child: CircleAvatar(
-                              radius: 80.0,
-                             
-                              child: image,
-                            ),
-
                           ),
                         ),
                         const SizedBox(height: 16.0),
@@ -285,8 +288,8 @@ Future<void> _importImage() async {
                         ),
                       ],
                     ),
-
                   ),
+
                   const SizedBox(width: 20.0),
                   // Texte pour les informations personnelles
                   Expanded(

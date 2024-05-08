@@ -19,6 +19,11 @@ class Bulletins_Soins {
   String DateConsultation;
   String piece_jointe;
   double etat;
+  String dateEtape1;
+  String dateEtape2;
+  String dateEtape3;
+  String dateEtape4;
+
 
   Bulletins_Soins({
     required this.ID,
@@ -29,6 +34,12 @@ class Bulletins_Soins {
     required this.DateConsultation,
     required this.piece_jointe,
     required this.etat,
+    required this.dateEtape1,
+    required this.dateEtape2,
+    required this.dateEtape3,
+    required this.dateEtape4,
+
+
 
   });
 
@@ -42,6 +53,12 @@ factory Bulletins_Soins.fromJson(Map<String, dynamic> json) {
     DateConsultation: json['date'] ?? '',
     piece_jointe: json['piece_jointe'] ?? '', 
     etat:json['etat'] ?? '',
+    dateEtape1:json['dateEtape1']?? '',
+    dateEtape2:json['dateEtape2']?? '',
+    dateEtape3:json['dateEtape3']?? '',
+    dateEtape4:json['dateEtape4']?? '',
+
+
   );
 }
 
@@ -96,13 +113,13 @@ class _bsState extends State<bs> {
 void initState() {
     super.initState();
     _loadFamilyMembers();
-    _loadBS();
+    getBS();
     _getUserData(); // Load family members when the widget initializes
   }
 
 
 
-Future<void> _loadBS() async {
+Future<void> getBS() async {
   try {
     List<Bulletins_Soins> BS = await fetchBS(); 
     setState(() {
@@ -203,7 +220,7 @@ Future<void> _getUserData() async {
     }
   }
 
-void ajouter_bulletin() async {
+void _addBS() async {
   try {
     var userId = LocalStorageService.getData('user_id');
   
@@ -243,7 +260,7 @@ void ajouter_bulletin() async {
 }
 
 
-void _deleteBS(String BSId,BuildContext context) async {
+void supprimer_bulletin(String BSId,BuildContext context) async {
   try {
           final response = await http.delete(
       Uri.parse('http://127.0.0.1:5000/api/BS/delete/$BSId'), 
@@ -365,7 +382,7 @@ Widget build(BuildContext context) {
                             "  Matricule",
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black,
+                              color: Colors.grey[700], 
                               fontWeight: FontWeight.bold
                             ),
                           ),
@@ -375,10 +392,10 @@ Widget build(BuildContext context) {
                         child: Container(
                           width: 150,
                           child: Text(
-                            " Qui est malade",
+                            " Adhérent",
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black,
+                              color: Colors.grey[700], 
                               fontWeight: FontWeight.bold
                             ),
                           ),
@@ -388,10 +405,10 @@ Widget build(BuildContext context) {
                         child: Container(
                           width: 150,
                           child: Text(
-                            "Acte médical",
+                            "nom de l'annuaire",
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black,
+                              color: Colors.grey[700], 
                               fontWeight: FontWeight.bold
                             ),
                           ),
@@ -401,10 +418,10 @@ Widget build(BuildContext context) {
                         child: Container(
                           width: 150,
                           child: Text(
-                            "Spécialité médecin",
+                            "Annuaire Santé",
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black,
+                              color: Colors.grey[700], 
                               fontWeight: FontWeight.bold
                             ),
                           ),
@@ -417,7 +434,7 @@ Widget build(BuildContext context) {
                             "Date de consultation",
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black,
+                              color: Colors.grey[700], 
                               fontWeight: FontWeight.bold
                             ),
                           ),
@@ -430,7 +447,7 @@ Widget build(BuildContext context) {
                             "Pièce jointe",
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black,
+                              color: const Color.fromARGB(255, 224, 87, 87),
                               fontWeight: FontWeight.bold
                             ),
                           ),
@@ -499,6 +516,7 @@ Widget build(BuildContext context) {
                                     bs.Qui_est_malade,
                                     style: TextStyle(
                                       fontSize: 16,
+                                      color:  Color(0xFF2695FB),
                                     ),
                                   ),
                                 ),
@@ -526,9 +544,11 @@ Widget build(BuildContext context) {
                                     bs.DateConsultation,
                                     style: TextStyle(
                                       fontSize: 16,
+                                      color: const Color.fromARGB(255, 33, 243, 131)
                                     ),
                                   ),
                                 ),
+                                SizedBox(width: 20,),
                                 SizedBox(
                                   width: 150,
                                   child: Container(
@@ -601,16 +621,17 @@ Widget build(BuildContext context) {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  buildStep(1, 'Ajouté', bs.etat >= 1),
-                                  Expanded(child: Divider(color: bs.etat  >= 2 ? const Color.fromARGB(255, 33, 243, 131) : Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
-                                  buildStep(2, 'Récupéré société', bs.etat >= 2),
-                                  Expanded(child: Divider(color: bs.etat  >= 3 ?const Color.fromARGB(255, 33, 243, 131) :  Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
-                                  buildStep(3, 'Envoyé assurance', bs.etat >= 3),
-                                  Expanded(child: Divider(color: bs.etat  >= 4 ? const Color.fromARGB(255, 33, 243, 131) : Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
-                                  buildStep(4, 'Remboursé', _currentStep >= 4),
+                                  buildStep(1, 'Ajouté', bs.etat >= 1, bs),
+                                  Expanded(child: Divider(color: bs.etat >= 2 ? const Color.fromARGB(255, 33, 243, 131) : Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
+                                  buildStep(2, 'Récupéré société', bs.etat >= 2, bs),
+                                  Expanded(child: Divider(color: bs.etat >= 3 ? const Color.fromARGB(255, 33, 243, 131) : Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
+                                  buildStep(3, 'Envoyé assurance', bs.etat >= 3, bs),
+                                  Expanded(child: Divider(color: bs.etat >= 4 ? const Color.fromARGB(255, 33, 243, 131) : Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
+                                  buildStep(4, 'Remboursé', _currentStep >= 4, bs),
                                 ],
                               ),
                             )
+
                           ],
                         ),
                       );
@@ -671,13 +692,39 @@ Widget build(BuildContext context) {
     ),
   );
 }
+Widget buildStep(int stepNumber, String title, bool isActive, Bulletins_Soins bs) {
+  String dateEtape;
+  switch (stepNumber) {
+    case 1:
+      dateEtape = bs.dateEtape1;
+      break;
+    case 2:
+      dateEtape = bs.dateEtape2;
+      break;
+    case 3:
+      dateEtape = bs.dateEtape3;
+      break;
+    case 4:
+      dateEtape = bs.dateEtape4;
+      break;
+    default:
+      dateEtape = '';
+      break;
+  }
 
-Widget buildStep(int stepNumber, String title, bool isActive) {
+  DateTime? dateTime;
+  if (dateEtape != null && dateEtape.isNotEmpty) {
+    dateTime = DateTime.tryParse(dateEtape);
+  }
+
+  // Formatter la date dans le format jj/mm/aaaa si elle est disponible
+  String formattedDate = dateTime != null ? DateFormat('dd/MM/yyyy').format(dateTime) : '';
+
   return Row(
     children: [
       if (isActive)
         Tooltip(
-          message: '17/02/2025',
+          message: ' $formattedDate',
           child: CircleAvatar(
             radius: 15,
             backgroundColor: const Color.fromARGB(255, 33, 243, 131),
@@ -702,6 +749,7 @@ Widget buildStep(int stepNumber, String title, bool isActive) {
     ],
   );
 }
+
 
  void _showAddBulletinDialog(BuildContext context) {
   String Qui_est_malade = ''; 
@@ -821,7 +869,7 @@ dateController.text = '';
                     return null;
                   },
                   decoration: InputDecoration(
-                    labelText: 'Qui est malade ?',
+                    labelText: 'Adhérent',
                     labelStyle: TextStyle(fontWeight: FontWeight.bold),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0),
@@ -876,7 +924,7 @@ dateController.text = '';
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Veuillez sélectionner un acte médical';
+                      return 'Veuillez sélectionner un annuaire santé';
                     }
                     return null;
                   },
@@ -886,11 +934,11 @@ dateController.text = '';
                           style: TextStyle(fontWeight: FontWeight.bold),
                         )
                       : Text(
-                          "Actes médicaux",
+                          "Annuaire santé",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                   decoration: InputDecoration(
-                    labelText: 'Actes médicauxx',
+                    labelText: 'Annuaire santé',
                     labelStyle: TextStyle(fontWeight: FontWeight.bold),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0),
@@ -938,7 +986,7 @@ dateController.text = '';
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Veuillez ajouter le nom de l\'acte médical';
+                      return 'Veuillez ajouter le nom de l\'annuaire santé';
                     }
                     return null;
                   },
@@ -1063,7 +1111,7 @@ dateController.text = '';
                     ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          ajouter_bulletin();
+                          _addBS();
                           setState(() {
                             bulletins.add(Bulletins_Soins(
                               bsId: '',
@@ -1072,7 +1120,12 @@ dateController.text = '';
                               nom_medecin: nom_medecin,
                               spec_medecin: actes,
                               DateConsultation: DateFormat('dd/MM/yyyy').format(_selectedDay),
-                              
+                                  dateEtape1:'',
+                                  dateEtape2:'',
+                                  dateEtape3:'',
+                                  dateEtape4:'',
+
+
                               piece_jointe: piece_jointe,
                               etat:1
 ,
@@ -1138,7 +1191,7 @@ void _supprimerBS(BuildContext context, Bulletins_Soins bulletin_soin) {
     btnOkOnPress: () {
       setState(() {
         bulletins.remove(bulletin_soin);
-        _deleteBS(bulletin_soin.bsId, context); // Appeler la méthode pour supprimer le bulletin de soins de la base de données
+        supprimer_bulletin(bulletin_soin.bsId, context); // Appeler la méthode pour supprimer le bulletin de soins de la base de données
       });
     },
     btnCancelText: "Non",

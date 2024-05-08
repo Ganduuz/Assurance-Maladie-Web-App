@@ -120,7 +120,7 @@ Future<void> _loadBS() async {
 
 Future<List<Bulletins_Soins>> fetchBS() async {
 
-  final response = await http.get(Uri.parse(''));
+  final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/BSadmin/etat2'));
   
   if (response.statusCode == 200) {
     // Analyser la réponse JSON

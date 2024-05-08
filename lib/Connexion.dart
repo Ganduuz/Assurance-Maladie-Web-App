@@ -14,7 +14,7 @@ class MyHomePage extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
   final flutterWebViewPlugin = FlutterWebviewPlugin();
 
-  Future<void> loginUser(BuildContext context) async {
+  Future<void> login(BuildContext context) async {
     final String mail = mailController.text;
     final String password = passwordController.text;
 
@@ -196,7 +196,7 @@ class MyHomePage extends StatelessWidget {
                           ),
                           // Déclencher la connexion lorsque "Entrée" est pressée
                           onSubmitted: (_) {
-                            loginUser(context);
+                            login(context);
                           },
                         ),
                         Padding(
@@ -234,7 +234,7 @@ class MyHomePage extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            loginUser(context);
+                            login(context);
                           },
                           child: InkWell(
                             splashColor: Colors.transparent,
