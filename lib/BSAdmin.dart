@@ -15,6 +15,7 @@ class Bulletins_Soins {
   String bsId;
   double etat;
   bool selected;
+  String username;
 
   Bulletins_Soins({
     required this.ID,
@@ -25,6 +26,8 @@ class Bulletins_Soins {
     required this.piece_jointe,
     required this.bsId,
     required this.etat,
+        required this.username,
+
     this.selected = false,
   });
 
@@ -38,6 +41,7 @@ class Bulletins_Soins {
       DateConsultation: json['date'] ?? '',
       piece_jointe: json['piece_jointe'] ?? '',
       etat: json['etat'] ?? '',
+      username: json ['username']??'',
     );
   }
 }
@@ -353,13 +357,13 @@ class _BSAdminState extends State<BSAdmin> {
                         },
                       ),
                       tableHeader(Text("ID Bulletin")),
-                      tableHeader(Text("Qui est malade")),
-                      tableHeader(Text("Nom médecin")),
-                      tableHeader(Text("Spécialité médecin")),
+                      tableHeader(Text("Nom employé")),
+                      tableHeader(Text("Adhérent")),
+                      tableHeader(Text("Annuaire santé")),
+                      tableHeader(Text("Spécialité")),
                       tableHeader(Text("Date de consultation")),
                       tableHeader(Text("Pièce jointe")),
-                      tableHeader(Text("data")),
-                      tableHeader(Text("data")),
+                      tableHeader(Text("")),
                     ],
                   ),
                   ..._currentbuso.asMap().entries.map((entry) {
@@ -393,7 +397,17 @@ class _BSAdminState extends State<BSAdmin> {
                             ],
                           ),
                         ),
-                        SizedBox(),
+                        Container(
+                          margin: EdgeInsets.symmetric(vertical: 15),
+                          child: Row(
+                            children: [
+                              SizedBox(width: 10,),
+                              Expanded(
+                                child: Text(BSAdmin.username),
+                              ),
+                            ],
+                          ),
+                        ),
                         Container(
                           margin: EdgeInsets.symmetric(vertical: 15),
                           child: Row(

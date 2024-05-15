@@ -1,146 +1,219 @@
-const FamilyMember = require('../Models/FamilyMember');
-const User = require('../Models/User');
+const { usersModel, FamilyMember } = require('../models.js'); // Déstructuration correcte
 const moment = require('moment');
+const mongoose = require('mongoose');
+
 
 exports.getFamilyMembers = async (req, res) => {
   try {
-    const userId = req.user._id; // Récupérer l'ID de l'utilisateur connecté à partir de la requête
-
-    const familyMembers = await FamilyMember.find({ userId });
-
+    const { user_id } = req.params;
+    
+    // Recherche des membres de la famille appartenant à l'utilisateur avec l'ID spécifié
+    const familyMembers = await FamilyMember.find({ userId: user_id });
+    
     if (familyMembers.length > 0) {
-      const membersDetails = familyMembers.map(member => {
-        // Formatage de la date de naissance
-        const formattedDate = moment(member.naissance).format('DD/MM/YYYY');
-
-        return {
-          _id: member._id,
-          nom: member.nom,
-          prenom: member.prenom,
-          relation: member.relation,
-          naissance: formattedDate,
-          plafond: member.plafond,
-          reste: member.reste, // Inclure le champ reste dans la réponse JSON
-          consomme: member.consomme,
-          verif:member.verif // Inclure le champ consome dans la réponse JSON
-        };
-      });
-
-      res.status(200).json({ message: 'Détails des membres de la famille récupérés', membersDetails });
-    } else {
-      res.status(404).json({ message: 'Aucun membre de la famille trouvé pour cet utilisateur' });
+        // Créer un tableau pour stocker les détails de chaque membre
+        const membersDetails = familyMembers.map(member => {
+            const formattedDate = moment(member.naissance).format('DD/MM/YYYY');
+    
+            return {
+                _id: member._id,
+                nom: member.nom,
+                prenom: member.prenom,
+                relation: member.relation,
+                naissance: formattedDate,
+                plafond: member.plafond,
+                reste: member.reste, // Inclure le champ reste dans la réponse JSON
+                consome: member.consome,
+                verif:member.verif // Inclure le champ consome dans la réponse JSON
+            };
+        });
+        console.log('membres récupérées');
+        res.status(200).json({ message: 'Détails des membres de la famille récupérés', membersDetails });
+    
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur lors de la récupération des membres de la famille' });
-  }
+    
+     else {
+        res.status(404).json({ message: 'Aucun membre de la famille trouvé pour cet utilisateur' });
+    }
+} catch (error) {
+    console.error('Erreur lors de la récupération des détails des membres de la famille : ', error);
+    res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des membres de la famille' });
+}
 };
+
+exports.getFamilyMembersNonValid = async (req, res) => {
+  try {
+    // Recherche des membres de la famille non vérifiés
+    const familyMembers = await FamilyMember.find({ verif: false });
+    
+    if (familyMembers.length > 0) {
+        // Créer un tableau pour stocker les détails de chaque membre
+        const membersDetails = await Promise.all(familyMembers.map(async (member) => {
+            const user = await usersModel.findById(member.userId);
+            const formattedDate = moment(member.naissance).format('DD/MM/YYYY');
+            const username = `${user.nom} ${user.prenom}`;
+            return {
+                username: username,
+                userId: member.userId,
+                _id: member._id,
+                nom: member.nom,
+                prenom: member.prenom,
+                relation: member.relation,
+                naissance: formattedDate,
+                plafond: member.plafond,
+                reste: member.reste, 
+                consome: member.consome,
+                verif: member.verif 
+            };
+        }));
+        console.log('Membres récupérés');
+        res.status(200).json({ message: 'Détails des membres de la famille récupérés', membersDetails });
+    } else {
+        res.status(404).json({ message: 'Aucun membre de la famille non vérifié trouvé' });
+    }
+} catch (error) {
+    console.error('Erreur lors de la récupération des détails des membres de la famille : ', error);
+    res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des membres de la famille' });
+}
+}
+
+exports.ValidationFamilyMember = async (req, res) => {
+  try {
+    const memberId = req.params.member_id;
+    
+
+    const validateMember = await FamilyMember.findByIdAndUpdate(memberId, { verif:'true' }, { new: true });
+
+    if (!validateMember) {
+        return res.status(404).json({ message: 'Membre introuvable' });
+    }
+
+    res.status(200).json({ message: 'Membre validé avec succès', validateMember });
+} catch (error) {
+    console.error('Erreur lors de la validation d\'un membre de la famille : ', error);
+    res.status(500).json({ message: 'Une erreur s\'est produite lors de la validation d\'un membre de la famille' });
+}
+}
+
 
 exports.addFamilyMember = async (req, res) => {
   try {
-    const userId = req.user._id; // Récupérer l'ID de l'utilisateur connecté à partir de la requête
-    const { nom, prenom, relation, naissance, plafond } = req.body;
+    const { userId, nom, prenom, relation, naissance } = req.body; 
 
-    // Vérifier si l'utilisateur existe
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur introuvable' });
+    // Vérifier si la date de naissance est définie et a le format attendu
+    if (!naissance || typeof naissance !== 'string') {
+        return res.status(400).json({ message: 'La date de naissance est requise et doit être une chaîne de caractères' });
     }
 
-    // Créer un nouveau membre de la famille
-    const newFamilyMember = new FamilyMember({
-      userId,
-      nom,
-      prenom,
-      relation,
-      naissance: new Date(naissance), // Convertir la date de naissance en objet Date
-      plafond,
-      reste: plafond, // Initialiser le reste avec le plafond
-      consomme: 0, // Initialiser la consommation à 0
-      verif:false // Initialiser la vérification à faux
+    // Séparer les composants de la date
+    const dateComponents = naissance.split('/');
+    if (dateComponents.length !== 3) {
+        return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
+    }
+
+    const [day, month, year] = dateComponents.map(Number);
+
+    // Vérifier si les composants sont valides
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
+        return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
+    }
+
+    // Créer un nouvel objet Date
+    const formattedDate = new Date(year, month - 1, day);
+
+    let plafond;
+    // Déterminer le plafond en fonction de la relation
+    if (relation === "Enfant") {
+        plafond = 500.00;
+    } else if (relation === "Conjoint") {
+        plafond = 1000.00;
+    }
+
+    // Ajouter le nouveau membre avec la date formatée, le plafond déterminé, reste et consome
+    const newMember = await FamilyMember.create({ 
+        userId, 
+        nom, 
+        prenom, 
+        relation, 
+        naissance: formattedDate, 
+        plafond,
+        reste: plafond, 
+        consome: 0,
+        verif:false 
     });
 
-    // Enregistrer le nouveau membre de la famille
-    await newFamilyMember.save();
-
-    res.status(201).json({ message: 'Membre de la famille ajouté avec succès', familyMember: newFamilyMember });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur lors de l\'ajout d\'un membre de la famille' });
-  }
+    res.status(200).json({ message: 'Nouveau membre ajouté', newMember });
+} catch (error) {
+    console.error('Erreur lors de l\'ajout d\'un membre de la famille : ', error);
+    res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un membre de la famille' });
+}
 };
 
 exports.updateFamilyMember = async (req, res) => {
   try {
-    const userId = req.user._id; // Récupérer l'ID de l'utilisateur connecté à partir de la requête
-    const familyMemberId = req.params.familyMemberId;
-    const { nom, prenom, relation, naissance, plafond } = req.body;
+    const { memberId } = req.params; // Extract memberId correctly from params
+    const { nom, prenom, relation, naissance } = req.body;
 
-    // Vérifier si l'utilisateur existe
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur introuvable' });
+    
+
+    // Validate the date format
+    const dateComponents = naissance.split('/');
+    if (dateComponents.length !== 3) {
+      return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
     }
 
-    // Vérifier si le membre de la famille existe
-    const familyMember = await FamilyMember.findById(familyMemberId);
-    if (!familyMember) {
-      return res.status(404).json({ message: 'Membre de la famille introuvable' });
+    const [day, month, year] = dateComponents.map(Number);
+
+    // Check if the date components are valid numbers
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
+      return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
     }
 
-    // Vérifier si le membre de la famille appartient à l'utilisateur
-    if (familyMember.userId.toString() !== userId) {
-      return res.status(401).json({ message: 'Vous n\'êtes pas autorisé à modifier ce membre de la famille' });
+    // Create a new Date object
+    const formattedDate = new Date(year, month - 1, day);
+
+    // Validate the created date
+    if (formattedDate.toString() === 'Invalid Date') {
+      return res.status(400).json({ message: 'Date invalide' });
     }
 
-    // Mettre à jour les informations du membre de la famille
-    familyMember.nom = nom;
-    familyMember.prenom = prenom;
-    familyMember.relation = relation;
-    familyMember.naissance = new Date(naissance); // Convertir la date de naissance en
-    familyMember.plafond = plafond;
+    let plafond;
+    if (relation === "Enfant") {
+      plafond = 500.00;
+    } else if (relation === "Conjoint") {
+      plafond = 1000.00;
+    } else {
+      return res.status(400).json({ message: 'Relation invalide' });
+    }
 
-    // Recalculer le reste en fonction du plafond et de la consommation courante
-    familyMember.reste = plafond - familyMember.consomme;
+    // Update the family member
+    const updatedMember = await FamilyMember.findByIdAndUpdate(
+      memberId,
+      { nom, prenom, relation, naissance: formattedDate, plafond, reste: plafond },
+      { new: true }
+    );
 
-    // Enregistrer les modifications
-    await familyMember.save();
+    if (!updatedMember) {
+      return res.status(404).json({ message: 'Membre introuvable' });
+    }
 
-    res.status(200).json({ message: 'Membre de la famille mis à jour avec succès', familyMember });
+    res.status(200).json({ message: 'Membre mis à jour avec succès', updatedMember });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur lors de la mise à jour d\'un membre de la famille' });
+    console.error('Erreur lors de la mise à jour d\'un membre de la famille :', error);
+    res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour d\'un membre de la famille' });
   }
 };
+
 
 exports.deleteFamilyMember = async (req, res) => {
   try {
-    const userId = req.user._id; // Récupérer l'ID de l'utilisateur connecté à partir de la requête
-    const familyMemberId = req.params.familyMemberId;
-
-    // Vérifier si l'utilisateur existe
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur introuvable' });
-    }
-
-    // Vérifier si le membre de la famille existe
-    const familyMember = await FamilyMember.findById(familyMemberId);
-    if (!familyMember) {
-      return res.status(404).json({ message: 'Membre de la famille introuvable' });
-    }
-
-    // Vérifier si le membre de la famille appartient à l'utilisateur
-    if (familyMember.userId.toString() !== userId) {
-      return res.status(401).json({ message: 'Vous n\'êtes pas autorisé à supprimer ce membre de la famille' });
-    }
-
-    // Supprimer le membre de la famille
-    await familyMember.deleteOne();
-
-    res.status(200).json({ message: 'Membre de la famille supprimé avec succès' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur lors de la suppression d\'un membre de la famille' });
-  }
+    await FamilyMember.findByIdAndDelete(req.params.memberId);
+    res.json({ message: 'Membre de la famille supprimé avec succès' });
+} catch (error) {
+    console.error('Erreur lors de la suppression d\'un membre de la famille : ', error);
+    res.status(500).json({ message: 'Une erreur s\'est produite lors de la suppression d\'un membre de la famille' });
+}
 };
+
+
+

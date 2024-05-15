@@ -68,7 +68,7 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    html.document.title = 'Authentification';
+    html.document.title = 'Capgemini Assurance';
 
     flutterWebViewPlugin.launch(
       'http://localhost:54228/connexion',
@@ -78,7 +78,7 @@ class MyHomePage extends StatelessWidget {
     flutterWebViewPlugin.onStateChanged.listen((WebViewStateChanged state) {
       if (state.type == WebViewState.finishLoad) {
         flutterWebViewPlugin.evalJavascript(
-            "document.title = 'Authentification';");
+            "document.title = 'Capgemini Assurance';");
       }
     });
 

@@ -414,22 +414,19 @@ Future<void> _disarchiveEmployee(String cin, BuildContext context) async {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(100),
-      ),
-      child: SingleChildScrollView(
+   return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Padding(
+        padding: const EdgeInsets.all(12),
         child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Text(
+        children: <Widget>[
+       Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+        Expanded(
+        child: SingleChildScrollView(
+        child: Text(
                       'Liste des employés ($nombre)',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
@@ -439,6 +436,14 @@ Future<void> _disarchiveEmployee(String cin, BuildContext context) async {
                     ),
                   ),
                 ),
+        ],),
+        SizedBox(height: 20,),
+                Row(
+                   mainAxisAlignment: MainAxisAlignment.end,
+               children: [
+                Row(
+                   mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
                 Container(
                   margin: const EdgeInsets.all(10),
                   width: 200,
@@ -454,12 +459,15 @@ Future<void> _disarchiveEmployee(String cin, BuildContext context) async {
                         borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
                         borderRadius: BorderRadius.circular(5.0),
                       ),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () {
-                          print("Effectuer la recherche avec le texte: $_searchText");
-                        },
-                      ),
+                     suffixIcon: Tooltip(
+            message: 'Rechercher',
+            child: IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                // Ajoutez votre logique de recherche ici
+              },
+            ),
+          ),
                     ),
                     onChanged: _updateSearchText, // Mettre à jour le texte de recherche lors de la saisie
                   ),
@@ -510,7 +518,9 @@ ElevatedButton(
   ),
   child: Column(
     children: [
-      const SizedBox(height: 8),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+     children: [
       Text(
         "Employés archivés",
         style: TextStyle(
@@ -519,22 +529,59 @@ ElevatedButton(
           color: Colors.blue.shade200,
         ),
       ),
-      const SizedBox(height: 20),
+      SizedBox(width: 300,),
+      Container(
+        margin: EdgeInsets.only(top: 20),
+      width: 200,
+      height: 35,
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Recherche',
+          contentPadding: EdgeInsets.fromLTRB(5, 0, 7, 0),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          suffixIcon: Tooltip(
+            message: 'Rechercher',
+            child: IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                // Ajoutez votre logique de recherche ici
+              },
+            ),
+          ),
+        ),
+        onChanged: 
+         _updateSearchText,
+        
+      ),
+    ),  ],),  
+      SizedBox(height: 50),
       Table(
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         children: [
           TableRow(
             decoration: BoxDecoration(
+              border: Border(
+                          bottom: BorderSide(
+                            color: Colors.grey,
+                            width: 0.5,
+                          ),
+                        ),
               color: Color.fromARGB(255, 207, 206, 206),
               borderRadius: BorderRadius.circular(10), // Coins arrondis
             ),
             children: [
-               tableHeader("       Nom complet",),
-                tableHeader("                     CIN"),
-                tableHeader("                  E-mail"),
-                tableHeader("                   Poste"),
-                  tableHeader("                Vérification"),
-                tableHeader("                      "),
+               tableHeader("Nom complet",),
+                tableHeader("CIN"),
+                tableHeader("E-mail"),
+                tableHeader("Poste"),
+                  tableHeader("Vérification"),
+                tableHeader("Actions"),
             ],
           ),
           ..._currentEmployeesArch.map((employee) {
@@ -549,17 +596,20 @@ ElevatedButton(
               ),
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
+                  decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                   margin: EdgeInsets.symmetric(vertical: 15),
                   child: Row(
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(1000),
                         child: Image.asset(
-                          'assets/téléchargement.jpeg',
+                          'assets//téléchargement.jpeg',
                           width: 30,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           employee.fullname,
@@ -569,46 +619,71 @@ ElevatedButton(
                     ],
                   ),
                 ),
-                TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: Text(
-                    employee.cin,
-                    style: const TextStyle(fontSize: 13),
-                    textAlign: TextAlign.center,
-                  ),
+                 Container(
+            margin: EdgeInsets.symmetric(vertical: 15),
+            child: Row(
+              children: [
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(employee.cin),
                 ),
-                TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: Text(
-                    employee.email,
-                    style: const TextStyle(fontSize: 13),
-                    textAlign: TextAlign.center,
-                  ),
+              ],
+            ),
+          ),
+               Container(
+            margin: EdgeInsets.symmetric(vertical: 15),
+            child: Row(
+              children: [
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(employee.email),
                 ),
-                TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: Text(
-                    employee.poste,
-                    style: const TextStyle(fontSize: 13),
-                    textAlign: TextAlign.center,
-                  ),
+              ],
+            ),
+          ),
+                 Container(
+            margin: EdgeInsets.symmetric(vertical: 15),
+            child: Row(
+              children: [
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(employee.poste),
                 ),
-                TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: Text(
-                    (employee.verification == "true") ? "Activé" : "non Activé",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: (employee.verification == "true") ? Colors.green : Colors.red,
-                    ),
-                    textAlign: TextAlign.center,
+              ],
+            ),
+          ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
                   ),
-                ),
-                Tooltip(
-                                message: 'Archiver',
-                child :IconButton(
-                  icon: Image.asset("assets/disarchiver.png"),
-                  onPressed: () {
+            margin: EdgeInsets.symmetric(vertical: 15),
+            child: Row(
+              children: [
+                SizedBox(width: 10),
+                Expanded(
+                  
+                          child: Text(
+                            (employee.verification == "true") ? "Activé" : "non Activé",
+                            style: TextStyle(
+                              color: Colors.white,
+                  
+                              fontSize: 13,
+                              backgroundColor: (employee.verification == "true") ? const Color.fromARGB(255, 148, 212, 151) : const Color.fromARGB(255, 224, 122, 115),
+                            ),
+    
+                          ),
+                        ),
+              ],),),
+                Container(
+                            padding: EdgeInsets.fromLTRB(0, 0, 110, 0),
+                            child: Row(
+                              children: [
+                                 Expanded(
+                            child: Tooltip(
+                            message: 'Désarchiver',
+                            child: IconButton(
+                            icon: Image.asset("assets/disarchiver.png"),
+                            onPressed: () {
                     _disarchiverEmployee(employee,context);
                      setState(() {
                        nombre ++;
@@ -616,8 +691,10 @@ ElevatedButton(
                   },
                 ),
                 ),
-              ],
-            );
+                                 ),
+                            
+                              ],),
+            ),],);
           }),
         ],
       ),
@@ -668,25 +745,23 @@ IconButton(
       },
     );
   },
-  style: ElevatedButton.styleFrom(
-    backgroundColor: const Color.fromARGB(255, 246, 156, 100),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(5.0),
-    ),
-    ),
-  child: const Text(
+  child: Text(
     "Archive",
     style: TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
     ),
   ),
-   ),
-  ],
-),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color.fromARGB(255, 246, 156, 100),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(5.0),
+    ),
+    ),
+   ),],),
+               ],),
 
-
-            const SizedBox(height: 40),
+           SizedBox(height: 40),
             Container(
               margin: const EdgeInsets.all(5),
               decoration: BoxDecoration(
@@ -714,12 +789,12 @@ IconButton(
                       ),
                     ),
                     children: [
-                      tableHeader("       Nom complet"),
-                      tableHeader("                     CIN"),
-                      tableHeader("                  E-mail"),
-                      tableHeader("                   Poste"),
-                      tableHeader("                Vérification"),
-                      tableHeader("                      "),
+                      tableHeader("Nom complet"),
+                      tableHeader("CIN"),
+                      tableHeader("E-mail"),
+                      tableHeader("Poste"),
+                      tableHeader("Vérification"),
+                      tableHeader("Actions"),
                     ]
                   ),
 
@@ -778,7 +853,7 @@ IconButton(
                     ClipRRect(
                       borderRadius: BorderRadius.circular(1000),
                       child: Image.asset(
-                        'assets/téléchargement.jpeg',
+                        'assets/user (2).png',
                         width: 30,
                       ),
                     ),
@@ -792,48 +867,68 @@ IconButton(
             ),
           ),),
                         
-                        TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: Text(
-                            employee.cin,
-                            style: const TextStyle(fontSize: 13),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: Text(
-                            employee.email,
-                            style: const TextStyle(fontSize: 13),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: Text(
-                            employee.poste,
-                            style: const TextStyle(fontSize: 13),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
+                        Container(
+            margin: EdgeInsets.symmetric(vertical: 15),
+            child: Row(
+              children: [
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(employee.cin),
+                ),
+              ],
+            ),
+          ),
+                        Container(
+            margin: EdgeInsets.symmetric(vertical: 15),
+            child: Row(
+              children: [
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(employee.email),
+                ),
+              ],
+            ),
+          ),
+                        Container(
+            margin: EdgeInsets.symmetric(vertical: 15),
+            child: Row(
+              children: [
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(employee.poste),
+                ),
+              ],
+            ),
+          ),
+            Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+            margin: EdgeInsets.symmetric(vertical: 15),
+            child: Row(
+              children: [
+                SizedBox(width: 10),
+                Expanded(
+                  
                           child: Text(
                             (employee.verification == "true") ? "Activé" : "non Activé",
+                            
                             style: TextStyle(
+                              color: Colors.white,
+                  
                               fontSize: 13,
-                              color: (employee.verification == "true") ? Colors.green : Colors.red,
+                              backgroundColor: (employee.verification == "true") ? const Color.fromARGB(255, 148, 212, 151) : const Color.fromARGB(255, 224, 122, 115),
                             ),
-                            textAlign: TextAlign.center,
+    
                           ),
                         ),
-
-                        TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Tooltip(
+              ],),),
+                        Container(
+            padding: EdgeInsets.fromLTRB(0, 0, 130, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Tooltip(
                                 message: 'Archiver',
                                 child: IconButton(
                                   icon: const Icon(Icons.archive, color: Colors.red),
@@ -845,7 +940,8 @@ IconButton(
                                   },
                                 ),
                               ),
-
+                ),
+                          Expanded(child: 
                               Tooltip(
                               message: 'Modifier',
                               child: IconButton(
@@ -855,22 +951,32 @@ IconButton(
                                 },
                               ),
                             )
-
+                          ),
                             ],
                           ),
                         ),
                       ],
                     );
-                  }),
+                  }).toList(),
                 ],
               ),
 
             ),
-            Container(
-  decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(5),
-  ),
-  padding: const EdgeInsets.all(7),
+           Container(
+             margin: EdgeInsets.all(5),
+             padding: EdgeInsets.all(5),
+               decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                BoxShadow(
+                color: Color.fromARGB(255, 215, 215, 215).withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 7,
+        offset: Offset(0, 2), // Changez l'offset selon votre préférence
+      ),
+    ],
+              ),
   child: Row(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
@@ -893,6 +999,7 @@ IconButton(
       const SizedBox(width: 20), // Ajout d'un espace entre les flèches et le DropdownButton
       DropdownButton<int>(
         value: _employeesPerPage,
+        underline: SizedBox(),
         onChanged: (value) {
           setState(() {
             _employeesPerPage = value!;
@@ -904,15 +1011,14 @@ IconButton(
             child: Text('$value'),
           );
         }).toList(),
-      ),
+       ),
     ],
-  ),
-),
-
-          ],
-        ),
-      ),
-    );
+              ),
+            ),
+        ],
+        
+      ),),),
+     );
   }
 
   Widget tableHeader(String text) {
@@ -1445,7 +1551,7 @@ void _showEditEmployeeDialog(Employee employee, BuildContext context) {
             ),
           ),
         ),
-   );
+);
 },
 );
 }

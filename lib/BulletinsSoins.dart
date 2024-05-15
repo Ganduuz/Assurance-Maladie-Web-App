@@ -225,7 +225,7 @@ void _addBS() async {
     var userId = LocalStorageService.getData('user_id');
   
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:5000/api/$userId/ajouterBS'), 
+      Uri.parse('http://127.0.0.1:5000/api/ajouterBS/$userId'), 
       body: jsonEncode({
         'matricule':_matricule,
         'malade':_malade,
@@ -390,9 +390,9 @@ Widget build(BuildContext context) {
                       ),
                       Flexible(
                         child: Container(
-                          width: 150,
+                          width: 140,
                           child: Text(
-                            " Adhérent",
+                            "Adhérent",
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[700], 
@@ -403,9 +403,9 @@ Widget build(BuildContext context) {
                       ),
                       Flexible(
                         child: Container(
-                          width: 150,
+                          width: 160,
                           child: Text(
-                            "nom de l'annuaire",
+                            "Nom de l'annuaire",
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[700], 
@@ -431,7 +431,7 @@ Widget build(BuildContext context) {
                         child: Container(
                           width: 200,
                           child: Text(
-                            "Date de consultation",
+                            "    Date de consultation",
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[700], 
@@ -444,7 +444,7 @@ Widget build(BuildContext context) {
                         child: Container(
                           width: 150,
                           child: Text(
-                            "Pièce jointe",
+                            "        Pièce jointe",
                             style: TextStyle(
                               fontSize: 16,
                               color: const Color.fromARGB(255, 224, 87, 87),
@@ -511,7 +511,7 @@ Widget build(BuildContext context) {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 150,
+                                  width: 170,
                                   child: Text(
                                     bs.Qui_est_malade,
                                     style: TextStyle(
@@ -521,7 +521,7 @@ Widget build(BuildContext context) {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 150,
+                                  width: 190,
                                   child: Text(
                                     bs.nom_medecin,
                                     style: TextStyle(
@@ -530,7 +530,7 @@ Widget build(BuildContext context) {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 150,
+                                  width: 180,
                                   child: Text(
                                     bs.spec_medecin,
                                     style: TextStyle(
@@ -539,7 +539,7 @@ Widget build(BuildContext context) {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 150,
+                                  width: 170,
                                   child: Text(
                                     bs.DateConsultation,
                                     style: TextStyle(
@@ -768,30 +768,10 @@ List<String> listeacts = [
   'Pharmacie',
   'Laboratoire d\'analyse',
   'Opticien',
-  'Médecin Anesthésiologie',
-  'Médecin Cardiologie',
-  'Médecin Dermatologie',
-  'Médecin Endocrinologie',
-  'Médecin Gastro-entérologie',
-  'Médecin Généraliste',
-  'Médecin Gériatrie',
-  'Médecin Gynécologie',
-  'Médecin Hématologie',
-  'Médecin Infectiologie',
-  'Médecin Néphrologie',
-  'Médecin Neurologie',
-  'Médecin Oncologie',
-  'Médecin Ophtalmologie',
-  'Médecin Orthopédie',
-  'Médecin Oto-rhino-laryngologie (ORL)',
-  'Médecin Pédiatrie',
-  'Médecin Pneumologie',
-  'Médecin Psychiatrie',
-  'Médecin Radiologie',
-  'Médecin Rhumatologie',
-  'Médecin Urologie',
-  
-
+  'Médecin ',
+  'Dentiste',
+  'Radiologue',
+  'Clinique',
 ];  listee.insert(0, _username);
 dateController.text = '';
   _selectedDay = DateTime.now();

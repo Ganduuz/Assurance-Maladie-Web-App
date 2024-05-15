@@ -1,18 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../Controllers/UserController');
+const authMiddleware = require('../authMiddleware');
 
-// Route pour créer un nouvel utilisateur
-router.post('/ajouterEmploye', userController.addEmployee);
+// Middleware d'authentification pour vérifier l'accès aux routes
 
-// Route pour obtenir les détails de l'utilisateur par ID
-//router.get('/:id', userController.getUserById);
+router.get('/employesArch', userController.getEmployesArch);
+router.get('/employes', userController.getEmployes);
+router.post('/employe/add', userController.addEmployee);
+router.put('/employe/update/:cinn', userController.updateEmployee);
+router.put('/employe/archive/:cin', userController.archiveEmployee);
+router.put('/employe/desarchive/:cin', userController.dearchiveEmployee);
+router.post('/user', userController.userRecup);
+router.post('/user/informations', userController.userInfos);
+router.post('/user/update', userController.userUpdate);
+router.post('/user/:userId/upload-image', userController.userUploadImage);
+router.post('/user/get-image', userController.userGetImage);
+router.post('/user/update-password', userController.userUpdatePassword);
+router.post('/forgot-password', userController.userForgetPassword);
+router.patch('/reset-password/:token', userController.userResetPassword);
 
-// Route pour mettre à jour les détails de l'utilisateur
-router.put('/:cin', userController.updateEmployee);
 
-// Route pour supprimer un utilisateur
-//router.delete('/:id', userController.deleteUser);
 
-// Exportez le routeur
+
 module.exports = router;
