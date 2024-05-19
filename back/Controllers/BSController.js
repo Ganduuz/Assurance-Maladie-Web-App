@@ -88,7 +88,11 @@ exports.ajouterBS = async (req, res) => {
             nomActes, 
             actes, 
             date: formattedDate,
-            etat: 1 // Attribution de l'état directement ici
+            etat: 1,
+            dateEtape1: Date.now(), 
+            dateEtape2: null,
+            dateEtape3: null,
+            dateEtape4: null,// Attribution de l'état directement ici
         });
         res.status(200).json({ message: 'Bulletin de soins ajouté', newBS });
     } catch (error) {
