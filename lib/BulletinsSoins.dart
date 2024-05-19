@@ -263,7 +263,7 @@ void _addBS() async {
 void supprimer_bulletin(String BSId,BuildContext context) async {
   try {
           final response = await http.delete(
-      Uri.parse('http://127.0.0.1:5000/api/BS/delete/$BSId'), 
+      Uri.parse('http://127.0.0.1:5000/api/deleteBS/$BSId'), 
       body: jsonEncode({  
       
       }),

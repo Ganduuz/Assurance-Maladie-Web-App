@@ -580,8 +580,8 @@ ElevatedButton(
                 tableHeader("CIN"),
                 tableHeader("E-mail"),
                 tableHeader("Poste"),
-                  tableHeader("Vérification"),
-                tableHeader("Actions"),
+                  tableHeader("  Statut"),
+                tableHeader(""),
             ],
           ),
           ..._currentEmployeesArch.map((employee) {
@@ -605,7 +605,7 @@ ElevatedButton(
                       ClipRRect(
                         borderRadius: BorderRadius.circular(1000),
                         child: Image.asset(
-                          'assets//téléchargement.jpeg',
+                          'assets/téléchargement.jpeg',
                           width: 30,
                         ),
                       ),
@@ -793,8 +793,8 @@ IconButton(
                       tableHeader("CIN"),
                       tableHeader("E-mail"),
                       tableHeader("Poste"),
-                      tableHeader("Vérification"),
-                      tableHeader("Actions"),
+                      tableHeader("  Statut"),
+                      tableHeader(""),
                     ]
                   ),
 
@@ -853,7 +853,7 @@ IconButton(
                     ClipRRect(
                       borderRadius: BorderRadius.circular(1000),
                       child: Image.asset(
-                        'assets/user (2).png',
+                        'assets/téléchargement.jpeg',
                         width: 30,
                       ),
                     ),
@@ -911,13 +911,13 @@ IconButton(
                 Expanded(
                   
                           child: Text(
-                            (employee.verification == "true") ? "Activé" : "non Activé",
+                            (employee.verification == "true") ? "  Activé" : "non Activé",
                             
                             style: TextStyle(
-                              color: Colors.white,
+                              color: (employee.verification == "true") ? const Color.fromARGB(255, 148, 212, 151) : const Color.fromARGB(255, 224, 122, 115),
                   
                               fontSize: 13,
-                              backgroundColor: (employee.verification == "true") ? const Color.fromARGB(255, 148, 212, 151) : const Color.fromARGB(255, 224, 122, 115),
+                              backgroundColor: Colors.white,
                             ),
     
                           ),

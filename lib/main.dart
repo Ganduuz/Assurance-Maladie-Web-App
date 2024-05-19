@@ -1,20 +1,32 @@
 import 'package:flutter/material.dart';
-import 'Connexion.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart'; // Importer Provider
+import 'connexion.dart';
+import 'cntrollers/controller.dart';
+void main() async {
+  // Initialisez les données de localisation pour le formatage des dates
+  await initializeDateFormatting('en_FR', null);
 
-
-void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => Controller(), // Créer une instance de votre Controller
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'pfe', // Titre de l'application Flutter
       debugShowCheckedModeBanner: false,
-      home: MyHomePage(),
-    );
-  }
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.white,
+       
+      ),
+      home:  MyHomePage(),
+);
+}
 }

@@ -1,4 +1,8 @@
 const { usersModel, usersArchiveModel, FamilyMember } = require('../models.js'); // Déstructuration correcte
+const cloudinary = require('cloudinary').v2;
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
 
 const crypto = require('crypto');
 const sendEmail = require('../email');
@@ -289,18 +293,43 @@ const userUpdate= async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour des informations de l\'utilisateur' });
     }
 }
-const userUploadImage= async (req, res) => {
+const userUploadImage = async (req, res) => {
     try {
-        const userId = req.params.userId;
-        const image = req.file.buffer; // Utilisez req.file.buffer pour accéder au contenu de l'image
-        await usersModel.findByIdAndUpdate(userId, { image: image });
-        res.status(200).json({ message: 'Image mise à jour avec succès' });
-    
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour de l\'image :', error);
-        res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'image' });
+      if (!req.file || !req.file.path) {
+        return res.status(400).json({ success: false, message: 'File is required' });
       }
-}
+  
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload(req.file.path, (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+  
+      const theUserPhoto = result.secure_url;
+      const userId = req.params.userId;
+      if (!userId) {
+        return res.status(400).json({ success: false, message: 'User ID is required' });
+      }
+  
+      await usersModel.findByIdAndUpdate(userId, { image: theUserPhoto });
+      const updatedUser = await usersModel.findById(userId);
+  
+      // Supprimez le fichier du serveur après l'avoir téléchargé sur Cloudinary
+      fs.unlinkSync(req.file.path);
+  
+      if (updatedUser) {
+        return res.status(200).json({ success: true, message: 'Image mise à jour avec succès', user: updatedUser });
+      } else {
+        return res.status(404).json({ success: false, message: 'User not found or update failed' });
+      }
+    } catch (err) {
+      return res.status(500).json({ success: false, message: 'Erreur lors de la mise à jour de l\'image', error: err.message });
+    }
+  };
 const userGetImage= async (req, res) => {
     try {
         const { user_id } = req.body;

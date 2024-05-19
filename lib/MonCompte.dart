@@ -187,7 +187,7 @@ Future<void> _importImage() async {
       final userId = await LocalStorageService.getData('user_id');
       final formData = http.MultipartRequest(
         'POST',
-        Uri.parse('http://127.0.0.1:5000/api/user/$userId/upload-image'),
+        Uri.parse('http://127.0.0.1:5000/api/user/upload-image/$userId'),
       );
       formData.files.add(http.MultipartFile.fromBytes(
         'image',
@@ -251,43 +251,44 @@ Future<void> _importImage() async {
                       ],
                     ),
                     child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () => _importImage(), 
-                          child: ClipOval(
-                            child: Container(
-                              width: 160.0,
-                              height: 160.0,
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                shape: BoxShape.circle,
-                              ),
-                              child: CircleAvatar(
-                                radius: 80.0,
-                                backgroundImage: AssetImage('assets/téléchargement.jpeg'),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16.0),
-                        ElevatedButton(
-                          onPressed: () => _importImage(), 
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            backgroundColor: const Color(0xFF5BADE9),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-                            child: Text(
-                              'Choose File',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+  children: [
+    GestureDetector(
+      onTap: () => _importImage(), 
+      child: ClipOval(
+        child: Container(
+          width: 160.0,
+          height: 160.0,
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            shape: BoxShape.circle,
+          ),
+          child: CircleAvatar(
+            radius: 80.0,
+backgroundImage:  AssetImage('assets/téléchargement.jpeg'),
+          ),
+        ),
+      ),
+    ),
+    const SizedBox(height: 16.0),
+    ElevatedButton(
+      onPressed: () => _importImage(), 
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        backgroundColor: const Color(0xFF5BADE9),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+        child: Text(
+          'Choose File',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    ),
+  ],
+),
+
                   ),
 
                   const SizedBox(width: 20.0),

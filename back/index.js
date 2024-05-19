@@ -11,6 +11,7 @@ const upload = multer();
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const { usersModel } = require('./models'); // Déstructuration correcte
+require('dotenv').config();
 
 // Import des routes
 const userRoutes = require('./Routes/UserRouter');
