@@ -15,10 +15,15 @@ const BSSchema = new mongoose.Schema({
     actes: String,
     date: String,
     etat:Number,
+    resultat:String,
+    total: Number,
+    remb : Number,
     dateEtape1:Date,
     dateEtape2:Date,
     dateEtape3:Date,
-    dateEtape4:Date
+    dateEtape4:Date,
+    dateEtape5:Date
+
     
 
 });

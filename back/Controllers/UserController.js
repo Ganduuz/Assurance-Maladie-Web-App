@@ -14,8 +14,8 @@ const sendWelcomeEmail = async (mail, prenom, cin) => {
         Nous sommes enchantés de vous accueillir dans notre système de suivi de remboursement médical, spécialement conçu pour les employés de Capgemini Tunisie ! 🎉
         Votre inscription a été validée avec succès et vous avez maintenant accès à notre plateforme intuitive et conviviale.
         Voici vos informations de connexion :
-        Identifiant (adresse e-mail) : ${mail}
-        Mot de passe : ${cin}
+           Identifiant (adresse e-mail) : ${mail}
+           Mot de passe : ${cin}
         Avec ces informations, vous pouvez dès maintenant explorer toutes les fonctionnalités de notre application, suivre vos remboursements médicaux et gérer vos demandes en toute simplicité.
         Nous nous engageons à vous offrir une expérience utilisateur de qualité et nous restons à votre disposition pour toute question ou assistance supplémentaire.
         Bienvenue à bord de notre système de suivi de remboursement médical dédié aux employés de Capgemini Tunisie !

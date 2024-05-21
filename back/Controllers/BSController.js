@@ -89,6 +89,8 @@ exports.ajouterBS = async (req, res) => {
             actes, 
             date: formattedDate,
             etat: 1,
+            total:0,
+            remb:0,
             dateEtape1: Date.now(), 
             dateEtape2: null,
             dateEtape3: null,
@@ -318,6 +320,59 @@ exports.getBSetat4 = async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des bulletins de soins' });
     }
 }
+
+exports.getBSetat5 = async (req, res) => {  
+    try {
+        // Recherche des bulletins de soins avec l'état 3 dans la base de données
+        const bulletins = await BS.find({ etat: 5 });
+
+        if (bulletins.length > 0) {
+            const nombre = bulletins.length;
+
+            // Créer un tableau pour stocker les détails de chaque bulletin
+            const bulletinsDetails = await Promise.all(bulletins.map(async (bulletin) => {
+                // Formatage de la date avec moment.js
+                const formattedDate = moment(bulletin.date).format('DD/MM/YYYY');
+                // Recherche de l'utilisateur associé à ce bulletin
+                const user = await usersModel.findOne({ _id: bulletin.userID });
+                
+                // Vérifier si l'utilisateur existe avant d'accéder à ses propriétés
+                const username = user ? `${user.nom} ${user.prenom}` : 'Utilisateur inconnu';
+
+                // Retourner les détails du bulletin avec le nom d'utilisateur associé
+                return {
+                    _id: bulletin._id,
+                    matricule: bulletin.matricule,
+                    memberId: bulletin.memberId,
+                    prenomMalade: bulletin.prenomMalade,
+                    nomMalade: bulletin.nomMalade,
+                    nomActes: bulletin.nomActes,
+                    actes: bulletin.actes,
+                    date: formattedDate,
+                    userId: bulletin.userID,
+                    etat: bulletin.etat,
+                    username: username,
+                    DateRemb :bulletin.dateEtape5,
+                    remb:bulletin.remb,
+                    total:bulletin.total,
+                    resultat:bulletin.resultat
+
+                };
+            }));
+
+            // Envoyer les détails des bulletins récupérés avec un code de statut 200
+            res.status(200).json({ message: 'Détails des bulletins de soins récupérés', nombre, bulletinsDetails });
+        } else {
+            // Envoyer un message d'erreur si aucun bulletin n'a été trouvé avec l'état 3
+            res.status(404).json({ message: 'Aucun bulletin trouvé avec l\'état 3' });
+        }
+    } catch (error) {
+        // Gérer les erreurs de manière appropriée et envoyer un message d'erreur avec un code de statut 500
+        console.error('Erreur lors de la récupération des détails des bulletins de soins : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des bulletins de soins' });
+    }
+}
+
 exports.BSetatSuivante = async (req, res) => {  
     try {
         const { BSIds } = req.body; // Récupérer la liste des identifiants des bulletins de soins depuis le corps de la requête
@@ -387,14 +442,19 @@ exports.BSetatPrecedent = async (req, res) => {
 exports.BSRemb = async (req, res) => {
     try {
         const { bsId } = req.params;
-        const { remb } = req.body; // Assuming 'remb' is provided in the request body
+        const { total ,remb } = req.body; // Assuming 'remb' is provided in the request body
 
         if (!remb || isNaN(remb)) {
             return res.status(400).json({ message: 'Le montant de remboursement est requis et doit être un nombre' });
         }
 
-        const bulletin = await BS.findById(bsId);
-
+        const bulletin = await BS.findOne({matricule:bsId});
+        bulletin.total=total;
+        bulletin.remb=remb;
+        bulletin.etat=5;
+        bulletin.resultat="Remb";
+        bulletin.dateEtape5=Date.now();
+        await bulletin.save();
         if (!bulletin) {
             return res.status(404).json({ message: 'Bulletin de soins non trouvé' });
         }

@@ -22,8 +22,11 @@ class _DecisionState extends State<Decision> {
   List<Bulletins_Soins> bulletin = [];
   int _currentPage = 0;
   int _bulletinPerPage = 5;
+  String bsid='';
   String _searchText = ''; // État local pour stocker le texte de recherche
   String? selectedMalade;
+  double fraais =0 ;
+  double rembs=0;
   int _selectedIndex = 0;
   List<bool> _selected = [];
    bool _isHeaderChecked = false;
@@ -67,6 +70,49 @@ void _toggleSelected(int index) {
     });
   }
   
+
+Future <void> _remb(String bsid ,double fraais,double rembs,BuildContext context) async {
+  try {
+    // Envoyer la liste des identifiants des bulletins de soins cochés à l'API
+    final response = await http.put(
+      Uri.parse('http://127.0.0.1:5000/api/BSRemb/$bsid'),
+      body: jsonEncode({
+        "remb":rembs ,
+        "total":fraais ,
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    // Vérifier si la requête a réussi
+    if (response.statusCode == 200) {
+      // Supprimer les bulletins sélectionnés de la liste affichée
+      setState(() {
+        bulletin.removeWhere((bs) => bsid.contains(bs.ID));
+        // Réinitialiser la liste des bulletins sélectionnés
+      });
+
+      // Afficher un SnackBar pour informer l'utilisateur
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Bulletin de soins passé à les rembourssements'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      // Afficher un message de succès ou effectuer d'autres actions nécessaires
+      print('Bulletins passés à l\'étape suivante');
+    } else {
+      // Afficher un message d'erreur en cas d'échec de la requête
+      print('Erreur lors du passage à l\'étape suivante: ${response.statusCode}');
+    }
+  } catch (error) {
+    // Afficher l'erreur en cas de problème de connexion ou autre erreur
+    print('Erreur lors du passage à l\'étape suivante : $error');
+  }
+}
+
+
+
   Future<void> _loadBS() async {
     try {
       List<Bulletins_Soins> BS = await fetchBS();
@@ -310,7 +356,7 @@ void _toggleSelected(int index) {
           height: 30, // Ajoutez la hauteur que vous voulez
           child: ElevatedButton(
             onPressed: () {
-              _decisionBulletins(context);
+              _decisionBulletins(BSAdmin,context);
             },
             child: Text("Décision",style: TextStyle(color: Colors.black),),
             style: TextButton.styleFrom(
@@ -393,13 +439,14 @@ void _toggleSelected(int index) {
     child: headerContent,
   );
 }
-void _decisionBulletins(BuildContext context) {
+void _decisionBulletins( Bulletins_Soins bs,BuildContext context) {
   String decision = 'Remboursé';
   List<String> listee = ['Remboursé', 'Contre visite', 'Annuler'];
-  String frais = '';
-  String rembourse = '';
-  String nom = '';
-  bool showFraisRembourse = false; // Initialiser à false
+  TextEditingController fraisController = TextEditingController();
+  TextEditingController rembourseController = TextEditingController();
+  bool showFraisRembourse = false;
+
+  final _formKey = GlobalKey<FormState>();
 
   showDialog(
     context: context,
@@ -414,7 +461,7 @@ void _decisionBulletins(BuildContext context) {
             backgroundColor: Colors.transparent,
             child: Container(
               width: 500,
-              height: 400, // Augmenté pour s'adapter aux éléments ajoutés
+              height: showFraisRembourse ? 460 : 400, // Adjust height based on fields
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: Colors.white,
@@ -423,154 +470,207 @@ void _decisionBulletins(BuildContext context) {
                 ),
               ),
               padding: EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Décision",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Container(
-                    padding: EdgeInsets.only(left: 16, right: 16),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey, width: 1),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: DropdownButton<String>(
-                      value: decision,
-                      onChanged: (newValue) {
-                        setState(() {
-                          decision = newValue!;
-                          // Mettre à jour la visibilité des champs "Frais" et "Rembourse"
-                          showFraisRembourse = (decision == 'Remboursé');
-                        });
-                      },
-                      hint: Text("Décision"),
-                      icon: Icon(Icons.arrow_drop_down),
-                      underline: SizedBox(),
-                      dropdownColor: Colors.white,
-                      isExpanded: true,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Décision",
                       style: TextStyle(
-                        color: Color.fromRGBO(41, 41, 41, 1),
-                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
                       ),
-                      items: listee.map((valueItem) {
-                        return DropdownMenuItem<String>(
-                          child: Text(valueItem),
-                          value: valueItem,
-                        );
-                      }).toList(),
                     ),
-                  ),
-                  SizedBox(height: 40),
-                  if (showFraisRembourse) // Afficher les champs seulement si showFraisRembourse est vrai
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            onChanged: (value) => frais = value,
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontFamily: 'Arial',
-                            ),
-                            decoration: InputDecoration(
-                              labelText: 'Frais',
-                              labelStyle: TextStyle(
-                                color: Color.fromRGBO(209, 216, 223, 1),
+                    SizedBox(height: 20),
+                    Container(
+                      padding: EdgeInsets.only(left: 16, right: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: DropdownButtonFormField<String>(
+                        value: decision,
+                        onChanged: (newValue) {
+                          setState(() {
+                            decision = newValue!;
+                            showFraisRembourse = (decision == 'Remboursé');
+                          });
+                        },
+                        hint: Text("Décision"),
+                        icon: Icon(Icons.arrow_drop_down),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                        ),
+                        dropdownColor: Colors.white,
+                        isExpanded: true,
+                        style: TextStyle(
+                          color: Color.fromRGBO(41, 41, 41, 1),
+                          fontSize: 18,
+                        ),
+                        items: listee.map((valueItem) {
+                          return DropdownMenuItem<String>(
+                            child: Text(valueItem),
+                            value: valueItem,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    SizedBox(height: 40),
+                    if (showFraisRembourse)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: fraisController,
+                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontFamily: 'Arial',
                               ),
-                              suffixText: 'DT',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.blue.shade300,
-                                  width: 2.0,
+                              decoration: InputDecoration(
+                                labelText: 'Frais',
+                                labelStyle: TextStyle(
+                                  color: Color.fromRGBO(209, 216, 223, 1),
                                 ),
-                                borderRadius: BorderRadius.circular(5.0),
+                                suffixText: 'DT',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.blue.shade300,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
                               ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Veuillez entrer un frais';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 20),
+                          Expanded(
+                            child: TextFormField(
+                              controller: rembourseController,
+                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontFamily: 'Arial',
+                              ),
+                              decoration: InputDecoration(
+                                labelText: 'Remboursé',
+                                labelStyle: TextStyle(
+                                  color: Color.fromRGBO(209, 216, 223, 1),
+                                ),
+                                suffixText: 'DT',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.blue,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Veuillez entrer un remboursé';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (showFraisRembourse)
+                      SizedBox(height: 20),
+                    if (showFraisRembourse)
+                      Text(
+                        'Le frais total doit être supérieur au remboursé.',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 14,
+                        ),
+                      ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(
+                            'Annuler',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 141, 142, 142),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
                             ),
                           ),
                         ),
-                        SizedBox(width: 20),
-                        Expanded(
-                          child: TextField(
-                            onChanged: (value) => rembourse = value,
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontFamily: 'Arial',
-                            ),
-                            decoration: InputDecoration(
-                              labelText: 'Rembourse',
-                              labelStyle: TextStyle(
-                                color: Color.fromRGBO(209, 216, 223, 1),
-                              ),
-                              suffixText: 'DT',
+                        SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              if (showFraisRembourse) {
+                                double frais = double.tryParse(fraisController.text) ?? 0.0;
+                                double rembourse = double.tryParse(rembourseController.text) ?? 0.0;
+                                  setState(() {
+                                    fraais = frais;
+                                    rembs = rembourse;
+                                  });
+                                if (frais <= rembourse) {
+                                  setState(() {
+                                    // Show error message below the fields
+                                    fraisController.text = '';
+                                    rembourseController.text = '';
+                                  });
+                                } else {
+                                  Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                                 _remb(bs.ID,fraais,rembs, context);
 
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.blue,
-                                  width: 2.0,
-                                ),
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
+                                }
+                                _remb(bs.ID,fraais,rembs, context);
+                              } else {
+                               
+
+                                
+                                Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                                // Ajouter votre logique pour "Ajouter"
+                              }
+                            }
+                          },
+                          child: Text(
+                            'Ajouter',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue.shade300,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Fermer la boîte de dialogue
-                        },
-                        child: Text(
-                          'Annuler',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 141, 142, 142),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Ajoutez votre logique ici
-                          Navigator.of(context).pop(); // Fermer la boîte de dialogue
-                        },
-                        child: Text(
-                          'Ajouter',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue.shade300,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -579,4 +679,5 @@ void _decisionBulletins(BuildContext context) {
     },
   );
 }
+
 }
