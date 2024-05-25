@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pfe/remboursement.dart';
+import 'package:pfe/Dashboard/dashboard.dart';
+import 'package:pfe/RemAdmin.dart';
 import 'employé.dart';
 import 'bsAdmin/BSAdmin.dart';
 import 'connexion.dart';
-import 'dashboard.dart';
 import 'newmember.dart';
 import 'responsive.dart';
 import 'package:pfe/cntrollers/controller.dart';
@@ -24,7 +24,7 @@ class _AccueilState extends State<AccueilAdmin> {
      Employeee (),
      BSAdmin(bulletinsSoins: [],),
       NewMemberPage(),
-      remb(),
+      Remb(),
 
 
   ];

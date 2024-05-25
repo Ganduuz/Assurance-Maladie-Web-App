@@ -576,12 +576,12 @@ ElevatedButton(
               borderRadius: BorderRadius.circular(10), // Coins arrondis
             ),
             children: [
-               tableHeader("Nom complet",),
-                tableHeader("CIN"),
-                tableHeader("E-mail"),
-                tableHeader("Poste"),
-                  tableHeader("  Statut"),
-                tableHeader(""),
+              tableHeader("Nom complet",),
+              tableHeader("CIN"),
+              tableHeader("E-mail"),
+              tableHeader("Poste"),
+              tableHeader("  Statut"),
+              tableHeader(""),
             ],
           ),
           ..._currentEmployeesArch.map((employee) {

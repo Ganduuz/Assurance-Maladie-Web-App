@@ -155,8 +155,8 @@ class _NouveauBulletinState extends State<Nouveaubulletin> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(width: 200,),
-                  SizedBox(height: 20,),
+                  SizedBox(width: 980,),
+                  SizedBox(height: 10,),
                   Container(
                     width: 200,
                     height: 35,

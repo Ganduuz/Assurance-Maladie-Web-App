@@ -3,37 +3,36 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Remboursement {
-  String Num;
   String ID;
   String Qui_est_malade;
-  String Frais;
-  String remboursements;
+  double Frais;
+  double remboursements;
   String DateRemboursement;
   String decision;
+  String nom_emp;
 
   Remboursement({
-    required this.Num,
     required this.ID,
     required this.Qui_est_malade,
     required this.Frais,
     required this.remboursements,
     required this.DateRemboursement,
     required this.decision,
+    required this.nom_emp,
   });
 
   factory Remboursement.fromJson(Map<String, dynamic> json) {
     return Remboursement(
-      Num: '',
       ID: json['matricule'] ?? '',
-      Frais: json['total'] ?? '',
-      remboursements: json['remb'] ?? '',
+      Frais: (json['total'] as num).toDouble(),
+      remboursements: (json['remb'] as num).toDouble(),
       Qui_est_malade: (json['prenomMalade'] ?? '') + ' ' + (json['nomMalade'] ?? ''),
       DateRemboursement: json['DateRemb'] ?? '',
       decision: json['resultat'] ?? '',
+      nom_emp: json['username'] ?? '',
     );
   }
 }
-
 class Remb extends StatefulWidget {
   @override
   _RembState createState() => _RembState();
@@ -45,11 +44,19 @@ class _RembState extends State<Remb> {
   int _remboursementsPerPage = 6;
   String _searchText = ''; // État local pour stocker le texte de recherche
 
+
+
+@override
+  void initState() {
+    _loadRemboursements();
+    super.initState();
+  }
+
+
   List<Remboursement> get _filteredRemboursements {
-    return remboursements.where((remb) => remb.Num.toLowerCase().contains(_searchText.toLowerCase()) ||
-           remb.Qui_est_malade.toLowerCase().contains(_searchText.toLowerCase()) ||
-           remb.ID.toLowerCase().contains(_searchText.toLowerCase()) ||
-           remb.DateRemboursement.toLowerCase().contains(_searchText.toLowerCase())).toList();
+            return remboursements.where((rembr) =>  rembr.Qui_est_malade.toLowerCase().contains(_searchText.toLowerCase()) ||
+           rembr.ID.toLowerCase().contains(_searchText.toLowerCase()) ||
+           rembr.DateRemboursement.toLowerCase().contains(_searchText.toLowerCase())).toList();
   }
 
   List<Remboursement> get _currentRemboursements {
@@ -59,11 +66,7 @@ class _RembState extends State<Remb> {
         startIndex, endIndex.clamp(0, _filteredRemboursements.length));
   }
 
-  @override
-  void initState() {
-    _loadRemboursements();
-    super.initState();
-  }
+  
 
   // Méthode pour mettre à jour le texte de recherche
   void _updateSearchText(String value) {
@@ -74,9 +77,9 @@ class _RembState extends State<Remb> {
 
   Future<void> _loadRemboursements() async {
     try {
-      List<Remboursement> remboursements = await fetchRemboursements();
+      List<Remboursement> rembr = await fetchRemboursements();
       setState(() {
-        this.remboursements = remboursements;
+        remboursements = rembr;
       });
     } catch (error) {
       print('Erreur lors du chargement des remboursements: $error');
@@ -84,7 +87,7 @@ class _RembState extends State<Remb> {
   }
 
   Future<List<Remboursement>> fetchRemboursements() async {
-    final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/BSadmin/etat5'));
+    final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/BSadmin/Rembs'));
 
     if (response.statusCode == 200) {
       // Analyser la réponse JSON
@@ -116,7 +119,7 @@ class _RembState extends State<Remb> {
                   Expanded(
                     child: SingleChildScrollView(
                       child: Text(
-                        'Mes remboursements ',
+                        'Remboursements ',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 22,
@@ -179,17 +182,16 @@ class _RembState extends State<Remb> {
                         ),
                       ),
                       children: [
-                        tableHeader("N° Bulletin"),
-                        tableHeader("ID Bulletin"),
-                        tableHeader("Malade"),
-                        tableHeader("Frais"),
+                        tableHeader("Matricule"),
+                        tableHeader("Nom employé"),
+                        tableHeader(" Malade"),
+                        tableHeader(" Frais"),
                         tableHeader("Remboursement"),
                         tableHeader("Date de remboursement"),
                         tableHeader("Décision"),
-                        tableHeader("Imprimer"),
                       ],
                     ),
-                    ..._currentRemboursements.map((remb) {
+                    ..._currentRemboursements.map((rembr) {
                       return TableRow(
                         decoration: BoxDecoration(
                           border: Border(
@@ -207,7 +209,7 @@ class _RembState extends State<Remb> {
                                 children: [
                                   SizedBox(width: 10,),
                                   Expanded(
-                                    child: Text(remb.Num),
+                                    child: Text(rembr.ID),
                                   ),
                                 ],
                               ),
@@ -220,34 +222,21 @@ class _RembState extends State<Remb> {
                                 children: [
                                   SizedBox(width: 10,),
                                   Expanded(
-                                    child: Text(remb.ID),
+                                    child: Text(rembr.nom_emp,
+                                    style: TextStyle(color: Colors.blue[300]),),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                          TableCell(
-                           
-child: Container(
-  margin: EdgeInsets.symmetric(vertical: 15),
-  child: Row(
-    children: [
-      SizedBox(width: 10,),
-      Expanded(
-        child: Text(remb.Qui_est_malade),
-      ),
-    ],
-  ),
-),
-                          ),
-                          TableCell(
+                          TableCell(                           
                             child: Container(
                               margin: EdgeInsets.symmetric(vertical: 15),
                               child: Row(
                                 children: [
                                   SizedBox(width: 10,),
                                   Expanded(
-                                    child: Text(remb.Frais),
+                                    child: Text(rembr.Qui_est_malade),
                                   ),
                                 ],
                               ),
@@ -259,9 +248,30 @@ child: Container(
                               child: Row(
                                 children: [
                                   SizedBox(width: 10,),
-                                  Expanded(
-                                    child: Text(remb.remboursements),
+                                  Expanded( 
+                                    child: rembr.decision == 'Remb'
+                                    ? Text(rembr.Frais.toStringAsFixed(2))
+                                    : Text('--'),
                                   ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Container(
+                              margin: EdgeInsets.symmetric(vertical: 15),
+                              child: Row(
+                                children: [
+                                  SizedBox(width: 10,),
+                                  Expanded(
+                                    child: rembr.decision == 'Remb'
+                                        ? Text(
+                                            rembr.remboursements.toStringAsFixed(2),
+                                            style: TextStyle(color: Colors.green[500]),
+                                          )
+                                        : Text('--'),
+                                  )
+
                                 ],
                               ),
                             ),
@@ -273,7 +283,7 @@ child: Container(
                                 children: [
                                   SizedBox(width: 10,),
                                   Expanded(
-                                    child: Text(remb.DateRemboursement),
+                                    child: Text(rembr.DateRemboursement.split('T').first),
                                   ),
                                 ],
                               ),
@@ -284,31 +294,29 @@ child: Container(
                               margin: EdgeInsets.symmetric(vertical: 8),
                               child: Row(
                                 children: [
-                                  SizedBox(width: 10,),
+                                  SizedBox(width: 10),
                                   Expanded(
-                                    child: Text(remb.decision),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Container(
-                              padding: EdgeInsets.fromLTRB(0, 0, 30, 0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: IconButton(
-                                      icon: Icon(Icons.print,color: Colors.red,),
-                                      onPressed: () {
-                                        // Fonctionnalité d'impression à ajouter ici
-                                      },
+                                    child: Text(
+                                      rembr.decision == 'Remb'
+                                          ? 'Remboursé'
+                                          : rembr.decision == 'annule'
+                                              ? 'Annulé'
+                                              : 'Contre visite',
+                                      style: TextStyle(
+                                        color: rembr.decision == 'Remb'
+                                            ? Colors.green
+                                            : rembr.decision == 'annule'
+                                                ? Colors.red
+                                                : Colors.orange,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
+
+                          
                         ],
                       );
                     }).toList(),

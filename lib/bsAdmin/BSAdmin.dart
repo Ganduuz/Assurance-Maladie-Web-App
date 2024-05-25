@@ -90,7 +90,6 @@ class _BSAdminState extends State<BSAdmin> with SingleTickerProviderStateMixin {
           controller: _tabController,
           tabs: <Widget>[
             Container(
-              height: 20,
               width: 120,
               child: Tab(text: 'Nouveau bulletin'),
             ),
@@ -119,16 +118,7 @@ class _BSAdminState extends State<BSAdmin> with SingleTickerProviderStateMixin {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(backgroundColor: Colors.blue.shade100,
-        onPressed: () {
-          if (_tabController!.index < _tabController!.length - 1) {
-            _tabController!.animateTo(_tabController!.index + 1);
-          } else {
-            _tabController!.animateTo(0);
-          }
-        },
-        child: Icon(Icons.arrow_forward),
-     ),
+      
 );
 }
 }

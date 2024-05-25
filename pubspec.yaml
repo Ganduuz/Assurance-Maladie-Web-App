@@ -44,7 +44,8 @@ dependencies:
   awesome_dialog: ^3.2.0
   flutter_webview_plugin: ^0.4.0
   webview_flutter: ^2.0.13
-
+  pie_chart: ^5.4.0
+  fl_chart: ^0.68.0
 
 dev_dependencies:
   flutter_test:
@@ -139,7 +140,7 @@ flutter:
   - assets/newspaper.png
   - assets/exit.png
   - assets/monCompte.png
-
+  - assets/
 
 
   fonts:  

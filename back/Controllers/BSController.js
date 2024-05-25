@@ -9,12 +9,12 @@ exports.getBS = async (req, res) => {
         const { user_id } = req.params;
         
         // Recherche des membres de la famille appartenant à l'utilisateur avec l'ID spécifié
-        const bulletins = await BS.find({ userID: user_id });
+        const bulletins = await BS.find({ userID: user_id, etat: { $lt: 5 }  });
         
         if (bulletins.length > 0) {
             // Créer un tableau pour stocker les détails de chaque membre
             const bulletinsDetails = bulletins.map(bulletin => {
-                const formattedDate = moment(bulletin.date, moment.ISO_8601).format('DD/MM/YYYY'); // Use recognized format
+                const formattedDate = moment(bulletin.date).format('DD/MM/YYYY');
 
                 return {
                     _id: bulletin._id,
@@ -321,7 +321,7 @@ exports.getBSetat4 = async (req, res) => {
     }
 }
 
-exports.getBSetat5 = async (req, res) => {  
+exports.getBSetat5Admin = async (req, res) => {  
     try {
         // Recherche des bulletins de soins avec l'état 3 dans la base de données
         const bulletins = await BS.find({ etat: 5 });
@@ -372,6 +372,65 @@ exports.getBSetat5 = async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des bulletins de soins' });
     }
 }
+
+
+
+exports.getBSetat5Empl = async (req, res) => {  
+    userid=req.params.userid;
+    try {
+        // Recherche des bulletins de soins avec l'état 3 dans la base de données
+        const bulletins = await BS.find({userID:userid ,etat: 5 });
+
+        if (bulletins.length > 0) {
+            const nombre = bulletins.length;
+
+            // Créer un tableau pour stocker les détails de chaque bulletin
+            const bulletinsDetails = await Promise.all(bulletins.map(async (bulletin) => {
+                // Formatage de la date avec moment.js
+                const formattedDate = moment(bulletin.date).format('DD/MM/YYYY');
+                // Recherche de l'utilisateur associé à ce bulletin
+                const user = await usersModel.findOne({ _id: bulletin.userID });
+                
+                // Vérifier si l'utilisateur existe avant d'accéder à ses propriétés
+                const username = user ? `${user.nom} ${user.prenom}` : 'Utilisateur inconnu';
+
+                // Retourner les détails du bulletin avec le nom d'utilisateur associé
+                return {
+                    _id: bulletin._id,
+                    matricule: bulletin.matricule,
+                    memberId: bulletin.memberId,
+                    prenomMalade: bulletin.prenomMalade,
+                    nomMalade: bulletin.nomMalade,
+                    nomActes: bulletin.nomActes,
+                    actes: bulletin.actes,
+                    date: formattedDate,
+                    userId: bulletin.userID,
+                    etat: bulletin.etat,
+                    username: username,
+                    DateRemb :bulletin.dateEtape5,
+                    remb:bulletin.remb,
+                    total:bulletin.total,
+                    resultat:bulletin.resultat
+
+                };
+            }));
+
+            // Envoyer les détails des bulletins récupérés avec un code de statut 200
+            res.status(200).json({ message: 'Détails des bulletins de soins récupérés', nombre, bulletinsDetails });
+        } else {
+            // Envoyer un message d'erreur si aucun bulletin n'a été trouvé avec l'état 3
+            res.status(404).json({ message: 'Aucun bulletin trouvé avec l\'état 3' });
+        }
+    } catch (error) {
+        // Gérer les erreurs de manière appropriée et envoyer un message d'erreur avec un code de statut 500
+        console.error('Erreur lors de la récupération des détails des bulletins de soins : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des détails des bulletins de soins' });
+    }
+}
+
+
+
+
 
 exports.BSetatSuivante = async (req, res) => {  
     try {
@@ -483,3 +542,97 @@ exports.BSRemb = async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour du remboursement' });
     }
 };
+
+exports.BSAnnule = async (req, res) => {
+    try {
+        const { bsId } = req.params;
+         // Assuming 'remb' is provided in the request body
+
+        if (!remb || isNaN(remb)) {
+            return res.status(400).json({ message: 'Le montant de remboursement est requis et doit être un nombre' });
+        }
+
+        const bulletin = await BS.findOne({matricule:bsId});
+        bulletin.total=0;
+        bulletin.remb=0;
+        bulletin.etat=5;
+        bulletin.resultat="annule";
+        bulletin.dateEtape5=Date.now();
+        await bulletin.save();
+        if (!bulletin) {
+            return res.status(404).json({ message: 'Bulletin de soins non trouvé' });
+        }
+
+        if (!bulletin.memberId) {
+            const user = await usersModel.findById(bulletin.userID);
+            if (!user) {
+                return res.status(404).json({ message: 'Utilisateur non trouvé' });
+            }
+            user.reste = 0;
+            user.consome = 0;
+            await user.save();
+        } else {
+            const member = await FamilyMember.findById(bulletin.memberId);
+            if (!member) {
+                return res.status(404).json({ message: 'Membre de la famille non trouvé' });
+            }
+            member.reste = (member.reste || 0) - remb;
+            member.consome = (member.consome || 0) + remb;
+            await member.save();
+        }
+
+        res.status(200).json({ message: 'Remboursement mis à jour avec succès' });
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du remboursement : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour du remboursement' });
+    }
+};
+
+
+
+exports.BSContreVisite = async (req, res) => {
+    try {
+        const { bsId } = req.params;
+         // Assuming 'remb' is provided in the request body
+
+        if (!remb || isNaN(remb)) {
+            return res.status(400).json({ message: 'Le montant de remboursement est requis et doit être un nombre' });
+        }
+
+        const bulletin = await BS.findOne({matricule:bsId});
+        bulletin.total=0;
+        bulletin.remb=0;
+        bulletin.etat=5;
+        bulletin.resultat="CV";
+        bulletin.dateEtape5=Date.now();
+        await bulletin.save();
+        if (!bulletin) {
+            return res.status(404).json({ message: 'Bulletin de soins non trouvé' });
+        }
+
+        if (!bulletin.memberId) {
+            const user = await usersModel.findById(bulletin.userID);
+            if (!user) {
+                return res.status(404).json({ message: 'Utilisateur non trouvé' });
+            }
+            user.reste = 0;
+            user.consome = 0;
+            await user.save();
+        } else {
+            const member = await FamilyMember.findById(bulletin.memberId);
+            if (!member) {
+                return res.status(404).json({ message: 'Membre de la famille non trouvé' });
+            }
+            member.reste = (member.reste || 0) - remb;
+            member.consome = (member.consome || 0) + remb;
+            await member.save();
+        }
+
+        res.status(200).json({ message: 'Remboursement mis à jour avec succès' });
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du remboursement : ', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour du remboursement' });
+    }
+};
+
+

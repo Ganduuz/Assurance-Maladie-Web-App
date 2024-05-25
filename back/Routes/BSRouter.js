@@ -11,9 +11,12 @@ router.get('/BSadmin/etat1', BSController.getBSetat1);
 router.get('/BSadmin/etat2', BSController.getBSetat2);
 router.get('/BSadmin/etat3', BSController.getBSetat3);
 router.get('/BSadmin/etat4', BSController.getBSetat4);
-router.get('/BSadmin/Rembs', BSController.getBSetat5);
-
+router.get('/BSadmin/Rembs', BSController.getBSetat5Admin);
+router.get('/BS/Remb/:userid', BSController.getBSetat5Empl);
 router.put('/BS/suivante', BSController.BSetatSuivante);
 router.put('/BSetatPrecedent', BSController.BSetatPrecedent);
 router.put('/BSRemb/:bsId',BSController.BSRemb);
+router.put('/BSAnnule/:bsId',BSController.BSAnnule);
+router.put('/BSContreVisite/:bsId',BSController.BSContreVisite);
+
 module.exports = router;

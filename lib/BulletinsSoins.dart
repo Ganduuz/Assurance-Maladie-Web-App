@@ -627,7 +627,7 @@ Widget build(BuildContext context) {
                                   Expanded(child: Divider(color: bs.etat >= 3 ? const Color.fromARGB(255, 33, 243, 131) : Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
                                   buildStep(3, 'Envoyé assurance', bs.etat >= 3, bs),
                                   Expanded(child: Divider(color: bs.etat >= 4 ? const Color.fromARGB(255, 33, 243, 131) : Color.fromARGB(255, 193, 193, 193), height: 10, thickness: 2)),
-                                  buildStep(4, 'Remboursé', _currentStep >= 4, bs),
+                                  buildStep(4, '', _currentStep >= 4, bs),
                                 ],
                               ),
                             )
