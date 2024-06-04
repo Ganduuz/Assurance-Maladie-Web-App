@@ -231,7 +231,7 @@ class _NouveauBulletinState extends State<Nouveaubulletin> {
                 ),),
                       tableHeader(Text("Matricule", style: TextStyle(fontWeight: FontWeight.bold))),
                       tableHeader(Text("Nom employé", style: TextStyle(fontWeight: FontWeight.bold))),
-                      tableHeader(Text("Adhérent", style: TextStyle(fontWeight: FontWeight.bold))),
+                      tableHeader(Text("Malade", style: TextStyle(fontWeight: FontWeight.bold))),
                       tableHeader(Text("Nom médecin", style: TextStyle(fontWeight: FontWeight.bold))),
                       tableHeader(Text("Spécialité ", style: TextStyle(fontWeight: FontWeight.bold))),
                       tableHeader(Text("Date de consultation", style: TextStyle(fontWeight: FontWeight.bold))),
@@ -362,7 +362,7 @@ class _NouveauBulletinState extends State<Nouveaubulletin> {
                                       }
                                     }
                                   },
-                                  child: BSAdmin.piece_jointe.isNotEmpty ? Text('Ouvrir', style: TextStyle(decoration: TextDecoration.underline ,decorationColor: Colors.blue, color: Colors.blue)) : Text('Aucune pièce jointe'),
+                                  child: Text('Ouvrir', style: TextStyle(decoration: TextDecoration.underline ,decorationColor: Colors.blue, color: Colors.blue)) ,
                                 ),
                               ),
                             ],

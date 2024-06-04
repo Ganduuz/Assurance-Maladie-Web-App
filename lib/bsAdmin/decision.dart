@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pfe/cntrollers/controller.dart';
 import '../calendar_widget.dart';
 import 'dart:html' as html;
 import 'dart:convert';
@@ -79,6 +80,86 @@ Future <void> _remb(String bsid ,double fraais,double rembs,BuildContext context
       body: jsonEncode({
         "remb":rembs ,
         "total":fraais ,
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    // Vérifier si la requête a réussi
+    if (response.statusCode == 200) {
+      // Supprimer les bulletins sélectionnés de la liste affichée
+      setState(() {
+        bulletin.removeWhere((bs) => bsid.contains(bs.ID));
+        // Réinitialiser la liste des bulletins sélectionnés
+      });
+
+      // Afficher un SnackBar pour informer l'utilisateur
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Bulletin de soins passé à les rembourssements'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      // Afficher un message de succès ou effectuer d'autres actions nécessaires
+      print('Bulletins passés à l\'étape suivante');
+    } else {
+      // Afficher un message d'erreur en cas d'échec de la requête
+      print('Erreur lors du passage à l\'étape suivante: ${response.statusCode}');
+    }
+  } catch (error) {
+    // Afficher l'erreur en cas de problème de connexion ou autre erreur
+    print('Erreur lors du passage à l\'étape suivante : $error');
+  }
+}
+
+
+Future <void> _annule(String bsid ,String comment,BuildContext context) async {
+  try {
+    // Envoyer la liste des identifiants des bulletins de soins cochés à l'API
+    final response = await http.put(
+      Uri.parse('http://127.0.0.1:5000/api/BSAnnule/$bsid'),
+      body: jsonEncode({
+        "commentaire":comment ,
+        
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    // Vérifier si la requête a réussi
+    if (response.statusCode == 200) {
+      // Supprimer les bulletins sélectionnés de la liste affichée
+      setState(() {
+        bulletin.removeWhere((bs) => bsid.contains(bs.ID));
+        // Réinitialiser la liste des bulletins sélectionnés
+      });
+
+      // Afficher un SnackBar pour informer l'utilisateur
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Bulletin de soins passé à les rembourssements'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      // Afficher un message de succès ou effectuer d'autres actions nécessaires
+      print('Bulletins passés à l\'étape suivante');
+    } else {
+      // Afficher un message d'erreur en cas d'échec de la requête
+      print('Erreur lors du passage à l\'étape suivante: ${response.statusCode}');
+    }
+  } catch (error) {
+    // Afficher l'erreur en cas de problème de connexion ou autre erreur
+    print('Erreur lors du passage à l\'étape suivante : $error');
+  }
+}
+Future <void> _contreVisite(String bsid ,String comment,BuildContext context) async {
+  try {
+    // Envoyer la liste des identifiants des bulletins de soins cochés à l'API
+    final response = await http.put(
+      Uri.parse('http://127.0.0.1:5000/api/BSContreVisite/$bsid'),
+      body: jsonEncode({
+        "commentaire":comment ,
+        
       }),
       headers: {'Content-Type': 'application/json'},
     );
@@ -444,8 +525,10 @@ void _decisionBulletins( Bulletins_Soins bs,BuildContext context) {
   List<String> listee = ['Remboursé', 'Contre visite', 'Annuler'];
   TextEditingController fraisController = TextEditingController();
   TextEditingController rembourseController = TextEditingController();
+  TextEditingController commentaireController = TextEditingController();
+ String comment ='';
   bool showFraisRembourse = false;
-
+bool commentaire =false;
   final _formKey = GlobalKey<FormState>();
 
   showDialog(
@@ -495,6 +578,7 @@ void _decisionBulletins( Bulletins_Soins bs,BuildContext context) {
                           setState(() {
                             decision = newValue!;
                             showFraisRembourse = (decision == 'Remboursé');
+                           commentaire = (decision == 'Contre visite' || decision == 'Annuler');
                           });
                         },
                         hint: Text("Décision"),
@@ -599,6 +683,49 @@ void _decisionBulletins( Bulletins_Soins bs,BuildContext context) {
                           fontSize: 14,
                         ),
                       ),
+                      SizedBox(height:10),
+                      if (commentaire)
+                        Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: commentaireController,
+                              onChanged: (controller){
+                              setState(() {
+                                comment=controller;
+                              });},
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontFamily: 'Arial',
+                              ),
+                              decoration: InputDecoration(
+                                labelText: 'Commentaire',
+                                labelStyle: TextStyle(
+                                  color: Color.fromRGBO(209, 216, 223, 1),
+                                ),
+                               
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.blue.shade300,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Veuillez entrer un commentaire';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          
+                        ],
+                      ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -640,13 +767,17 @@ void _decisionBulletins( Bulletins_Soins bs,BuildContext context) {
                                   });
                                 } else {
                                   Navigator.of(context).pop(); // Fermer la boîte de dialogue
-                                 _remb(bs.ID,fraais,rembs, context);
+                                 if (decision=='Remboursé') _remb(bs.ID,fraais,rembs, context);
+                                 if (decision=='Annuler') _annule(bs.ID,comment, context);
+                                 if (decision=='Contre visite') _contreVisite(bs.ID,comment, context);
 
                                 }
-                                _remb(bs.ID,fraais,rembs, context);
+                                if (decision=='Remboursé') _remb(bs.ID,fraais,rembs, context);
+                                 if (decision=='Annuler') _annule(bs.ID,comment, context);
+                                 if (decision=='Contre visite') _contreVisite(bs.ID,comment, context);
                               } else {
-                               
-
+                               if (decision=='Annuler') _annule(bs.ID,comment, context);
+                                if (decision=='Contre visite') _contreVisite(bs.ID,comment, context);
                                 
                                 Navigator.of(context).pop(); // Fermer la boîte de dialogue
                                 // Ajouter votre logique pour "Ajouter"

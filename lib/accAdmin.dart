@@ -164,7 +164,7 @@ class MenuDrawer extends StatelessWidget {
                   
                     AccueLisTile(
                       title: "Tableau de bord",
-                      imagePath: "assets/home.png",
+                      imagePath: "assets/dashboard.png",
                       press: () {
                         onItemTapped(0);
                       },

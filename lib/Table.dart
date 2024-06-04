@@ -254,7 +254,7 @@ class _BulletinSoinsTableState extends State<BulletinSoinsTable> {
                               }
                             }
                           },
-                          child: BSAdmin.piece_jointe.isNotEmpty ? Text('Ouvrir', style: TextStyle(decoration: TextDecoration.underline ,decorationColor: Colors.blue, color: Colors.blue)) : Text('Aucune pièce jointe'),
+                          child: Text('Ouvrir', style: TextStyle(decoration: TextDecoration.underline ,decorationColor: Colors.blue, color: Colors.blue)) ,
                         ),
                       ),
                     ],

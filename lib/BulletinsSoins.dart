@@ -392,7 +392,7 @@ Widget build(BuildContext context) {
                         child: Container(
                           width: 140,
                           child: Text(
-                            "Adhérent",
+                            "Malade",
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[700], 
@@ -585,18 +585,19 @@ Widget build(BuildContext context) {
                                                 }
                                               }
                                             },
-                                            child: bs.piece_jointe.isNotEmpty
-                                                ? Text(
-                                                    'Ouvrir',
+                                            child:
+                                                Text(
+                                                    '    Ouvrir',
                                                     style: TextStyle(
-                                                      decoration: TextDecoration.underline,
+                                                      
                                                       decorationColor: Colors.blue,
                                                       color: Colors.blue,
                                                     ),
                                                   )
-                                                : Text('Aucune pièce jointe'),
+                                                
+                                                ),
                                           ),
-                                        ),
+                                        
                                       ],
                                     ),
                                   ),

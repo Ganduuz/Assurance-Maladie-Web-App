@@ -16,6 +16,7 @@ const BSSchema = new mongoose.Schema({
     date: String,
     etat:Number,
     resultat:String,
+    commentaire:String,
     total: Number,
     remb : Number,
     dateEtape1:Date,

@@ -17,6 +17,7 @@ require('dotenv').config();
 const userRoutes = require('./Routes/UserRouter');
 const familyMemberRoutes = require('./Routes/FamilyMemberRouter');
 const BSRoutes=require('./Routes/BSRouter')
+const DBRouters = require ('./Routes/DashboardRouter')
 // Import des middlewares
 
 app.use(cors());
@@ -69,8 +70,8 @@ app.use('/api', userRoutes);
 
 // Routes des membres de la famille
 app.use('/api', familyMemberRoutes);
-app.use('/api',BSRoutes)
-
+app.use('/api',BSRoutes);
+app.use('/api',DBRouters);
 app.post('/api/login', async (req, res) => {
     try {
         const { mail, password } = req.body;

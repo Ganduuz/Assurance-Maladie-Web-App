@@ -231,7 +231,7 @@ class _envoyeAssurState extends State<EnvoyeAssur> {
                 ),),
                       tableHeader(Text("Matricule", style: TextStyle(fontWeight: FontWeight.bold))),
                       tableHeader(Text("Nom employé", style: TextStyle(fontWeight: FontWeight.bold))),
-                      tableHeader(Text("Adhérent", style: TextStyle(fontWeight: FontWeight.bold))),
+                      tableHeader(Text("Malade", style: TextStyle(fontWeight: FontWeight.bold))),
                       tableHeader(Text("Nom médecin", style: TextStyle(fontWeight: FontWeight.bold))),
                       tableHeader(Text("Spécialité ", style: TextStyle(fontWeight: FontWeight.bold))),
                       tableHeader(Text("Date de consultation", style: TextStyle(fontWeight: FontWeight.bold))),

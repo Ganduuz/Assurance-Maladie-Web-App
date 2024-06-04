@@ -1,91 +1,224 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
-class ActesMed extends StatefulWidget {
+class ActesMed extends StatelessWidget {
   ActesMed({Key? key}) : super(key: key);
 
-  @override
-  _ActesMedState createState() => _ActesMedState();
-}
-
-class _ActesMedState extends State<ActesMed> {
-  late Future<List<ActeMed>> futureActes;
-
-  @override
-  void initState() {
-    super.initState();
-    futureActes = fetchActes();
-  }
+  List<ActeMed> acteMed = [
+    ActeMed(
+      title: 'Les pharmacies',
+      pharmacies: [
+        annuaire(
+          name: 'Pharmacie Dr.Basma Mdaissi',
+          region: "Nianou 8052",
+          numTel: '28228741',
+        ),
+        annuaire(
+          name: 'Pharmacie Victoria',
+          region: "Rue Lac Victoria, Tunis 1053",
+          numTel: '71 860 040',
+        ),
+        annuaire(
+          name: 'Pharmacie du Centre Kobbi Ariana',
+          region: "60 Av. Habib Bourguiba, Ariana",
+          numTel: '70 732 201',
+        ),
+         annuaire(
+          name: 'Pharmacie Bouattour Hichem',
+          region: "Bardo Palace, 63 Av. Habib Bourguiba, Tunis 2000",
+          numTel: '53 585 505',
+        ),
+      ],
+      imagePath: "assets/pharmacie.png",
+      couleurBordure: Colors.green,
+    ),
+    ActeMed(
+      title: 'Les radiologues',
+      pharmacies: [
+        annuaire(
+          name: ' Dr Ben Othman Nadia',
+          region: "Centre de Radiologie Ghazela",
+          numTel: '71 866 891',
+        ),
+        annuaire(
+          name: 'Dr Hella Said Abdelhadi',
+          region: "Centre radiologie manar",
+          numTel: '71 881 881',
+        ),
+        annuaire(
+          name: 'Dr Mohamed Amine Chemli',
+          region: " Habib Bourguiba St, Nabeul",
+          numTel: '92 540 838',
+        ),
+      ],
+      imagePath: "assets/radiologue.png",
+      couleurBordure: Colors.orange,
+    ),
+    ActeMed(
+      title: 'Les médecins',
+      pharmacies: [
+        annuaire(
+          name: 'Dr. Samir Gharbi (Généraliste)',
+          region: "32 Rue Sidi Aloui, Bab Lakoues, Tunis ",
+          numTel: ' 71 568 881',
+        ),
+        annuaire(
+          name: 'Dr. Leila Ben Sedrine (Dermatologie)',
+          region: "7 Rue de l'Artisanat, 2035 Tunis",
+          numTel: ' 71 820 123',
+        ),
+        annuaire(
+          name: 'Dr. Riadh Daghfous (Neurologie)',
+          region: "12 Avenue de Paris, 1000 Tunis",
+          numTel: ' 71 341 891',
+        ),
+        annuaire(
+          name: 'Dr. Lamia Hamrouni Gharbi (Généraliste)',
+          region: "Omrane Supérieur, Tunis",
+          numTel: ' 71 796 654',
+        ),
+        annuaire(
+          name: 'Dr. Adel Bouzid (Généraliste)',
+          region: "Tunis",
+          numTel: ' 71 797 987',
+        ),
+        
+      ],
+      imagePath: "assets/medecin.png",
+      couleurBordure: Colors.blue,
+    ),
+    ActeMed(
+      title: 'Les cliniques',
+      pharmacies: [
+        annuaire(
+          name: 'Clinique Carthagéne',
+          region: "Centre Urbain Nord, Tunis",
+          numTel: '31 336 336',
+        ),
+        annuaire(
+          name: 'Clinique Saint Augustin',
+          region: "Centre Ville, Tunis",
+          numTel: '71 791 100',
+        ),
+        annuaire(
+          name: 'Clinique Ridha Mrad',
+          region: "Centre Ville, Tunis",
+          numTel: '71 846 666',
+        ),
+        annuaire(
+          name: 'Clinique Mourali',
+          region: "Centre Ville, Tunis",
+          numTel: '71 331 331',
+        ),
+        annuaire(
+          name: 'Clinique Taoufik',
+          region: "Boulevard Mohamed Bouazizi, Tunis",
+          numTel: '71 840 000',
+        ),
+        
+      ],
+      imagePath: "assets/hospital.png",
+      couleurBordure: Colors.green,
+    ),
+    ActeMed(
+      title: 'Les dentistes',
+      pharmacies: [
+        annuaire(
+          name: 'Dr Yosra Tlijani Ben Farhat',
+          region: "Ariana ",
+          numTel: '52 659 797',
+        ),
+        annuaire(
+          name: 'Dr.Mrabet Med Amin',
+          region: "Ariana",
+          numTel: '51 441 020',
+        ),
+        annuaire(
+          name: 'Dr Damak Aref',
+          region: "Rue Habib Chatti, Tunis",
+          numTel: '20 290 074',
+        ),
+        annuaire(
+          name: 'Dr. Emna Mouelhi',
+          region: "Ezzahra, Ben Arous",
+          numTel: '20 075 587',
+        ),
+      ],
+      imagePath: "assets/destist.png",
+      couleurBordure: Colors.blue,
+    ),
+    ActeMed(
+      title: 'Les laboratoires',
+      pharmacies: [
+        annuaire(
+          name: 'Laboratoire Manougui Bouzoffara',
+          region: "Ariana ",
+          numTel: '97 963 516',
+        ),
+        annuaire(
+          name: 'Laboratoire Rahal',
+          region: "38, Rue d Italie, Tunis ",
+          numTel: '71 259 099',
+        ),
+        annuaire(
+          name: 'Laboratoire Masmoudi',
+          region: "5, Rue Ibn El Jazzar, Tunis",
+          numTel: '70 860 680',
+        ),
+        annuaire(
+          name: 'Laboratoire Clément',
+          region: "3, Avenue de l'Indépendance, Tunis ",
+          numTel: '71 321 144',
+        ),
+        
+      ],
+      imagePath: "assets/lab.png",
+      couleurBordure: Colors.red,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: FutureBuilder<List<ActeMed>>(
-        future: futureActes,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Erreur: ${snapshot.error}'));
-          } else {
-            return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: snapshot.data!.map((acte) {
-                  return Container(
+      body: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: acteMed
+              .map((acte) => Container(
                     margin: EdgeInsets.symmetric(horizontal: 10),
                     child: ActeMedWidget(acteMed: acte),
-                  );
-                }).toList(),
-              ),
-            );
-          }
-        },
+                  ))
+              .toList(),
+        ),
       ),
     );
   }
 }
 
 class ActeMed {
-  final String id;
-  final String type;
-  final String nomActe;
-  final String region;
-    final String numTel;
-
+  final String title;
+  final List<annuaire> pharmacies;
+  final String imagePath;
+  final Color couleurBordure;
 
   ActeMed({
-    required this.id,
-    required this.type,
-    required this.nomActe,
-    required this.region,
-        required this.numTel,
-
+    required this.title,
+    required this.pharmacies,
+    required this.imagePath,
+    required this.couleurBordure,
   });
-
-  factory ActeMed.fromJson(Map<String, dynamic> json) {
-    return ActeMed(
-      id: json['_id'] ?? '',
-      type: json['type'] ?? '',
-      nomActe: json['nomActe'] ?? '',
-      region: json['region'] ?? '',
-      numTel:""
-    );
-  }
 }
 
-Future<List<ActeMed>> fetchActes() async {
-  final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/actes'));
+class annuaire {
+  final String name;
+  final String region;
+  final String numTel;
 
-  if (response.statusCode == 200) {
-    final jsonData = jsonDecode(response.body.toString());
-    List<ActeMed> actes = jsonData.map<ActeMed>((json) => ActeMed.fromJson(json)).toList();
-    return actes;
-  } else {
-    throw Exception('Failed to load actes');
-  }
+  annuaire({
+    required this.name,
+    required this.region,
+    required this.numTel,
+  });
 }
 
 class ActeMedWidget extends StatelessWidget {
@@ -95,16 +228,17 @@ class ActeMedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
     return Container(
       padding: EdgeInsets.all(10),
       color: const Color.fromARGB(255, 253, 250, 250),
       width: 350,
-      height: 600,
+      height: screenHeight*1.5,
       child: Container(
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: _getColorForTitle(acteMed.type),
+              color: acteMed.couleurBordure,
               width: 2.0,
             ),
           ),
@@ -117,13 +251,13 @@ class ActeMedWidget extends StatelessWidget {
               Row(
                 children: [
                   Image.asset(
-                    _getImagePathForTitle(acteMed.type),
+                    acteMed.imagePath,
                     width: 50,
                     height: 50,
                   ),
                   SizedBox(width: 10),
                   Text(
-                    acteMed.type,
+                    acteMed.title,
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -147,71 +281,56 @@ class ActeMedWidget extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        acteMed.nomActe,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: _getColorForTitle(acteMed.type),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Image.asset(
-                            "assets/location.png",
-                            width: 15,
-                            height: 15,
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              acteMed.region,
-                              overflow: TextOverflow.ellipsis,
+                    children: acteMed.pharmacies.map((annuaire) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              annuaire.name,
+                              style: TextStyle(fontWeight: FontWeight.bold, color: acteMed.couleurBordure),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Image.asset(
-                            "assets/phone.png",
-                            width: 15,
-                            height: 15,
-                          ),
-                          SizedBox(width: 10),
-                          Text(acteMed.numTel),
-                        ],
-                      ),
-                    ],
+                            SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Image.asset(
+                                  "assets/location.png",
+                                  width: 15,
+                                  height: 15,
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    annuaire.region,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Image.asset(
+                                  "assets/phone.png",
+                                  width: 15,
+                                  height: 15,
+                                ),
+                                SizedBox(width: 10),
+                                Text(annuaire.numTel),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
+    ),
+),
+);
 }
-
-Color _getColorForTitle(String type) {
-  switch (type.toLowerCase()) {
-    case 'medecin':
-      return Colors.blue;
-    // Ajoutez d'autres cas selon vos besoins
-    default:
-      return Colors.black;
-  }
-}
-
-String _getImagePathForTitle(String type) {
-  switch (type.toLowerCase()) {
-    case 'medecin':
-      return "assets/medecin.png";
-    // Ajoutez d'autres cas selon vos besoins
-    default:
-      return ""; // Chemin d'image par défaut ou vide si aucun titre ne correspond
-  }
 }

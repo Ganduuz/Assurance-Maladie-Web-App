@@ -8,6 +8,11 @@ const crypto = require('crypto');
 const sendEmail = require('../email');
 const moment = require('moment');
 
+
+
+
+
+
 // Fonction pour envoyer un e-mail de bienvenue
 const sendWelcomeEmail = async (mail, prenom, cin) => {
     const message = `Cher/Chère ${prenom},

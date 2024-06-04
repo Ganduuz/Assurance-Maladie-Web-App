@@ -355,7 +355,9 @@ exports.getBSetat5Admin = async (req, res) => {
                     DateRemb :bulletin.dateEtape5,
                     remb:bulletin.remb,
                     total:bulletin.total,
-                    resultat:bulletin.resultat
+                    resultat:bulletin.resultat,
+                    commentaire:bulletin.commentaire
+
 
                 };
             }));
@@ -410,7 +412,8 @@ exports.getBSetat5Empl = async (req, res) => {
                     DateRemb :bulletin.dateEtape5,
                     remb:bulletin.remb,
                     total:bulletin.total,
-                    resultat:bulletin.resultat
+                    resultat:bulletin.resultat,
+                    commentaire:bulletin.commentaire
 
                 };
             }));
@@ -546,16 +549,14 @@ exports.BSRemb = async (req, res) => {
 exports.BSAnnule = async (req, res) => {
     try {
         const { bsId } = req.params;
-         // Assuming 'remb' is provided in the request body
-
-        if (!remb || isNaN(remb)) {
-            return res.status(400).json({ message: 'Le montant de remboursement est requis et doit être un nombre' });
-        }
+        const {commentaire}=req.body;
+       
 
         const bulletin = await BS.findOne({matricule:bsId});
         bulletin.total=0;
         bulletin.remb=0;
         bulletin.etat=5;
+        bulletin.commentaire=commentaire;
         bulletin.resultat="annule";
         bulletin.dateEtape5=Date.now();
         await bulletin.save();
@@ -563,23 +564,6 @@ exports.BSAnnule = async (req, res) => {
             return res.status(404).json({ message: 'Bulletin de soins non trouvé' });
         }
 
-        if (!bulletin.memberId) {
-            const user = await usersModel.findById(bulletin.userID);
-            if (!user) {
-                return res.status(404).json({ message: 'Utilisateur non trouvé' });
-            }
-            user.reste = 0;
-            user.consome = 0;
-            await user.save();
-        } else {
-            const member = await FamilyMember.findById(bulletin.memberId);
-            if (!member) {
-                return res.status(404).json({ message: 'Membre de la famille non trouvé' });
-            }
-            member.reste = (member.reste || 0) - remb;
-            member.consome = (member.consome || 0) + remb;
-            await member.save();
-        }
 
         res.status(200).json({ message: 'Remboursement mis à jour avec succès' });
     } catch (error) {
@@ -593,17 +577,17 @@ exports.BSAnnule = async (req, res) => {
 exports.BSContreVisite = async (req, res) => {
     try {
         const { bsId } = req.params;
-         // Assuming 'remb' is provided in the request body
+        const {commentaire}=req.body;
 
-        if (!remb || isNaN(remb)) {
-            return res.status(400).json({ message: 'Le montant de remboursement est requis et doit être un nombre' });
-        }
+        
 
         const bulletin = await BS.findOne({matricule:bsId});
         bulletin.total=0;
         bulletin.remb=0;
         bulletin.etat=5;
         bulletin.resultat="CV";
+        bulletin.commentaire=commentaire;
+
         bulletin.dateEtape5=Date.now();
         await bulletin.save();
         if (!bulletin) {

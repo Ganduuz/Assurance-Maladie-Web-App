@@ -10,6 +10,7 @@ class Remboursement {
   String DateRemboursement;
   String decision;
   String nom_emp;
+  String commentaire;
 
   Remboursement({
     required this.ID,
@@ -19,6 +20,8 @@ class Remboursement {
     required this.DateRemboursement,
     required this.decision,
     required this.nom_emp,
+    required this.commentaire,
+
   });
 
   factory Remboursement.fromJson(Map<String, dynamic> json) {
@@ -30,6 +33,8 @@ class Remboursement {
       DateRemboursement: json['DateRemb'] ?? '',
       decision: json['resultat'] ?? '',
       nom_emp: json['username'] ?? '',
+      commentaire: json ['commentaire'] ?? '',
+
     );
   }
 }
@@ -296,21 +301,26 @@ class _RembState extends State<Remb> {
                                 children: [
                                   SizedBox(width: 10),
                                   Expanded(
-                                    child: Text(
-                                      rembr.decision == 'Remb'
-                                          ? 'Remboursé'
-                                          : rembr.decision == 'annule'
-                                              ? 'Annulé'
-                                              : 'Contre visite',
-                                      style: TextStyle(
-                                        color: rembr.decision == 'Remb'
-                                            ? Colors.green
-                                            : rembr.decision == 'annule'
-                                                ? Colors.red
-                                                : Colors.orange,
-                                      ),
-                                    ),
-                                  ),
+          child: Tooltip(
+            message: (rembr.decision == 'CV' || rembr.decision == 'annule') && rembr.commentaire.isNotEmpty 
+                      ? rembr.commentaire 
+                      : '',
+            child: Text(
+              rembr.decision == 'Remb'
+                  ? 'Remboursé'
+                  : rembr.decision == 'annule'
+                      ? 'Annulé'
+                      : 'Contre visite',
+              style: TextStyle(
+                color: rembr.decision == 'Remb'
+                    ? Colors.green
+                    : rembr.decision == 'annule'
+                        ? Colors.red
+                        : Colors.orange,
+              ),
+            ),
+          ),
+        ),
                                 ],
                               ),
                             ),
