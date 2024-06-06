@@ -10,8 +10,8 @@ class BarGraphData {
           GraphModel(x: 1, y: 30),
           GraphModel(x: 2, y: 38),
           GraphModel(x: 3, y: 20),
-           GraphModel(x: 4, y: 12),
-           GraphModel(x: 5, y: 3),
+          GraphModel(x: 4, y: 12),
+          GraphModel(x: 5, y: 3),
         ]),
     const BarGraphModel(
         label: "Bulletins de soins ajoutés par mois",
