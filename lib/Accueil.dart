@@ -27,7 +27,7 @@ int initialNumberOfNotifications = 0; // Définir le nombre initial de notificat
 
   int selectedIndex = 0;
   String _userName = '';
-
+  String image='';
   String _userEmail = '';
   List<FamilyMember> familyMembers = [];
   List<Widget> alertWidgets = [];
@@ -71,11 +71,38 @@ Future<List<FamilyMember>> fetchFamilyMembers() async {
   void initState() {
     super.initState();
     _getUserData();
+    _getUserImage();
     _loadFamilyMembers(); 
     number=0;
     _calculateNotifications();
 
   }
+
+
+  Future<void> _getUserImage() async {
+  try {
+    var userId = LocalStorageService.getData('user_id');
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:5000/api/user/get-image'),
+      body: jsonEncode({'user_id': userId}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      // Les données binaires de l'image sont directement dans la réponse, donc pas besoin de décoder le JSON
+final data = jsonDecode(response.body);      
+      setState(() {
+        // Convertir les données binaires en widget Image
+        image = data['_imageUrl'];
+      });
+    } else {
+      print('Erreur lors de la récupération de l\'image: ${response.statusCode}');
+    }
+  } catch (error) {
+    print('Erreur de connexion: $error');
+  }
+}
+
+
 
 Future<void> _getUserData() async {
     try {
@@ -383,6 +410,7 @@ notifications++;  });
                   child: MenuDrawer(
                     userName: _userName,
                     userEmail: _userEmail,
+                    imagee: image,
                     onItemTapped: (index) {
                       setState(() {
                         selectedIndex = index;
@@ -414,11 +442,12 @@ notifications++;  });
 class MenuDrawer extends StatelessWidget {
   final String userName;
   final String userEmail;
+  final String imagee;
   final Function(int) onItemTapped;
   final int selectedIndex;
 static const double defaultPadding = 5.0;
 
-  const MenuDrawer({super.key, required this.userEmail,  required this.userName,required this.onItemTapped, required this.selectedIndex});
+  const MenuDrawer({super.key, required this.userEmail,required this.imagee,  required this.userName,required this.onItemTapped, required this.selectedIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -453,8 +482,8 @@ static const double defaultPadding = 5.0;
                           children: [
                             Row(
                               children: [
-                                const CircleAvatar(
-                                  backgroundImage: AssetImage("assets/téléchargement.jpeg"),
+                                CircleAvatar(
+                                  backgroundImage: NetworkImage(imagee),
                                   radius: 20,
                                 ),
                                 const SizedBox(width: defaultPadding),

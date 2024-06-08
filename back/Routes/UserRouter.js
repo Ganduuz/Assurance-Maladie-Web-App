@@ -2,10 +2,8 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../Controllers/UserController');
 const authMiddleware = require('../authMiddleware');
-const upload = require('../multer'); // Path to your Multer setup
+const upload = require('../multer'); 
 
-
-// Middleware d'authentification pour vérifier l'accès aux routes
 
 router.get('/employesArch', userController.getEmployesArch);
 router.get('/employes', userController.getEmployes);

@@ -16,7 +16,7 @@ class MonCompte extends StatefulWidget {
 }
 
 class _MonCompteState extends State<MonCompte> {
-  Image ?image;
+  String image='';
   
   String _cin='';
   String _nom = '';
@@ -45,13 +45,11 @@ Future<void> _getUserImage() async {
     );
     if (response.statusCode == 200) {
       // Les données binaires de l'image sont directement dans la réponse, donc pas besoin de décoder le JSON
-      final imageBytes = response.bodyBytes;
-      
+final data = jsonDecode(response.body);      
       setState(() {
-        Uint8List imageBytes0 = imageBytes;
-         image = Image.memory(imageBytes0);
+        // Convertir les données binaires en widget Image
+        image = data['_imageUrl'];
       });
-      
     } else {
       print('Erreur lors de la récupération de l\'image: ${response.statusCode}');
     }
@@ -59,6 +57,7 @@ Future<void> _getUserImage() async {
     print('Erreur de connexion: $error');
   }
 }
+
 
 
   Future<void> _getUserData() async {
@@ -181,36 +180,41 @@ Future<void> _importImage() async {
   input.onChange.listen((event) async {
     final file = input.files!.first;
     final reader = html.FileReader();
-    reader.readAsArrayBuffer(file);
+
     reader.onLoadEnd.listen((event) async {
-      final encodedImage = reader.result as Uint8List;
-      final userId = await LocalStorageService.getData('user_id');
-      final formData = http.MultipartRequest(
-        'POST',
-        Uri.parse('http://127.0.0.1:5000/api/user/upload-image/$userId'),
-      );
-      formData.files.add(http.MultipartFile.fromBytes(
-        'image',
-        encodedImage,
-        filename: 'image.jpg',
-        contentType: MediaType('image', 'jpg'),
-      ));
-      try {
-        final response = await http.Response.fromStream(await formData.send());
-        if (response.statusCode == 200) {
-          print('Image ajoutée avec succès');
-          // Traitez la réponse du serveur si nécessaire
-        } else {
-          print('Erreur lors de l\'ajout de l\'image: ${response.statusCode}');
-          // Gérez les erreurs de réponse du serveur
+      final encodedImage = reader.result as Uint8List?;
+      if (encodedImage != null) {
+        final userId = await LocalStorageService.getData('user_id');
+        final formData = http.MultipartRequest(
+          'POST',
+          Uri.parse('http://127.0.0.1:5000/api/user/upload-image/$userId'),
+        );
+        formData.files.add(http.MultipartFile.fromBytes(
+          'file',
+          encodedImage, // Utilisez ici la Uint8List convertie
+          filename: 'file.jpg',
+          contentType: MediaType('file', 'jpg'),
+        ));
+        try {
+          final response = await http.Response.fromStream(await formData.send());
+          if (response.statusCode == 200) {
+            print('Image ajoutée avec succès');
+            // Traitez la réponse du serveur si nécessaire
+          } else {
+            print('Erreur lors de l\'ajout de l\'image: ${response.statusCode}');
+            // Gérez les erreurs de réponse du serveur
+          }
+        } catch (error) {
+          print('Erreur lors de la connexion: $error');
+          // Gérez les erreurs de connexion
         }
-      } catch (error) {
-        print('Erreur lors de la connexion: $error');
-        // Gérez les erreurs de connexion
       }
     });
+
+    reader.readAsArrayBuffer(file);
   });
 }
+
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +268,7 @@ Future<void> _importImage() async {
           ),
           child: CircleAvatar(
             radius: 80.0,
-backgroundImage:  AssetImage('assets/téléchargement.jpeg'),
+  backgroundImage: NetworkImage(image), 
           ),
         ),
       ),

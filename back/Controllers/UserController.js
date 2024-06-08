@@ -1,5 +1,5 @@
 const { usersModel, usersArchiveModel, FamilyMember } = require('../models.js'); // Déstructuration correcte
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('../cloudinary.js');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
@@ -7,7 +7,6 @@ require('dotenv').config();
 const crypto = require('crypto');
 const sendEmail = require('../email');
 const moment = require('moment');
-
 
 
 
@@ -303,6 +302,7 @@ const userUploadImage = async (req, res) => {
       if (!req.file || !req.file.path) {
         return res.status(400).json({ success: false, message: 'File is required' });
       }
+      
   
       const result = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload(req.file.path, (error, result) => {
@@ -316,6 +316,7 @@ const userUploadImage = async (req, res) => {
   
       const theUserPhoto = result.secure_url;
       const userId = req.params.userId;
+      console.log("user id =>",userId)
       if (!userId) {
         return res.status(400).json({ success: false, message: 'User ID is required' });
       }
@@ -335,6 +336,7 @@ const userUploadImage = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Erreur lors de la mise à jour de l\'image', error: err.message });
     }
   };
+
 const userGetImage= async (req, res) => {
     try {
         const { user_id } = req.body;
