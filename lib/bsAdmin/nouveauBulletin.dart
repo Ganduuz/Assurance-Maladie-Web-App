@@ -334,37 +334,47 @@ class _NouveauBulletinState extends State<Nouveaubulletin> {
                             children: [
                               SizedBox(width: 5,),
                               Expanded(
-                                child: InkWell(
-                                  onTap: () {
-                                    if (BSAdmin.piece_jointe.isNotEmpty) {
-                                      if (BSAdmin.piece_jointe.startsWith('http')) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => Scaffold(
-                                              body: Center(
-                                                child: Image.network(BSAdmin.piece_jointe),
-                                              ),
-                                            ),
+                                          child: InkWell(
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: 1100, // Largeur réduite
+            height: 800, // Hauteur réduite
+            child: InteractiveViewer(
+              boundaryMargin: EdgeInsets.all(20),
+              minScale: 0.1,
+              maxScale: 4.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5.0),
+                child: Image.network(
+                  BSAdmin.piece_jointe,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  },
+  child: Text(
+    '    Ouvrir',
+    style: TextStyle(
+      decorationColor: Colors.blue,
+      color: Colors.blue,
+    ),
+  ),
+),
+
                                           ),
-                                        );
-                                      } else {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => Scaffold(
-                                              body: Center(
-                                                child: Image.network((BSAdmin.piece_jointe)),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    }
-                                  },
-                                  child: Text('Ouvrir', style: TextStyle(decoration: TextDecoration.underline ,decorationColor: Colors.blue, color: Colors.blue)) ,
-                                ),
-                              ),
                             ],
                           ),
                         ),

@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: awesome_dialog
-      sha256: c5bccfc0cd94f2025ba6af324e723b99241859e49d9951933d0e1a7952f4f8bb
+      sha256: "41c41ae4b30b5c7f26bb3d9f9c87010ed1cab0bb4d4ac0cc513e5799c37e9d82"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.0"
+    version: "3.2.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -81,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  file_picker:
+    dependency: "direct main"
+    description:
+      name: file_picker
+      sha256: f9245fc33aeba9e0b938d7f3785f10b7a7230e05b8fc40f5a6a8342d7899e391
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.4"
   fl_chart:
     dependency: "direct main"
     description:
@@ -118,6 +126,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      sha256: "8cf40eebf5dec866a6d1956ad7b4f7016e6c0cc69847ab946833b7d43743809f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.19"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -241,7 +257,7 @@ packages:
     source: hosted
     version: "1.0.0"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       sha256: "087ce49c3f0dc39180befefc60fdb4acd8f8620e5682fe2476afd0b3688bb4af"
@@ -332,18 +348,18 @@ packages:
     dependency: transitive
     description:
       name: rive
-      sha256: ae75a6e9cfbf146630bfb1feba97ee582d935508be6b362e4bd197b9c55a6dd3
+      sha256: "24868d5e5ad7e7937dbaaed508e48ca96d164fb4fbeac3400be119596588ab72"
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.4"
+    version: "0.13.7"
   rive_common:
     dependency: transitive
     description:
       name: rive_common
-      sha256: f4e20d0a99c5040c85624a3eb2b0b6b19e614d93a693c3bb25cf6e7bb2d3d6d3
+      sha256: "3fe76ba4680787741688ee393e47b63417e8643816795e4eac01021683af1d84"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.8"
+    version: "0.4.9"
   simple_gesture_detector:
     dependency: transitive
     description:

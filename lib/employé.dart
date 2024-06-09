@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 
 class Member {
+  
   String nom;
   String prenom;
   String relation;
@@ -36,6 +37,7 @@ class Member {
 }
 
 class Employee {
+  String image;
   String fullname;
   String cin;
   String email;
@@ -48,6 +50,7 @@ class Employee {
 
 
   Employee({
+    required this.image,
     required this.fullname,
     required this.cin,
     required this.email,
@@ -72,6 +75,7 @@ class Employee {
 
   // Créer l'objet Employee en incluant les détails des membres de la famille
   return Employee(
+    image:json['imageurl'],
     fullname: '${json['nom']} ${json['prenom']}',
     cin: json['cin'],
     email: json['mail'],
@@ -596,29 +600,30 @@ ElevatedButton(
               ),
               children: [
                 Container(
-                  decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                   margin: EdgeInsets.symmetric(vertical: 15),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(1000),
-                        child: Image.asset(
-                          'assets/téléchargement.jpeg',
-                          width: 30,
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          employee.fullname,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(30),
+  ),
+  margin: EdgeInsets.symmetric(vertical: 15),
+  child: Row(
+    children: [
+      CircleAvatar(
+  backgroundImage: employee.image == ''
+      ? NetworkImage('https://res.cloudinary.com/dskt7yadi/image/upload/v1717883826/jegzmivozhigcmhuozdy.jpg')
+      : NetworkImage(employee.image),
+  radius: 20,
+),
+
+      SizedBox(width: 10),
+      Expanded(
+        child: Text(
+          employee.fullname,
+          style: const TextStyle(fontSize: 13),
+        ),
+      ),
+    ],
+  ),
+),
+
                  Container(
             margin: EdgeInsets.symmetric(vertical: 15),
             child: Row(
@@ -813,11 +818,14 @@ IconButton(
                          Transform.translate(
   offset: Offset(20, 0), // Décalage de 20 pixels vers la droite
        child:    Tooltip(
-               key: UniqueKey(), // Utilisez UniqueKey() ici
+               key: UniqueKey(),
+               
             message: ' ${employee.fullname}      Reste:${employee.reste} -- Consomé :${employee.consome}\n'
                      ' Membres de famille: ${employee.nmbrMem} \n'
 '${employee.familyMembersDetails.map((member) => '  - ${member.relation}:${member.nom} ${member.prenom}     Reste:${member.reste} -- Consomé:${member.consome}').join('\n')}',
                     
+                    
+
             padding: EdgeInsets.all(20),
             margin: EdgeInsets.all(15),
             decoration: BoxDecoration(
@@ -850,13 +858,13 @@ IconButton(
                 margin: EdgeInsets.symmetric(vertical: 15),
                 child: Row(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(1000),
-                      child: Image.asset(
-                        'assets/téléchargement.jpeg',
-                        width: 30,
-                      ),
-                    ),
+                    CircleAvatar(
+  backgroundImage: employee.image == ''
+      ? NetworkImage('https://res.cloudinary.com/dskt7yadi/image/upload/v1717883826/jegzmivozhigcmhuozdy.jpg')
+      : NetworkImage(employee.image),
+  radius: 20,
+),
+
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(employee.fullname),
@@ -1262,6 +1270,7 @@ IconButton(
                           if (success) { 
                             setState(() {
                               employeesDetails.add(Employee(
+                                image:'',
                                 fullname: '$name $username',                           
                                 cin: CIN,
                                 email: email,

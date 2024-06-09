@@ -483,8 +483,10 @@ static const double defaultPadding = 5.0;
                             Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundImage: NetworkImage(imagee),
-                                  radius: 20,
+                                  backgroundImage: imagee == ''
+                                      ? NetworkImage('https://res.cloudinary.com/dskt7yadi/image/upload/v1717883826/jegzmivozhigcmhuozdy.jpg')
+                                      : NetworkImage(imagee),  
+                                      radius: 20,
                                 ),
                                 const SizedBox(width: defaultPadding),
                                 Column(

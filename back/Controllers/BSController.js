@@ -3,6 +3,11 @@ const moment = require('moment');
 const mongoose = require('mongoose');
 const { ObjectId } = require('mongoose').Types;
 
+const cloudinary = require('../cloudinary.js');
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
+
 
 exports.getBS = async (req, res) => {
     try {
@@ -31,7 +36,7 @@ exports.getBS = async (req, res) => {
                     dateEtape2:bulletin.dateEtape2,
                     dateEtape3:bulletin.dateEtape3,
                     dateEtape4:bulletin.dateEtape4,
-
+                    piece_jointe:bulletin.pieceJointe,
                     
 
                 };
@@ -49,25 +54,32 @@ exports.getBS = async (req, res) => {
 }
 exports.ajouterBS = async (req, res) => {
     try {
-        const { userId } = req.params.user_id;
-        const userrId = new mongoose.Types.ObjectId(req.params.user_id); // Utilisez 'new'
+        const { user_id } = req.params;
+        const userrId = new mongoose.Types.ObjectId(user_id);
+        
         const { matricule, malade, nomActes, actes, date } = req.body; 
+        
         // Vérification si la date est définie et a le format attendu
         if (!date || typeof date !== 'string') {
             return res.status(400).json({ message: 'La date est requise et doit être une chaîne de caractères' });
         }
+        
         // Séparation des composants de la date
         const dateComponents = date.split('/');
         if (dateComponents.length !== 3) {
             return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
         }
+        
         const [day, month, year] = dateComponents.map(Number);
+        
         // Vérification si les composants sont valides
         if (isNaN(day) || isNaN(month) || isNaN(year)) {
             return res.status(400).json({ message: 'Le format de date attendu est JJ/MM/AAAA' });
         }
+        
         // Création d'un nouvel objet Date
         const formattedDate = new Date(year, month - 1, day);
+        
         // Séparation du nom et prénom du malade
         let nomMalade = '';
         let prenomMalade = '';
@@ -76,12 +88,33 @@ exports.ajouterBS = async (req, res) => {
             nomMalade = maladeComponents[0];
             prenomMalade = maladeComponents.slice(1).join(' ');
         }
+        
         // Recherche du membre de la famille en fonction du prénom ou de l'ID de l'utilisateur
         const member = await FamilyMember.findOne({ prenom: prenomMalade, userId: userrId });
-        const memberID = member ? new ObjectId(member.id) : null;        // Ajout du nouveau bulletin avec la date formatée et l'état défini
+        const memberID = member ? new ObjectId(member.id) : null;        
+        
+        // Téléchargement du fichier
+        if (!req.file || !req.file.path) {
+            return res.status(400).json({ success: false, message: 'File is required' });
+        }
+        
+        // Upload du fichier vers Cloudinary
+        const result = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload(req.file.path, (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+        
+        const theUserPhoto = result.secure_url;
+        
+        // Création du nouveau bulletin de soins
         const newBS = await BS.create({ 
-            userID:userrId, 
-            memberId: memberID, // Si member est null, aucun membre n'est trouvé
+            userID: userrId, 
+            memberId: memberID, 
             matricule, 
             nomMalade,
             prenomMalade,
@@ -89,19 +122,26 @@ exports.ajouterBS = async (req, res) => {
             actes, 
             date: formattedDate,
             etat: 1,
-            total:0,
-            remb:0,
+            total: 0,
+            remb: 0,
             dateEtape1: Date.now(), 
             dateEtape2: null,
             dateEtape3: null,
-            dateEtape4: null,// Attribution de l'état directement ici
+            dateEtape4: null,
+            pieceJointe: theUserPhoto
         });
+        
+        // Suppression du fichier du serveur après l'avoir téléchargé sur Cloudinary
+        fs.unlinkSync(req.file.path);
+        
+        // Réponse
         res.status(200).json({ message: 'Bulletin de soins ajouté', newBS });
     } catch (error) {
         console.error('Erreur lors de l\'ajout d\'un bulletin de soins : ', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un bulletin de soins' });
     }
 };
+
 exports.deleteBS = async (req, res) => {
     try {
         console.log(req.params); // Vérifiez ici si l'ID est bien extrait
@@ -166,6 +206,7 @@ exports.getBSetat1 = async (req, res) => {
                     userId: bulletin.userID,
                     etat: bulletin.etat,
                     username: username,
+                    piece_jointe:bulletin.pieceJointe
                 };
             }));
 
@@ -212,6 +253,8 @@ exports.getBSetat2 = async (req, res) => {
                     userId: bulletin.userID,
                     etat: bulletin.etat,
                     username: username,
+                    piece_jointe:bulletin.pieceJointe
+
                 };
             }));
 
@@ -259,6 +302,8 @@ exports.getBSetat3 = async (req, res) => {
                     userId: bulletin.userID,
                     etat: bulletin.etat,
                     username: username,
+                    piece_jointe:bulletin.pieceJointe
+
                 };
             }));
 
@@ -305,6 +350,8 @@ exports.getBSetat4 = async (req, res) => {
                     userId: bulletin.userID,
                     etat: bulletin.etat,
                     username: username,
+                    piece_jointe:bulletin.pieceJointe
+
                 };
             }));
 

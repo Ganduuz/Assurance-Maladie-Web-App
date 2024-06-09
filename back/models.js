@@ -14,6 +14,7 @@ const BSSchema = new mongoose.Schema({
     nomActes: String,
     actes: String,
     date: String,
+    pieceJointe: String,
     etat:Number,
     resultat:String,
     commentaire:String,

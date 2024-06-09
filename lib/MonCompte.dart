@@ -266,10 +266,12 @@ Future<void> _importImage() async {
             color: Colors.transparent,
             shape: BoxShape.circle,
           ),
+          
           child: CircleAvatar(
             radius: 80.0,
-  backgroundImage: NetworkImage(image), 
-          ),
+  backgroundImage: image == ''
+      ? NetworkImage('https://res.cloudinary.com/dskt7yadi/image/upload/v1717883826/jegzmivozhigcmhuozdy.jpg')
+      : NetworkImage(image),          ),
         ),
       ),
     ),

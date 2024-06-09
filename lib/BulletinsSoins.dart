@@ -5,9 +5,15 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:html' as html;
 import 'local_storage_service.dart';
-
+import 'package:file_picker/file_picker.dart';
+import 'dart:io'; 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path; 
+
+import 'dart:typed_data';
+
+import 'package:http_parser/http_parser.dart';
 
 
 class Bulletins_Soins {
@@ -190,6 +196,47 @@ Future<List<FamilyMemb>> fetchFamilyMembers() async {
     throw Exception('Failed to load family members');
   }
 }
+Future<void> _PieceJointe() async {
+  final html.FileUploadInputElement input = html.FileUploadInputElement()..accept = 'image/*';
+  input.click();
+
+  input.onChange.listen((event) async {
+    final file = input.files!.first;
+    final reader = html.FileReader();
+
+    reader.onLoadEnd.listen((event) async {
+      final encodedImage = reader.result as Uint8List?;
+      if (encodedImage != null) {
+        final userId = await LocalStorageService.getData('user_id');
+        final formData = http.MultipartRequest(
+          'POST',
+          Uri.parse('http://127.0.0.1:5000/api/ajouterBS/$userId'),
+        );
+        formData.files.add(http.MultipartFile.fromBytes(
+          'file',
+          encodedImage, // Utilisez ici la Uint8List convertie
+          filename: 'file.jpg',
+          contentType: MediaType('file', 'jpg'),
+        ));
+        try {
+          final response = await http.Response.fromStream(await formData.send());
+          if (response.statusCode == 200) {
+            print('Image ajoutée avec succès');
+            // Traitez la réponse du serveur si nécessaire
+          } else {
+            print('Erreur lors de l\'ajout de l\'image: ${response.statusCode}');
+            // Gérez les erreurs de réponse du serveur
+          }
+        } catch (error) {
+          print('Erreur lors de la connexion: $error');
+          // Gérez les erreurs de connexion
+        }
+      }
+    });
+
+    reader.readAsArrayBuffer(file);
+  });
+}
 
 Future<void> _getUserData() async {
     try {
@@ -220,46 +267,62 @@ Future<void> _getUserData() async {
     }
   }
 
-void _addBS() async {
-  try {
-    var userId = LocalStorageService.getData('user_id');
-  
-    final response = await http.post(
-      Uri.parse('http://127.0.0.1:5000/api/ajouterBS/$userId'), 
-      body: jsonEncode({
-        'matricule':_matricule,
-        'malade':_malade,
-        'nomActes':_nom_medecin,
-        'actes':_actes,
-        'date':_date,
+Future<void> _addBS() async {
+  final html.FileUploadInputElement input = html.FileUploadInputElement()..accept = 'image/*';
+  input.click();
 
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    );
+  input.onChange.listen((event) async {
+    final file = input.files!.first;
+    final reader = html.FileReader();
 
-    if (response.statusCode == 200) { 
-      print('Nouveau bulletin ajouté .');
-       ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Bulletin ajouté avec succès'),
-        duration: Duration(seconds: 3),
-      ),
-    );
-    } else {
-      
-      print('Erreur lors de l ajout de membre: ${response.statusCode}');
-     
-    }
-  } catch (error) {
-    // Gérer les erreurs de connexion
-    print('Erreur de connexion: $error');
-    
-  }
+    reader.onLoadEnd.listen((event) async {
+      final encodedImage = reader.result as Uint8List?;
+      if (encodedImage != null) {
+        try {
+          var userId = LocalStorageService.getData('user_id');
+
+          // Création de la demande multipartie
+          var request = http.MultipartRequest('POST', Uri.parse('http://127.0.0.1:5000/api/ajouterBS/$userId'));
+          
+          // Ajout des données du formulaire
+          request.fields['matricule'] = _matricule  ; // Null check for _matricule
+          request.fields['malade'] = _malade ; // Null check for _malade
+          request.fields['nomActes'] = _nom_medecin ; // Null check for _nom_medecin
+          request.fields['actes'] = _actes ; // Null check for _actes
+          request.fields['date'] = _date ; // Null check for _date
+
+          // Ajout du fichier téléchargé
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'file',
+              encodedImage, // Utilisez ici la Uint8List convertie
+              filename: 'file.jpg',
+              contentType: MediaType('file', 'jpg'),
+            ),
+          );
+
+          final response = await http.Response.fromStream(await request.send());
+          if (response.statusCode == 200) {
+            print('Nouveau bulletin ajouté.');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Bulletin ajouté avec succès'),
+                duration: Duration(seconds: 3),
+              ),
+            );
+          } else {
+            print('Erreur lors de l ajout de membre: ${response.statusCode}');
+          }
+        } catch (error) {
+          // Gérer les erreurs de connexion
+          print('Erreur de connexion: $error');
+        }
+      }
+    });
+
+    reader.readAsArrayBuffer(file);
+  });
 }
-
-
 void supprimer_bulletin(String BSId,BuildContext context) async {
   try {
           final response = await http.delete(
@@ -558,44 +621,45 @@ Widget build(BuildContext context) {
                                         SizedBox(width: 10),
                                         Expanded(
                                           child: InkWell(
-                                            onTap: () {
-                                              if (bs.piece_jointe.isNotEmpty) {
-                                                if (bs.piece_jointe.startsWith('http')) {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) => Scaffold(
-                                                        body: Center(
-                                                          child: Image.network(bs.piece_jointe),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) => Scaffold(
-                                                        body: Center(
-                                                          child: Image.network((bs.piece_jointe)),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  );
-                                                }
-                                              }
-                                            },
-                                            child:
-                                                Text(
-                                                    '    Ouvrir',
-                                                    style: TextStyle(
-                                                      
-                                                      decorationColor: Colors.blue,
-                                                      color: Colors.blue,
-                                                    ),
-                                                  )
-                                                
-                                                ),
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: 1100, // Largeur réduite
+            height: 800, // Hauteur réduite
+            child: InteractiveViewer(
+              boundaryMargin: EdgeInsets.all(20),
+              minScale: 0.1,
+              maxScale: 4.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5.0),
+                child: Image.network(
+                  bs.piece_jointe,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  },
+  child: Text(
+    '    Ouvrir',
+    style: TextStyle(
+      decorationColor: Colors.blue,
+      color: Colors.blue,
+    ),
+  ),
+),
+
                                           ),
                                         
                                       ],
@@ -751,393 +815,385 @@ Widget buildStep(int stepNumber, String title, bool isActive, Bulletins_Soins bs
   );
 }
 
-
- void _showAddBulletinDialog(BuildContext context) {
-  String Qui_est_malade = ''; 
-  String actes = ''; 
-
+void _showAddBulletinDialog(BuildContext context) {
+  String Qui_est_malade = '';
+  String actes = '';
   String ID = '';
   String nom_medecin = '';
-  String piece_jointe = '';
- GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String piece_jointe = ''; // Declare the piece_jointe variable
+
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController medecinController = TextEditingController();
 
-
-  
   List<String> listee = familyMembers.map((member) => '${member.nom} ${member.prenom}').toList();
-List<String> listeacts = [
-  'Pharmacie',
-  'Laboratoire d\'analyse',
-  'Opticien',
-  'Médecin ',
-  'Dentiste',
-  'Radiologue',
-  'Clinique',
-];  listee.insert(0, _username);
-dateController.text = '';
+  List<String> listeacts = [
+    'Pharmacie',
+    'Laboratoire d\'analyse',
+    'Opticien',
+    'Médecin ',
+    'Dentiste',
+    'Radiologue',
+    'Clinique',
+  ];
+  listee.insert(0, _username);
+  dateController.text = '';
   _selectedDay = DateTime.now();
 
   showDialog(
-  context: context,
-  builder: (BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5.0),
-      ),
-      elevation: 0.0,
-      backgroundColor: Colors.transparent,
-      child: SingleChildScrollView(
-        child: Container(
-          width: 750,
-          height: 700,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            color: Colors.white,
-          ),
-          padding: EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Nouveau Bulletin",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-                SizedBox(height: 30),
-                TextFormField(
-                  onChanged: (value) {
-                  setState(() {
-                    ID = value;
-                    _matricule=value;
-                  });
-                   },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Champ matricule bulletin est obligatoire';
-                    }
-                    return null;
-                  },
-                  style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
-                  decoration: InputDecoration(
-                    labelText: 'Matricule bulletin',
-                    labelStyle: TextStyle(
-                      color: Color.fromRGBO(209, 216, 223, 1),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        elevation: 0.0,
+        backgroundColor: Colors.transparent,
+        child: SingleChildScrollView(
+          child: Container(
+            width: 750,
+            height: 700,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: Colors.white,
+            ),
+            padding: EdgeInsets.all(20.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Nouveau Bulletin",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                ),
-                SizedBox(height: 20),
-                DropdownButtonFormField<String>(
-                  value: Qui_est_malade.isNotEmpty ? Qui_est_malade : null,
-                  onChanged: (newValue) {
-                    setState(() {
-                      Qui_est_malade = newValue!;
-                      _malade = newValue; 
-
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez sélectionner un malade';
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Adhérent',
-                    labelStyle: TextStyle(fontWeight: FontWeight.bold),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  icon: Icon(Icons.arrow_drop_down),
-                  dropdownColor: Colors.white,
-                  isExpanded: true,
-                  style: TextStyle(
-                    color: Color.fromRGBO(43, 144, 238, 1),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  items: listee.asMap().entries.map<DropdownMenuItem<String>>((entry) {
-                    int index = entry.key;
-                    String valueItem = entry.value;
-                    return DropdownMenuItem<String>(
-                      value: valueItem,
-                      child: Text(
-                        valueItem,
-                        style: index == 0 ? TextStyle(color: Theme.of(context).primaryColor) : null, // Mettre en couleur le premier élément de la liste
-                      ),
-                    );
-                  }).toList(),
-                ),
-                SizedBox(height: 20),
-                DropdownButtonFormField<String>(
-                  value: actes.isNotEmpty ? actes : null,
-                  onChanged: (newValue) {
-                    setState(() {
-                      actes = newValue!;
-                      _actes=newValue;
-                      // Mettre à jour le label du TextField en fonction de l'acte médical sélectionné
-                      if (actes == "Pharmacie") {
-                        medecinController.clear(); // Effacez le contenu du TextField
-                        medecinController.text = 'Nom de la pharmacie'; // Réinitialisez le texte du TextField
-                      } else if (actes == "Opticien") {
-                        medecinController.clear(); // Effacez le contenu du TextField
-                        medecinController.text = 'Nom de l\'opticien'; // Réinitialisez le texte du TextField
-                      } else if (actes == "Laboratoire d\'analyse") {
-                        medecinController.clear(); // Effacez le contenu du TextField
-                        medecinController.text = 'Nom de laboratoire'; // Réinitialisez le texte du TextField
-                      } else {
-                        medecinController.clear(); // Effacez le contenu du TextField
-                        medecinController.text = 'Nom du médecin'; // Réinitialisez le texte du TextField
+                  SizedBox(height: 30),
+                  TextFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        ID = value;
+                        _matricule = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Champ matricule bulletin est obligatoire';
                       }
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez sélectionner un annuaire santé';
-                    }
-                    return null;
-                  },
-                  hint: actes.isNotEmpty
-                      ? Text(
-                          actes,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )
-                      : Text(
-                          "Annuaire santé",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                  decoration: InputDecoration(
-                    labelText: 'Annuaire santé',
-                    labelStyle: TextStyle(fontWeight: FontWeight.bold),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  icon: Icon(Icons.arrow_drop_down),
-                  dropdownColor: Colors.white,
-                  isExpanded: true,
-                  style: TextStyle(
-                    color: Color.fromRGBO(43, 144, 238, 1),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  items: listeacts.asMap().entries.map<DropdownMenuItem<String>>((entry) {
-                    int index = entry.key;
-                    String valueItem = entry.value;
-                    return DropdownMenuItem<String>(
-                      value: valueItem,
-                      child: Text(
-                        valueItem,
-                        style: index == 0
-                            ? TextStyle(color: Theme.of(context).primaryColor)
-                            : index == 1
-                                ? TextStyle(color: Colors.amber[600])
-                                : index == 2
-                                    ? TextStyle(color: Colors.green)
-                                    : null, // Appliquer différentes couleurs en fonction de l'index
+                      return null;
+                    },
+                    style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+                    decoration: InputDecoration(
+                      labelText: 'Matricule bulletin',
+                      labelStyle: TextStyle(
+                        color: Color.fromRGBO(209, 216, 223, 1),
                       ),
-                    );
-                  }).toList(),
-                ),
-
-                SizedBox(height: 20),
-                TextFormField(
-                  controller: medecinController,
-                  onChanged: (value) {
-                  setState(() {
-                    nom_medecin = value;
-                    _nom_medecin=value;
-                  });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez ajouter le nom de l\'annuaire santé';
-                    }
-                    return null;
-                  },
-                  style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
-                  decoration: InputDecoration(
-                    labelText: medecinController.text,
-                    labelStyle: TextStyle(
-                      color: Color.fromRGBO(209, 216, 223, 1),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
-                      borderRadius: BorderRadius.circular(5.0),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Flexible(
-                      child: Container(
-                        constraints: BoxConstraints(maxWidth: 250),
-                        child: TextFormField(
-                          controller: dateController,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez ajouter la date de consultation ';
-                            }
-                            return null;
-                          },
-                          readOnly: true,
-                          onTap: () {
-                            buildCalendarWidget(context);
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'Date de consultation',
-                            labelStyle: TextStyle(
-                              color: Color.fromRGBO(209, 216, 223, 1),
-                            ),
-                            border: OutlineInputBorder(),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey, width: 1),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blue, width: 1),
-                            ),
-                            prefixIcon: IconButton(
-                              onPressed: () {
-                                buildCalendarWidget(context);
-                              },
-                              icon: Icon(
-                                Icons.calendar_today,
-                                color: Colors.blue,
+                  SizedBox(height: 20),
+                  DropdownButtonFormField<String>(
+                    value: Qui_est_malade.isNotEmpty ? Qui_est_malade : null,
+                    onChanged: (newValue) {
+                      setState(() {
+                        Qui_est_malade = newValue!;
+                        _malade = newValue;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Veuillez sélectionner un malade';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Adhérent',
+                      labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                    icon: Icon(Icons.arrow_drop_down),
+                    dropdownColor: Colors.white,
+                    isExpanded: true,
+                    style: TextStyle(
+                      color: Color.fromRGBO(43, 144, 238, 1),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    items: listee.asMap().entries.map<DropdownMenuItem<String>>((entry) {
+                      int index = entry.key;
+                      String valueItem = entry.value;
+                      return DropdownMenuItem<String>(
+                        value: valueItem,
+                        child: Text(
+                          valueItem,
+                          style: index == 0 ? TextStyle(color: Theme.of(context).primaryColor) : null,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 20),
+                  DropdownButtonFormField<String>(
+                    value: actes.isNotEmpty ? actes : null,
+                    onChanged: (newValue) {
+                      setState(() {
+                        actes = newValue!;
+                        _actes = newValue;
+                        if (actes == "Pharmacie") {
+                          medecinController.clear();
+                          medecinController.text = 'Nom de la pharmacie';
+                        } else if (actes == "Opticien") {
+                          medecinController.clear();
+                          medecinController.text = 'Nom de l\'opticien';
+                        } else if (actes == "Laboratoire d\'analyse") {
+                          medecinController.clear();
+                          medecinController.text = 'Nom de laboratoire';
+                        } else {
+                          medecinController.clear();
+                          medecinController.text = 'Nom du médecin';
+                        }
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Veuillez sélectionner un annuaire santé';
+                      }
+                      return null;
+                    },
+                    hint: actes.isNotEmpty
+                        ? Text(
+                            actes,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          )
+                        : Text(
+                            "Annuaire santé",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                    decoration: InputDecoration(
+                      labelText: 'Annuaire santé',
+                      labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                    icon: Icon(Icons.arrow_drop_down),
+                    dropdownColor: Colors.white,
+                    isExpanded: true,
+                    style: TextStyle(
+                      color: Color.fromRGBO(43, 144, 238, 1),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    items: listeacts.asMap().entries.map<DropdownMenuItem<String>>((entry) {
+                      int index = entry.key;
+                      String valueItem = entry.value;
+                      return DropdownMenuItem<String>(
+                        value: valueItem,
+                        child: Text(
+                          valueItem,
+                          style: index == 0
+                              ? TextStyle(color: Theme.of(context).primaryColor)
+                              : index == 1
+                                  ? TextStyle(color: Colors.amber[600])
+                                  : index == 2
+                                      ? TextStyle(color: Colors.green)
+                                      : null,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: medecinController,
+                    onChanged: (value) {
+                      setState(() {
+                        nom_medecin = value;
+                        _nom_medecin = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Veuillez ajouter le nom de l\'annuaire santé';
+                      }
+                      return null;
+                    },
+                    style: TextStyle(fontSize: 18.0, fontFamily: 'Arial'),
+                    decoration: InputDecoration(
+                      labelText: medecinController.text,
+                      labelStyle: TextStyle                        (color: Color.fromRGBO(209, 216, 223, 1),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue.shade300, width: 2.0),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Container(
+                          constraints: BoxConstraints(maxWidth: 250),
+                          child: TextFormField(
+                            controller: dateController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Veuillez ajouter la date de consultation ';
+                              }
+                              return null;
+                            },
+                            readOnly: true,
+                            onTap: () {
+                              buildCalendarWidget(context);
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Date de consultation',
+                              labelStyle: TextStyle(
+                                color: Color.fromRGBO(209, 216, 223, 1),
+                              ),
+                              border: OutlineInputBorder(),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey, width: 1),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.blue, width: 1),
+                              ),
+                              prefixIcon: IconButton(
+                                onPressed: () {
+                                  buildCalendarWidget(context);
+                                },
+                                icon: Icon(
+                                  Icons.calendar_today,
+                                  color: Colors.blue,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () async {
-                    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-                    uploadInput.click();
-                    uploadInput.onChange.listen((e) {
-                      final files = uploadInput.files;
-                      if (files!.length == 1) {
-                        final file = files[0];
-                        final reader = html.FileReader();
-                        reader.readAsDataUrl(file);
-                        reader.onLoadEnd.listen((event) {
-                          setState(() {
-                            piece_jointe = file.name; // Utilisez le nom du fichier comme pièce jointe
-                          });
-                          // Ajoutez une action à effectuer une fois que le fichier est téléchargé
-                          _showConfirmationDialog(); // Affiche une boîte de dialogue de confirmation
-                        });
-                      } else {
+                    ],
+                  ),
+                  SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final result = await FilePicker.platform.pickFiles();
+                      if (result != null) {
+                        final file = result.files.single;
                         setState(() {
-                          piece_jointe = ''; // Effacez la pièce jointe si aucun fichier n'est sélectionné
+                          piece_jointe = file.path!; // Chemin du fichier sélectionné
                         });
                       }
-                    });
-                  },
-                  child: Text(
-                    piece_jointe.isEmpty ? 'Importer votre bulletin de soins' : 'Fichier joint : $piece_jointe',
-                    style: TextStyle(color: const Color.fromARGB(255, 28, 28, 28), fontSize: 16),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Color.fromARGB(255, 3, 171, 243)),
-                      borderRadius: BorderRadius.circular(5.0),
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      backgroundColor: const Color(0xFF5BADE9),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+                      child: Text(
+                        'Choisir un fichier',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
-                ),
-
-                SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Fermer la boîte de dialogue
-                      },
+                  if (piece_jointe.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
                       child: Text(
-                        'Annuler',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
+                        'Fichier sélectionné : ${piece_jointe.split('/').last}',
+                        style: TextStyle(color: Colors.green),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 141, 142, 142),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                        },
+                        child: Text(
+                          'Annuler',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 141, 142, 142),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _addBS();
-                          setState(() {
-                            bulletins.add(Bulletins_Soins(
-                              bsId: '',
-                              ID: ID,
-                              Qui_est_malade: Qui_est_malade,
-                              nom_medecin: nom_medecin,
-                              spec_medecin: actes,
-                              DateConsultation: DateFormat('dd/MM/yyyy').format(_selectedDay),
-                                  dateEtape1:'',
-                                  dateEtape2:'',
-                                  dateEtape3:'',
-                                  dateEtape4:'',
-
-
-                              piece_jointe: piece_jointe,
-                              etat:1
-,
-                            ));
-                            selectedMalade = '';
-                          });
-                          Navigator.of(context).pop();
-                        }
-                      },
-                      child: Text(
-                        'Ajouter',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade300,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0),
+                      SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _addBS(); // Appel à la fonction d'ajout de bulletin de soins
+                            setState(() {
+                              bulletins.add(Bulletins_Soins(
+                                bsId: '',
+                                ID: ID,
+                                Qui_est_malade: Qui_est_malade,
+                                nom_medecin: nom_medecin,
+                                spec_medecin: actes,
+                                DateConsultation: DateFormat('dd/MM/yyyy').format(_selectedDay),
+                                dateEtape1:'',
+                                dateEtape2:'',
+                                dateEtape3:'',
+                                dateEtape4:'',
+                                piece_jointe: piece_jointe, // Ajout du chemin du fichier
+                                etat: 1,
+                              ));
+                              selectedMalade = '';
+                            });
+                            Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                          }
+                        },
+                        child: Text(
+                          'Ajouter',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade300,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  },
-);
+      );
+    },
+  );
 }
+
+
+
+
+
 
    void _showConfirmationDialog() {
   showDialog(
