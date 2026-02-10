@@ -75,7 +75,7 @@ class Employee {
 
   // Créer l'objet Employee en incluant les détails des membres de la famille
   return Employee(
-    image:json['imageurl'],
+    image:json['imageurl']??'',
     fullname: '${json['nom']} ${json['prenom']}',
     cin: json['cin'],
     email: json['mail'],
@@ -606,12 +606,49 @@ ElevatedButton(
   margin: EdgeInsets.symmetric(vertical: 15),
   child: Row(
     children: [
-      CircleAvatar(
-  backgroundImage: employee.image == ''
-      ? NetworkImage('https://res.cloudinary.com/dskt7yadi/image/upload/v1717883826/jegzmivozhigcmhuozdy.jpg')
-      : NetworkImage(employee.image),
-  radius: 20,
+      InkWell(
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: 800, // Largeur réduite
+            height: 600, // Hauteur réduite
+            child: InteractiveViewer(
+              boundaryMargin: EdgeInsets.all(20),
+              minScale: 0.1,
+              maxScale: 4.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5.0),
+                child: Image.network(
+                  employee.image.isEmpty 
+                      ? 'https://res.cloudinary.com/dskt7yadi/image/upload/v1717883826/jegzmivozhigcmhuozdy.jpg'
+                      : employee.image,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  },
+  child: CircleAvatar(
+    backgroundImage: NetworkImage(
+      employee.image.isEmpty
+          ? 'https://res.cloudinary.com/dskt7yadi/image/upload/v1717883826/jegzmivozhigcmhuozdy.jpg'
+          : employee.image,
+    ),
+    radius: 20,
+  ),
 ),
+
 
       SizedBox(width: 10),
       Expanded(
@@ -858,12 +895,49 @@ IconButton(
                 margin: EdgeInsets.symmetric(vertical: 15),
                 child: Row(
                   children: [
-                    CircleAvatar(
-  backgroundImage: employee.image == ''
-      ? NetworkImage('https://res.cloudinary.com/dskt7yadi/image/upload/v1717883826/jegzmivozhigcmhuozdy.jpg')
-      : NetworkImage(employee.image),
-  radius: 20,
+                    InkWell(
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: 800, // Largeur réduite
+            height: 600, // Hauteur réduite
+            child: InteractiveViewer(
+              boundaryMargin: EdgeInsets.all(20),
+              minScale: 0.1,
+              maxScale: 4.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5.0),
+                child: Image.network(
+                  employee.image.isEmpty 
+                      ? 'https://res.cloudinary.com/dskt7yadi/image/upload/v1717883826/jegzmivozhigcmhuozdy.jpg'
+                      : employee.image,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  },
+  child: CircleAvatar(
+    backgroundImage: NetworkImage(
+      employee.image.isEmpty
+          ? 'https://res.cloudinary.com/dskt7yadi/image/upload/v1717883826/jegzmivozhigcmhuozdy.jpg'
+          : employee.image,
+    ),
+    radius: 20,
+  ),
 ),
+
 
                     SizedBox(width: 10),
                     Expanded(

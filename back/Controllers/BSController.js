@@ -141,7 +141,6 @@ exports.ajouterBS = async (req, res) => {
         res.status(500).json({ message: 'Une erreur s\'est produite lors de l\'ajout d\'un bulletin de soins' });
     }
 };
-
 exports.deleteBS = async (req, res) => {
     try {
         console.log(req.params); // Vérifiez ici si l'ID est bien extrait
@@ -155,10 +154,17 @@ exports.deleteBS = async (req, res) => {
 
         // Logguer l'ID reçu dans la requête à des fins de débogage
         console.log('ID reçu :', bsId);
+        
+        // Trouver le bulletin de soins par son ID
+        const bulletin = await BS.findOne({ matricule: bsId });
+        
+        if (!bulletin) {
+            console.log('Bulletin non trouvé pour l\'ID :', bsId);
+            return res.status(404).json({ message: 'Bulletin de soins non trouvé pour l\'ID spécifié' });
+        }
 
-        // Trouver le bulletin de soins par son ID et le supprimer
-        const deletedBS = await BS.findByIdAndDelete(bsId);
-
+        // Supprimer le bulletin de soins par son ID
+        const deletedBS = await BS.findByIdAndDelete(bulletin._id);
         if (deletedBS) {
             console.log('Bulletin supprimé :', deletedBS);
             res.json({ message: 'Bulletin de soins supprimé avec succès' });
@@ -167,11 +173,10 @@ exports.deleteBS = async (req, res) => {
             res.status(404).json({ message: 'Bulletin de soins non trouvé pour l\'ID spécifié' });
         }
     } catch (error) {
-        console.error('Erreur lors de la suppression du bulletin de soins : ', error);
+        console.error('Erreur lors de la suppression du bulletin de soins :', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la suppression du bulletin de soins' });
     }
 };
-
 
 
 exports.getBSetat1 = async (req, res) => {

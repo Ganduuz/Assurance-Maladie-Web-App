@@ -141,6 +141,34 @@ class _envoyeAssurState extends State<EnvoyeAssur> {
       throw Exception('Failed to load family members');
     }
   }
+Future<void> _deleteBS(String bsid,BuildContext context) async {
+  try {
+          final response = await http.delete(
+      Uri.parse('http://127.0.0.1:5000/api/deleteBS/$bsid'), 
+      body: jsonEncode({  
+      
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('Bulletin supprimé.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bulletin supprimé .'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } else {
+      print('Erreur lors de la mise supression du membre: ${response.statusCode}');
+    }
+  } catch (error) {
+    // Gérer les erreurs de connexion
+    print('Erreur de connexion: $error');
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -384,13 +412,43 @@ class _envoyeAssurState extends State<EnvoyeAssur> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: IconButton(
-                                  icon: Icon(Icons.delete,color: Colors.red,),
-                                  onPressed: () {
-                                    _archiverBulletinsSoins(BSAdmin);
-                                  },
-                                ),
-                              ),
+  child: IconButton(
+    icon: Icon(Icons.delete, color: Colors.red),
+    onPressed: () async {
+      final confirmDelete = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Confirmation'),
+            content: Text('Êtes-vous sûr de vouloir supprimer ce bulletin ?'),
+            actions: [
+              TextButton(
+                child: Text('Non'),
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+              ),
+              TextButton(
+                child: Text('Oui'),
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmDelete == true) {
+        _archiverBulletinsSoins(BSAdmin);
+        setState(() {
+          buso.removeAt(index);
+        });
+      }
+    },
+  ),
+),
+
                             ],
                           ),
                         ),
@@ -471,6 +529,6 @@ class _envoyeAssurState extends State<EnvoyeAssur> {
   }
 
   void _archiverBulletinsSoins(Bulletins_Soins bulletins_soins) {
-    // Implémentez la logique pour archiver le bulletin de soins ici
+    _deleteBS(bulletins_soins.ID, context);
 }
 }
